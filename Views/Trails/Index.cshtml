@@ -1,101 +1,67 @@
 @model IEnumerable<ascent_app.Models.Trail>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Trails";
 }
 
-<h1>Index</h1>
+<div class="d-flex align-items-end justify-content-between mt-4 mb-3">
+    <div>
+        <p class="eyebrow mb-1">ALL TRAILS</p>
+        <h1 class="mb-0">Discover trails</h1>
+    </div>
+    @if (User.IsInRole("Guide") || User.IsInRole("Admin"))
+    {
+        <a class="btn-ascent" asp-action="Create"><i class="ti ti-plus"></i> Add trail</a>
+    }
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ShortDescription)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DistanceKm)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ElevationGainM)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Latitude)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Longitude)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PhotoUrl)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Region)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Difficulty)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Author)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ShortDescription)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DistanceKm)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ElevationGainM)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Latitude)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Longitude)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhotoUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Region.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Difficulty.Label)
-            </td>
-            <td>
-                @(item.Author?.DisplayName ?? "—")
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+@if (!Model.Any())
+{
+    <div class="asc-panel text-center text-muted my-4">
+        <i class="ti ti-mountain" style="font-size:32px;opacity:.5"></i>
+        <p class="mb-0 mt-2">No trails yet.</p>
+    </div>
 }
-    </tbody>
-</table>
+else
+{
+    <div class="trail-grid">
+        @foreach (var trail in Model)
+        {
+            var diffClass = (trail.Difficulty?.Label ?? "").ToLowerInvariant();
+            <div class="trail-card-wrap">
+                <a class="trail-card" asp-action="Details" asp-route-id="@trail.Id">
+                    <div class="tc-media">
+                        @if (!string.IsNullOrEmpty(trail.PhotoUrl))
+                        {
+                            <img src="@trail.PhotoUrl" alt="@trail.Name">
+                        }
+                        else
+                        {
+                            <i class="ti ti-mountain placeholder"></i>
+                        }
+                        @if (trail.Difficulty is not null)
+                        {
+                            <span class="diff-badge diff-@diffClass">@trail.Difficulty.Label</span>
+                        }
+                    </div>
+                    <div class="tc-body">
+                        <div class="tc-region"><i class="ti ti-map-pin"></i> @trail.Region?.Name</div>
+                        <h3 class="tc-title">@trail.Name</h3>
+                        <p class="tc-desc">@trail.ShortDescription</p>
+                        <div class="tc-stats">
+                            <span><i class="ti ti-route"></i> @trail.DistanceKm km</span>
+                            <span><i class="ti ti-mountain"></i> @trail.ElevationGainM m</span>
+                        </div>
+                    </div>
+                </a>
+                @if (User.IsInRole("Guide") || User.IsInRole("Admin"))
+                {
+                    <div class="d-flex gap-3 mt-2 px-1" style="font-size:13px">
+                        <a asp-action="Edit" asp-route-id="@trail.Id">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@trail.Id" class="text-muted">Delete</a>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}

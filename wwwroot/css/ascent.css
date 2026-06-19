@@ -1,0 +1,336 @@
+/* Ascent — warm editorial design system.
+   Tokens + components per the spec. Light mode only. */
+
+:root {
+    --paper: #F3EFE5;
+    --surface: #FBFAF4;
+    --surface-alt: #E7E3D7;
+    --border: #E0DACA;
+    --border-strong: #D8D2C0;
+    --forest: #2F4A2C;
+    --forest-dark: #21301C;
+    --forest-deep: #33502F;
+    --terracotta: #B05E3B;
+    --text: #283524;
+    --text-secondary: #5F5C4D;
+    --text-muted: #8A8775;
+
+    --r-card: 14px;
+    --r-input: 8px;
+    --r-pill: 999px;
+    --r-badge: 6px;
+
+    --font-display: "Fraunces", Georgia, serif;
+    --font-body: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* ---- base ---- */
+body {
+    background: var(--paper);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: var(--forest-dark);
+    font-weight: 500;
+    letter-spacing: -0.4px;
+}
+
+a { color: var(--forest); text-decoration: none; }
+a:hover { color: var(--forest-deep); }
+
+em { color: var(--terracotta); font-style: italic; }
+
+.text-muted { color: var(--text-muted) !important; }
+.text-secondary { color: var(--text-secondary); }
+
+.eyebrow {
+    font-family: var(--font-body);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1.8px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* visible focus ring everywhere */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.btn-ascent:focus-visible,
+.trail-card:focus-visible {
+    outline: 2px solid var(--forest);
+    outline-offset: 2px;
+}
+
+/* ---- navbar ---- */
+.asc-navbar {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+}
+
+.asc-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--forest-dark);
+}
+.asc-brand:hover { color: var(--forest-dark); }
+.asc-brand .mark {
+    display: grid;
+    place-items: center;
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--forest);
+    color: var(--paper);
+    font-size: 20px;
+}
+.asc-brand .wm {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+}
+.asc-brand .wm small {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+}
+
+.asc-nav-link {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 14px;
+}
+.asc-nav-link:hover { color: var(--forest-dark); }
+
+/* ---- buttons ---- */
+.btn-ascent,
+.btn-ascent-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border-radius: var(--r-input);
+    padding: 9px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+}
+.btn-ascent {
+    background: var(--forest);
+    color: var(--paper);
+    border: 0.5px solid var(--forest);
+}
+.btn-ascent:hover { background: var(--forest-deep); color: var(--paper); }
+.btn-ascent-outline {
+    background: transparent;
+    color: var(--forest-dark);
+    border: 0.5px solid var(--border-strong);
+}
+.btn-ascent-outline:hover { border-color: var(--forest); color: var(--forest-dark); }
+
+/* ---- hero ---- */
+.asc-hero { padding: 56px 0 36px; }
+.asc-hero h1 {
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 1.04;
+    margin: 14px 0 12px;
+    max-width: 16ch;
+}
+.asc-hero .lead {
+    font-size: 17px;
+    color: var(--text-secondary);
+    max-width: 52ch;
+    margin-bottom: 22px;
+}
+.asc-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border-radius: var(--r-pill);
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface);
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+}
+
+/* ---- featured panel (offset tan card + topo rings) ---- */
+.asc-featured { position: relative; padding: 14px 0 28px; }
+.fp-shadow {
+    position: absolute;
+    inset: 26px -10px -6px 14px;
+    background: var(--surface-alt);
+    border-radius: var(--r-card);
+}
+.fp-panel {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--r-card);
+    background: var(--forest-deep);
+    color: var(--paper);
+    min-height: 220px;
+    display: flex;
+    align-items: flex-end;
+}
+.fp-topo {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+}
+.fp-strip {
+    position: relative;
+    padding: 18px 22px;
+}
+.fp-strip .eyebrow { color: rgba(243, 239, 229, 0.7); }
+.fp-strip h3 { color: var(--paper); }
+
+/* ---- chips ---- */
+.asc-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: var(--r-pill);
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface);
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.asc-chip:hover { border-color: var(--forest); color: var(--forest-dark); }
+.asc-chip.active {
+    background: var(--forest);
+    border-color: var(--forest);
+    color: var(--paper);
+}
+
+/* ---- trail cards ---- */
+.trail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+.trail-card {
+    display: block;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-card);
+    overflow: hidden;
+    color: var(--text);
+    transition: border-color .15s, transform .15s;
+}
+.trail-card:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+    color: var(--text);
+}
+.tc-media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--surface-alt);
+    display: grid;
+    place-items: center;
+}
+.tc-media img { width: 100%; height: 100%; object-fit: cover; }
+.tc-media .placeholder { font-size: 40px; color: var(--text-muted); opacity: .5; }
+.tc-fav {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    border-radius: var(--r-pill);
+    border: none;
+    background: rgba(251, 250, 244, 0.9);
+    color: var(--text-muted);
+    cursor: pointer;
+}
+.tc-fav.active { color: var(--terracotta); }
+.tc-body { padding: 14px 16px 16px; }
+.tc-region {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+.tc-title { font-size: 19px; margin: 0 0 6px; }
+.tc-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0 0 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.tc-stats {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.tc-stats span { display: inline-flex; align-items: center; gap: 5px; }
+
+/* ---- difficulty badges ---- */
+.diff-badge {
+    position: absolute;
+    bottom: 10px; left: 10px;
+    border-radius: var(--r-badge);
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.diff-easy       { background: #E4ECD1; color: #4A6B2F; }
+.diff-moderate   { background: #F2E7CE; color: #8A6A2A; }
+.diff-hard       { background: #F1DECF; color: #A85A33; }
+.diff-strenuous  { background: #EFD9D4; color: #9E4B3F; }
+
+/* difficulty chip used inline (details/lists) */
+.diff-inline {
+    display: inline-block;
+    border-radius: var(--r-badge);
+    padding: 2px 9px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* ---- forms / panels reuse ---- */
+.asc-panel {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 22px;
+}
+.form-control, .form-select {
+    border-radius: var(--r-input);
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface);
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--forest);
+    box-shadow: none;
+}
+
+footer.footer {
+    border-top: 0.5px solid var(--border);
+    color: var(--text-muted);
+}

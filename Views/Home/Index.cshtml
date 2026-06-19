@@ -1,8 +1,26 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<section class="asc-hero">
+    <span class="asc-pill"><i class="ti ti-compass"></i> ASCENT · TRAILS REGISTER</span>
+    <h1>The mountains of <em>North Macedonia</em>, hike by hike.</h1>
+    <p class="lead">A curated register of trails, auto-rated for difficulty from
+        distance and climb.</p>
+    <div class="d-flex gap-2">
+        <a class="btn-ascent" asp-controller="Trails" asp-action="Index">Browse all trails</a>
+        <a class="btn-ascent-outline" href="#"><i class="ti ti-navigation"></i> Use my location</a>
+    </div>
+</section>
+
+<div class="asc-featured">
+    <div class="fp-shadow"></div>
+    <div class="fp-panel">
+        <partial name="_TopoRings" />
+        <div class="fp-strip">
+            <p class="eyebrow mb-1">FEATURED PEAK</p>
+            <h3 class="mb-0" style="font-size:18px">Mt. Korab · 2,764 m</h3>
+            <p class="mb-0 text-muted" style="font-size:13px">The highest summit in the country</p>
+        </div>
+    </div>
 </div>
