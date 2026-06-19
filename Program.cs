@@ -1,5 +1,6 @@
 using ascent_app.Data;
 using ascent_app.Models;
+using ascent_app.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,10 +15,14 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<AscentDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<IDifficultyService, DifficultyService>();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+await DbInitializer.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment()) {
