@@ -1,0 +1,42 @@
+@model ascent_app.ViewModels.HikeLogFormViewModel
+@{
+    ViewData["Title"] = "Log a hike";
+}
+
+<div class="auth-wrap">
+    <p class="eyebrow mb-1">LOG A HIKE</p>
+    <h1 class="mb-3">@Model.TrailName</h1>
+
+    <div class="asc-panel">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+            <input type="hidden" asp-for="TrailId" />
+            <input type="hidden" asp-for="TrailName" />
+
+            <div class="mb-3">
+                <label asp-for="HikedOn" class="form-label"></label>
+                <input asp-for="HikedOn" class="form-control" />
+                <span asp-validation-for="HikedOn" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="DurationMinutes" class="form-label"></label>
+                <input asp-for="DurationMinutes" class="form-control" />
+                <span asp-validation-for="DurationMinutes" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Notes" class="form-label"></label>
+                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2 mt-2">
+                <button type="submit" class="btn-ascent">Save hike</button>
+                <a class="btn-ascent-outline" asp-controller="Trails" asp-action="Details" asp-route-id="@Model.TrailId">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

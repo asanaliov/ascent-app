@@ -21,13 +21,19 @@
             }
         </h1>
     </div>
-    @if (canManage)
-    {
-        <div class="d-flex gap-2">
+    <div class="d-flex gap-2">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a class="btn-ascent" asp-controller="HikeLogs" asp-action="Create" asp-route-trailId="@Model.Id">
+                <i class="ti ti-plus"></i> Log this hike
+            </a>
+        }
+        @if (canManage)
+        {
             <a class="btn-ascent-outline" asp-action="Edit" asp-route-id="@Model.Id"><i class="ti ti-edit"></i> Edit</a>
             <a class="btn-ascent-outline" asp-action="Delete" asp-route-id="@Model.Id"><i class="ti ti-trash"></i> Delete</a>
-        </div>
-    }
+        }
+    </div>
 </div>
 
 <div class="trail-detail-media mb-4">

@@ -30,6 +30,7 @@ public static class DbInitializer
 
         await SeedDifficultiesAsync(context);
         await SeedRegionsAsync(context);
+        await SeedBadgesAsync(context);
 
         var guide = await userManager.FindByEmailAsync("guide@ascent.local");
         await SeedTrailsAsync(context, guide?.Id);
@@ -76,6 +77,19 @@ public static class DbInitializer
             new Region { Name = "Šar Planina" },
             new Region { Name = "Mavrovo" },
             new Region { Name = "Galičica" });
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedBadgesAsync(AscentDbContext context)
+    {
+        if (await context.Badges.AnyAsync()) return;
+
+        context.Badges.AddRange(
+            new Badge { Name = "First Steps", Description = "Logged your first hike.", IconName = "ti-shoe", Criteria = BadgeCriteria.HikeCount, Threshold = 1 },
+            new Badge { Name = "Trailblazer", Description = "Logged 10 hikes.", IconName = "ti-flame", Criteria = BadgeCriteria.HikeCount, Threshold = 10 },
+            new Badge { Name = "Summit Seeker", Description = "Climbed 5,000 m in total.", IconName = "ti-mountain", Criteria = BadgeCriteria.CumulativeElevation, Threshold = 5000 },
+            new Badge { Name = "Explorer", Description = "Hiked in 3 different regions.", IconName = "ti-map-2", Criteria = BadgeCriteria.DistinctRegions, Threshold = 3 });
 
         await context.SaveChangesAsync();
     }

@@ -16,6 +16,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IDifficultyService, DifficultyService>();
+builder.Services.AddScoped<IBadgeService, BadgeService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
