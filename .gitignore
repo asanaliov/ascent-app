@@ -1,5 +1,48 @@
+# Build output
 bin/
 obj/
 /packages/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]uild/
+
+# Rider / ReSharper
+.idea/
 riderModule.iml
+*.sln.iml
+_ReSharper.Caches/
 /_ReSharper.Caches/
+*.DotSettings.user
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userprefs
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+
+# NuGet
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+
+# ASP.NET
+appsettings.*.local.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
