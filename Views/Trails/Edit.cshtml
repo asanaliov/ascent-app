@@ -1,73 +1,81 @@
 @model ascent_app.ViewModels.TrailFormViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit trail";
 }
 
-<h1>Edit</h1>
+<div style="max-width:640px">
+    <p class="eyebrow mb-1 mt-4">EDIT TRAIL</p>
+    <h1 class="mb-3">Edit @Model.Name</h1>
 
-<h4>Trail</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+    <div class="asc-panel">
         <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
             <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ShortDescription" class="control-label"></label>
+            <div class="mb-3">
+                <label asp-for="ShortDescription" class="form-label"></label>
                 <input asp-for="ShortDescription" class="form-control" />
                 <span asp-validation-for="ShortDescription" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
                 <textarea asp-for="Description" class="form-control" rows="4"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="DistanceKm" class="control-label"></label>
-                <input asp-for="DistanceKm" class="form-control" />
-                <span asp-validation-for="DistanceKm" class="text-danger"></span>
+
+            <div class="row">
+                <div class="col-sm-6 mb-3">
+                    <label asp-for="DistanceKm" class="form-label"></label>
+                    <input asp-for="DistanceKm" class="form-control" />
+                    <span asp-validation-for="DistanceKm" class="text-danger"></span>
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <label asp-for="ElevationGainM" class="form-label"></label>
+                    <input asp-for="ElevationGainM" class="form-control" />
+                    <span asp-validation-for="ElevationGainM" class="text-danger"></span>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="ElevationGainM" class="control-label"></label>
-                <input asp-for="ElevationGainM" class="form-control" />
-                <span asp-validation-for="ElevationGainM" class="text-danger"></span>
-                <small class="form-text text-muted">Difficulty is recalculated automatically from distance and elevation gain.</small>
+            <p class="text-muted mb-3" style="font-size:13px">
+                <i class="ti ti-info-circle"></i>
+                Difficulty is recalculated automatically from distance and elevation gain.
+            </p>
+
+            <div class="row">
+                <div class="col-sm-6 mb-3">
+                    <label asp-for="Latitude" class="form-label"></label>
+                    <input asp-for="Latitude" class="form-control" />
+                    <span asp-validation-for="Latitude" class="text-danger"></span>
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <label asp-for="Longitude" class="form-label"></label>
+                    <input asp-for="Longitude" class="form-control" />
+                    <span asp-validation-for="Longitude" class="text-danger"></span>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Latitude" class="control-label"></label>
-                <input asp-for="Latitude" class="form-control" />
-                <span asp-validation-for="Latitude" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Longitude" class="control-label"></label>
-                <input asp-for="Longitude" class="form-control" />
-                <span asp-validation-for="Longitude" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PhotoUrl" class="control-label"></label>
+
+            <div class="mb-3">
+                <label asp-for="PhotoUrl" class="form-label"></label>
                 <input asp-for="PhotoUrl" class="form-control" />
                 <span asp-validation-for="PhotoUrl" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="RegionId" class="control-label"></label>
-                <select asp-for="RegionId" class="form-control" asp-items="ViewBag.RegionId"></select>
+            <div class="mb-3">
+                <label asp-for="RegionId" class="form-label"></label>
+                <select asp-for="RegionId" class="form-select" asp-items="ViewBag.RegionId"></select>
                 <span asp-validation-for="RegionId" class="text-danger"></span>
             </div>
-            <div class="form-group mt-3">
-                <input type="submit" value="Save" class="btn btn-primary" />
+
+            <div class="d-flex gap-2 mt-2">
+                <button type="submit" class="btn-ascent">Save changes</button>
+                <a class="btn-ascent-outline" asp-action="Index">Cancel</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {

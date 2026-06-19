@@ -1,93 +1,39 @@
 @model ascent_app.Models.Trail
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Delete trail";
+    var diffClass = (Model.Difficulty?.Label ?? "").ToLowerInvariant();
 }
 
-<h1>Delete</h1>
+<div class="auth-wrap">
+    <p class="eyebrow mb-1">CONFIRM DELETE</p>
+    <h1 class="mb-3">Delete this trail?</h1>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Trail</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ShortDescription)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ShortDescription)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DistanceKm)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DistanceKm)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ElevationGainM)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ElevationGainM)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Latitude)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Latitude)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Longitude)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Longitude)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PhotoUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PhotoUrl)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Region)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Region.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Difficulty)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Difficulty.Label)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Author)
-        </dt>
-        <dd class = "col-sm-10">
-            @(Model.Author?.DisplayName ?? "—")
-        </dd>
-    </dl>
-    
+    <div class="asc-panel mb-3">
+        <div class="tc-region"><i class="ti ti-map-pin"></i> @Model.Region?.Name</div>
+        <h3 class="tc-title d-inline-flex align-items-center gap-2">
+            @Model.Name
+            @if (Model.Difficulty is not null)
+            {
+                <span class="diff-inline diff-@diffClass">@Model.Difficulty.Label</span>
+            }
+        </h3>
+        <p class="text-secondary mb-2">@Model.ShortDescription</p>
+        <div class="tc-stats">
+            <span><i class="ti ti-route"></i> @Model.DistanceKm km</span>
+            <span><i class="ti ti-mountain"></i> @Model.ElevationGainM m</span>
+        </div>
+    </div>
+
+    <p class="text-muted" style="font-size:13px">This action cannot be undone.</p>
+
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn-ascent" style="background:var(--terracotta);border-color:var(--terracotta)">
+                <i class="ti ti-trash"></i> Delete trail
+            </button>
+            <a class="btn-ascent-outline" asp-action="Index">Cancel</a>
+        </div>
     </form>
 </div>
