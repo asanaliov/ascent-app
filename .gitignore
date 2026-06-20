@@ -46,3 +46,6 @@ Thumbs.db
 *.db-shm
 *.db-wal
 
+
+# uploaded user content
+wwwroot/uploads/

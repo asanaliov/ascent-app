@@ -11,6 +11,12 @@
         <strong>New badge@(newBadges.Contains(',') ? "s" : "") earned:</strong> @newBadges
     </div>
 }
+@if (TempData["PhotoError"] is string photoError)
+{
+    <div class="asc-panel mt-4 mb-2" style="border-color:var(--terracotta)">
+        <i class="ti ti-alert-triangle" style="color:var(--terracotta)"></i> @photoError
+    </div>
+}
 
 <div class="d-flex align-items-end justify-content-between mt-4 mb-3">
     <div>
@@ -62,6 +68,38 @@
                             <button type="submit" class="btn-ascent-outline" title="Delete"><i class="ti ti-trash"></i></button>
                         </form>
                     </div>
+
+                    @if (hike.Photos.Any())
+                    {
+                        <div class="photo-strip mt-3">
+                            @foreach (var photo in hike.Photos)
+                            {
+                                <figure class="photo-thumb">
+                                    <img src="@photo.Url" alt="@photo.Caption" />
+                                    <form asp-action="DeletePhoto" asp-route-id="@photo.Id" method="post"
+                                          onsubmit="return confirm('Delete this photo?');">
+                                        <button type="submit" class="photo-del" title="Delete photo"><i class="ti ti-x"></i></button>
+                                    </form>
+                                    @if (!string.IsNullOrWhiteSpace(photo.Caption))
+                                    {
+                                        <figcaption>@photo.Caption</figcaption>
+                                    }
+                                </figure>
+                            }
+                        </div>
+                    }
+
+                    <form asp-action="AddPhoto" method="post" enctype="multipart/form-data"
+                          class="d-flex gap-2 align-items-center mt-3 flex-wrap">
+                        <input type="hidden" name="hikeLogId" value="@hike.Id" />
+                        <input type="file" name="photoFile" accept="image/png,image/jpeg,image/webp"
+                               class="form-control form-control-sm" style="max-width:240px" required />
+                        <input type="text" name="caption" placeholder="Caption (optional)"
+                               class="form-control form-control-sm" style="max-width:200px" maxlength="200" />
+                        <button type="submit" class="btn-ascent-outline" style="padding:6px 12px;font-size:13px">
+                            <i class="ti ti-camera-plus"></i> Add photo
+                        </button>
+                    </form>
                 </div>
             }
         }

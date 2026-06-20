@@ -29,15 +29,48 @@ public class TrailsController : Controller
         _userManager = userManager;
     }
 
-    // GET: Trails
-    public async Task<IActionResult> Index()
+    // GET: Trails?q=&regionId=&difficultyId=&tagId=
+    public async Task<IActionResult> Index(string? q, int? regionId, int? difficultyId, int? tagId)
     {
-        var trails = await _context.Trails
+        var query = _context.Trails
             .Include(t => t.Difficulty)
             .Include(t => t.Region)
             .Include(t => t.Reviews)
+            .Include(t => t.TrailTags)
             .AsNoTracking()
-            .ToListAsync();
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            var term = q.Trim();
+            query = query.Where(t =>
+                EF.Functions.Like(t.Name, $"%{term}%") ||
+                EF.Functions.Like(t.ShortDescription, $"%{term}%"));
+        }
+
+        if (regionId.HasValue)
+            query = query.Where(t => t.RegionId == regionId);
+
+        if (difficultyId.HasValue)
+            query = query.Where(t => t.DifficultyId == difficultyId);
+
+        if (tagId.HasValue)
+            query = query.Where(t => t.TrailTags.Any(tt => tt.TagId == tagId));
+
+        var trails = await query.ToListAsync();
+
+        var regions = await _context.Regions.OrderBy(r => r.Name).AsNoTracking().ToListAsync();
+        var difficulties = await _context.Difficulties.AsNoTracking().ToListAsync();
+        ViewBag.Regions = new SelectList(regions, "Id", "Name", regionId);
+        ViewBag.Difficulties = new SelectList(difficulties, "Id", "Label", difficultyId);
+        ViewBag.Tags = await _context.Tags.OrderBy(t => t.Name).AsNoTracking().ToListAsync();
+        ViewBag.Filter = new TrailFilterViewModel
+        {
+            Q = q,
+            RegionId = regionId,
+            DifficultyId = difficultyId,
+            TagId = tagId,
+        };
 
         ViewBag.FavoriteTrailIds = await GetFavoriteTrailIdsAsync();
         return View(trails);
@@ -54,6 +87,7 @@ public class TrailsController : Controller
             .Include(t => t.Region)
             .Include(t => t.Reviews).ThenInclude(r => r.User)
             .Include(t => t.TrailTags).ThenInclude(tt => tt.Tag)
+            .Include(t => t.Photos)
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -63,7 +97,7 @@ public class TrailsController : Controller
         return View(trail);
     }
 
-    // GET: Trails/Nearby?lat=..&lng=..  — coords come from browser geolocation
+    // GET: Trails/Nearby?lat=  — coords come from browser geolocation
     public async Task<IActionResult> Nearby(double? lat, double? lng)
     {
         var trails = await _context.Trails

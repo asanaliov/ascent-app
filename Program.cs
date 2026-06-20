@@ -18,6 +18,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.AddScoped<IDifficultyService, DifficultyService>();
 builder.Services.AddScoped<IBadgeService, BadgeService>();
 builder.Services.AddScoped<IGeoService, GeoService>();
+builder.Services.AddScoped<IImageStorage, ImageStorage>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

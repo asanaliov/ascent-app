@@ -20,4 +20,11 @@ public class HikeLogFormViewModel
 
     [MaxLength(1000)]
     public string? Notes { get; set; }
+
+    [Display(Name = "Photo")]
+    public IFormFile? PhotoFile { get; set; }
+
+    [MaxLength(200)]
+    [Display(Name = "Photo caption")]
+    public string? PhotoCaption { get; set; }
 }
