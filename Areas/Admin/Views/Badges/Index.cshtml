@@ -1,0 +1,47 @@
+@model List<ascent_app.Models.Badge>
+@{
+    ViewData["Title"] = "Badges";
+    var counts = ViewBag.AwardCounts as Dictionary<int, int> ?? new();
+}
+
+<partial name="_AdminNav" />
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0" style="font-size:22px">Badges</h2>
+    <a class="btn-ascent" asp-action="Create"><i class="ti ti-plus"></i> New badge</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="asc-panel text-center text-muted">No badges yet.</div>
+}
+else
+{
+    <table class="admin-table">
+        <thead>
+            <tr><th></th><th>Name</th><th>Criteria</th><th>Threshold</th><th>Awarded</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var badge in Model)
+            {
+                <tr>
+                    <td><i class="ti @badge.IconName" style="font-size:20px;color:var(--forest)"></i></td>
+                    <td>
+                        <strong>@badge.Name</strong>
+                        <div class="text-muted" style="font-size:12px">@badge.Description</div>
+                    </td>
+                    <td class="text-secondary">@badge.Criteria</td>
+                    <td>@badge.Threshold</td>
+                    <td>@counts.GetValueOrDefault(badge.Id)</td>
+                    <td class="text-end text-nowrap">
+                        <a class="asc-nav-link" asp-action="Edit" asp-route-id="@badge.Id"><i class="ti ti-edit"></i> Edit</a>
+                        <form asp-action="Delete" asp-route-id="@badge.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete @badge.Name? This removes it from everyone who earned it.');">
+                            <button type="submit" class="admin-del"><i class="ti ti-trash"></i> Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

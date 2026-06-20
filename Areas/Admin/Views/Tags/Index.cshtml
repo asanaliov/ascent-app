@@ -1,0 +1,41 @@
+@model List<ascent_app.Models.Tag>
+@{
+    ViewData["Title"] = "Tags";
+    var counts = ViewBag.TrailCounts as Dictionary<int, int> ?? new();
+}
+
+<partial name="_AdminNav" />
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0" style="font-size:22px">Tags</h2>
+    <a class="btn-ascent" asp-action="Create"><i class="ti ti-plus"></i> New tag</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="asc-panel text-center text-muted">No tags yet.</div>
+}
+else
+{
+    <table class="admin-table">
+        <thead>
+            <tr><th>Name</th><th>Trails</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var tag in Model)
+            {
+                <tr>
+                    <td><strong>@tag.Name</strong></td>
+                    <td>@counts.GetValueOrDefault(tag.Id)</td>
+                    <td class="text-end text-nowrap">
+                        <a class="asc-nav-link" asp-action="Edit" asp-route-id="@tag.Id"><i class="ti ti-edit"></i> Edit</a>
+                        <form asp-action="Delete" asp-route-id="@tag.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete @tag.Name?');">
+                            <button type="submit" class="admin-del"><i class="ti ti-trash"></i> Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

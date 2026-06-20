@@ -5,30 +5,36 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <a class="asc-nav-link" asp-controller="Dashboard" asp-action="Index">
+    <a class="asc-nav-link" asp-area="" asp-controller="Dashboard" asp-action="Index">
         <i class="ti ti-layout-dashboard"></i> Dashboard
     </a>
-    <a class="asc-nav-link" asp-controller="HikeLogs" asp-action="Index">
+    <a class="asc-nav-link" asp-area="" asp-controller="HikeLogs" asp-action="Index">
         <i class="ti ti-route"></i> My hikes
     </a>
-    <a class="asc-nav-link" asp-controller="Favorites" asp-action="Index">
+    <a class="asc-nav-link" asp-area="" asp-controller="Favorites" asp-action="Index">
         <i class="ti ti-heart"></i> Saved
     </a>
     @if (User.IsInRole("Guide") || User.IsInRole("Admin"))
     {
-        <a class="asc-nav-link" asp-controller="Trails" asp-action="Create">
+        <a class="asc-nav-link" asp-area="" asp-controller="Trails" asp-action="Create">
             <i class="ti ti-plus"></i> Add trail
         </a>
     }
+    @if (User.IsInRole("Admin"))
+    {
+        <a class="asc-nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+            <i class="ti ti-settings"></i> Admin
+        </a>
+    }
     <span class="asc-nav-link"><i class="ti ti-user"></i> @UserManager.GetUserName(User)</span>
-    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
         <button type="submit" class="btn-ascent-outline">Log out</button>
     </form>
 }
 else
 {
-    <a class="asc-nav-link" asp-controller="Account" asp-action="Register">Register</a>
-    <a class="btn-ascent" asp-controller="Account" asp-action="Login">
+    <a class="asc-nav-link" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+    <a class="btn-ascent" asp-area="" asp-controller="Account" asp-action="Login">
         <i class="ti ti-user"></i> Sign in
     </a>
 }

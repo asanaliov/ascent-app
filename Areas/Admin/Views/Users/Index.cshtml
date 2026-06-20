@@ -1,0 +1,44 @@
+@model List<ascent_app.Areas.Admin.ViewModels.UserRowViewModel>
+@{
+    ViewData["Title"] = "Users";
+}
+
+<partial name="_AdminNav" />
+
+<h2 class="mb-3" style="font-size:22px">Users</h2>
+
+<table class="admin-table">
+    <thead>
+        <tr><th>Name</th><th>Email</th><th>Roles</th><th class="text-end">Manage</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td><strong>@user.DisplayName</strong></td>
+                <td class="text-secondary">@user.Email</td>
+                <td>
+                    @if (user.IsAdmin) { <span class="diff-inline diff-strenuous">Admin</span> }
+                    @if (user.IsGuide) { <span class="diff-inline diff-hard">Guide</span> }
+                    @if (!user.IsAdmin && !user.IsGuide) { <span class="diff-inline diff-easy">Hiker</span> }
+                </td>
+                <td class="text-end text-nowrap">
+                    <form asp-action="ToggleRole" method="post" class="d-inline">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <input type="hidden" name="role" value="Guide" />
+                        <button type="submit" class="btn-ascent-outline" style="padding:5px 10px;font-size:13px">
+                            @(user.IsGuide ? "Remove Guide" : "Make Guide")
+                        </button>
+                    </form>
+                    <form asp-action="ToggleRole" method="post" class="d-inline">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <input type="hidden" name="role" value="Admin" />
+                        <button type="submit" class="btn-ascent-outline" style="padding:5px 10px;font-size:13px">
+                            @(user.IsAdmin ? "Remove Admin" : "Make Admin")
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

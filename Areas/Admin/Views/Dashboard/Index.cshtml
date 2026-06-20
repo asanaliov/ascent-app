@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Admin";
+}
+
+<partial name="_AdminNav" />
+
+<div class="stat-row mb-4">
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-mountain"></i> Trails</div>
+        <div class="value">@ViewBag.Trails</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-map-2"></i> Regions</div>
+        <div class="value">@ViewBag.Regions</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-tag"></i> Tags</div>
+        <div class="value">@ViewBag.Tags</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-award"></i> Badges</div>
+        <div class="value">@ViewBag.Badges</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-users"></i> Users</div>
+        <div class="value">@ViewBag.Users</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-star"></i> Reviews</div>
+        <div class="value">@ViewBag.Reviews</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-route"></i> Hikes logged</div>
+        <div class="value">@ViewBag.Hikes</div>
+    </div>
+</div>
+
+<div class="asc-panel">
+    <p class="eyebrow mb-2">QUICK ACTIONS</p>
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="btn-ascent-outline" asp-area="Admin" asp-controller="Regions" asp-action="Create"><i class="ti ti-plus"></i> New region</a>
+        <a class="btn-ascent-outline" asp-area="Admin" asp-controller="Tags" asp-action="Create"><i class="ti ti-plus"></i> New tag</a>
+        <a class="btn-ascent-outline" asp-area="Admin" asp-controller="Badges" asp-action="Create"><i class="ti ti-plus"></i> New badge</a>
+        <a class="btn-ascent-outline" asp-area="" asp-controller="Trails" asp-action="Create"><i class="ti ti-plus"></i> New trail</a>
+    </div>
+</div>

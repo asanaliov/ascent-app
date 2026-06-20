@@ -1,0 +1,48 @@
+@model ascent_app.Areas.Admin.ViewModels.BadgeFormViewModel
+@{
+    ViewData["Title"] = "Edit badge";
+}
+
+<partial name="_AdminNav" />
+
+<div class="auth-wrap">
+    <h2 class="mb-3" style="font-size:22px">Edit badge</h2>
+    <div class="asc-panel">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="IconName" class="form-label"></label>
+                <input asp-for="IconName" class="form-control" placeholder="ti-mountain" />
+                <span asp-validation-for="IconName" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <label asp-for="Criteria" class="form-label"></label>
+                    <select asp-for="Criteria" asp-items="Html.GetEnumSelectList<ascent_app.Models.BadgeCriteria>()" class="form-select"></select>
+                </div>
+                <div class="col-6 mb-3">
+                    <label asp-for="Threshold" class="form-label"></label>
+                    <input asp-for="Threshold" class="form-control" />
+                    <span asp-validation-for="Threshold" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn-ascent">Save</button>
+                <a class="btn-ascent-outline" asp-action="Index">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }
