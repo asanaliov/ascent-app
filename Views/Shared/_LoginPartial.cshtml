@@ -16,6 +16,9 @@
     </a>
     @if (User.IsInRole("Guide") || User.IsInRole("Admin"))
     {
+        <a class="asc-nav-link" asp-area="" asp-controller="Guide" asp-action="Index">
+            <i class="ti ti-map-2"></i> My trails
+        </a>
         <a class="asc-nav-link" asp-area="" asp-controller="Trails" asp-action="Create">
             <i class="ti ti-plus"></i> Add trail
         </a>
@@ -26,7 +29,9 @@
             <i class="ti ti-settings"></i> Admin
         </a>
     }
-    <span class="asc-nav-link"><i class="ti ti-user"></i> @UserManager.GetUserName(User)</span>
+    <a class="asc-nav-link" asp-area="" asp-controller="Profile" asp-action="Index" asp-route-id="@UserManager.GetUserId(User)">
+        <i class="ti ti-user"></i> @UserManager.GetUserName(User)
+    </a>
     <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
         <button type="submit" class="btn-ascent-outline">Log out</button>
     </form>

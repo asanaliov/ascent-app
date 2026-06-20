@@ -1,0 +1,96 @@
+@model ascent_app.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = Model.DisplayName;
+}
+
+<div class="mt-4 mb-3">
+    <p class="eyebrow mb-1">HIKER PROFILE</p>
+    <h1 class="mb-1">@Model.DisplayName</h1>
+    <div class="meta-row">
+        <span><i class="ti ti-calendar"></i> Member since @Model.MemberSince.ToString("MMM yyyy")</span>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.Bio))
+    {
+        <p class="text-secondary mb-0 mt-2" style="max-width:640px">@Model.Bio</p>
+    }
+</div>
+
+@* stat cards — totals over all hikes *@
+<div class="stat-row mb-4">
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-route"></i> Total hikes</div>
+        <div class="value">@Model.TotalHikes</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-map-pin"></i> Distance</div>
+        <div class="value">@Model.TotalDistanceKm.ToString("0.0") km</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-mountain"></i> Elevation</div>
+        <div class="value">@Model.TotalElevationM.ToString("N0") m</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-map-pin"></i> Regions</div>
+        <div class="value">@Model.RegionsCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-star"></i> Reviews</div>
+        <div class="value">@Model.ReviewsCount</div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <p class="eyebrow mb-2">RECENT HIKES</p>
+        @if (Model.RecentHikes.Count == 0)
+        {
+            <div class="asc-panel text-center text-muted">
+                <i class="ti ti-route" style="font-size:32px;opacity:.5"></i>
+                <p class="mb-0 mt-2">No hikes logged yet.</p>
+            </div>
+        }
+        else
+        {
+            foreach (var h in Model.RecentHikes)
+            {
+                var diffClass = (h.Trail.Difficulty?.Label ?? "").ToLowerInvariant();
+                <div class="asc-panel mb-3">
+                    <div class="tc-region"><i class="ti ti-map-pin"></i> @h.Trail.Region?.Name</div>
+                    <h3 class="tc-title mb-1">
+                        <a asp-controller="Trails" asp-action="Details" asp-route-id="@h.TrailId">@h.Trail.Name</a>
+                    </h3>
+                    <div class="meta-row">
+                        <span><i class="ti ti-calendar"></i> @h.HikedOn.ToString("MMM d, yyyy")</span>
+                        @if (h.Trail.Difficulty is not null)
+                        {
+                            <span class="diff-inline diff-@diffClass">@h.Trail.Difficulty.Label</span>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="col-md-5">
+        <p class="eyebrow mb-2">BADGES EARNED</p>
+        @if (Model.Badges.Count == 0)
+        {
+            <p class="text-muted" style="font-size:14px">No badges yet.</p>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-2">
+                @foreach (var badge in Model.Badges)
+                {
+                    <div class="asc-panel d-flex align-items-center gap-3" style="padding:12px 14px">
+                        <i class="ti @badge.IconName" style="font-size:24px;color:var(--forest)"></i>
+                        <div>
+                            <div style="font-weight:600">@badge.Name</div>
+                            <div class="text-muted" style="font-size:12px">@badge.Description</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

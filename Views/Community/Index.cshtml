@@ -1,0 +1,118 @@
+@model ascent_app.ViewModels.CommunityViewModel
+@{
+    ViewData["Title"] = "Community";
+}
+
+<div class="mt-4 mb-3">
+    <p class="eyebrow mb-1">ASCENT · COMMUNITY</p>
+    <h1 class="mb-0">The community, by the numbers</h1>
+</div>
+
+@* site totals *@
+<div class="stat-row mb-4">
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-route"></i> Trails</div>
+        <div class="value">@Model.TotalTrails</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-mountain"></i> Hikes logged</div>
+        <div class="value">@Model.TotalHikes</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-users"></i> Hikers</div>
+        <div class="value">@Model.TotalHikers</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-mountain"></i> Elevation logged</div>
+        <div class="value">@Model.TotalElevationM.ToString("N0") m</div>
+    </div>
+</div>
+
+<div class="row">
+    @* top hikers leaderboard *@
+    <div class="col-md-6">
+        <div class="asc-panel">
+            <p class="eyebrow mb-3"><i class="ti ti-trophy"></i> TOP HIKERS</p>
+            @if (Model.TopHikers.Count == 0)
+            {
+                <p class="text-muted mb-0" style="font-size:14px">No hikes logged yet.</p>
+            }
+            else
+            {
+                var rank = 0;
+                foreach (var row in Model.TopHikers)
+                {
+                    rank++;
+                    <div class="d-flex align-items-center gap-3 py-2"
+                         style="border-bottom:.5px solid var(--border)">
+                        <span class="tc-title" style="font-size:18px;width:28px;text-align:right">@rank</span>
+                        <div class="flex-grow-1">
+                            <a class="tc-title" style="font-size:15px"
+                               asp-controller="Profile" asp-action="Index" asp-route-id="@row.UserId">@row.DisplayName</a>
+                            <div class="meta-row mt-1">
+                                <span><i class="ti ti-route"></i> @row.Hikes hike@(row.Hikes == 1 ? "" : "s")</span>
+                                <span><i class="ti ti-mountain"></i> @row.ElevationM.ToString("N0") m</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    @* most-favorited trails *@
+    <div class="col-md-6">
+        <div class="asc-panel">
+            <p class="eyebrow mb-3"><i class="ti ti-heart"></i> MOST LOVED TRAILS</p>
+            @if (Model.PopularTrails.Count == 0)
+            {
+                <p class="text-muted mb-0" style="font-size:14px">No favorites yet.</p>
+            }
+            else
+            {
+                foreach (var pt in Model.PopularTrails)
+                {
+                    <div class="d-flex align-items-center justify-content-between gap-3 py-2"
+                         style="border-bottom:.5px solid var(--border)">
+                        <div>
+                            <div class="tc-region"><i class="ti ti-map-pin"></i> @pt.Trail.Region?.Name</div>
+                            <a class="tc-title" style="font-size:15px"
+                               asp-controller="Trails" asp-action="Details" asp-route-id="@pt.Trail.Id">@pt.Trail.Name</a>
+                        </div>
+                        <span class="meta-row">
+                            <span><i class="ti ti-heart" style="color:var(--terracotta)"></i> @pt.FavoriteCount</span>
+                        </span>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@* recently added trails *@
+<div class="asc-panel mt-1">
+    <p class="eyebrow mb-3"><i class="ti ti-star"></i> RECENTLY ADDED</p>
+    @if (Model.RecentTrails.Count == 0)
+    {
+        <p class="text-muted mb-0" style="font-size:14px">No trails yet.</p>
+    }
+    else
+    {
+        foreach (var trail in Model.RecentTrails)
+        {
+            var diffClass = (trail.Difficulty?.Label ?? "").ToLowerInvariant();
+            <div class="d-flex align-items-center justify-content-between gap-3 py-2"
+                 style="border-bottom:.5px solid var(--border)">
+                <div>
+                    <div class="tc-region"><i class="ti ti-map-pin"></i> @trail.Region?.Name</div>
+                    <a class="tc-title" style="font-size:15px"
+                       asp-controller="Trails" asp-action="Details" asp-route-id="@trail.Id">@trail.Name</a>
+                </div>
+                @if (trail.Difficulty is not null)
+                {
+                    <span class="diff-inline diff-@diffClass">@trail.Difficulty.Label</span>
+                }
+            </div>
+        }
+    }
+</div>
