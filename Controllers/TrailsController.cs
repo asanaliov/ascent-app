@@ -14,15 +14,18 @@ public class TrailsController : Controller
 {
     private readonly AscentDbContext _context;
     private readonly IDifficultyService _difficulty;
+    private readonly IGeoService _geo;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public TrailsController(
         AscentDbContext context,
         IDifficultyService difficulty,
+        IGeoService geo,
         UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _difficulty = difficulty;
+        _geo = geo;
         _userManager = userManager;
     }
 
@@ -57,6 +60,34 @@ public class TrailsController : Controller
 
         ViewBag.FavoriteTrailIds = await GetFavoriteTrailIdsAsync();
         return View(trail);
+    }
+
+    // GET: Trails/Nearby?lat=..&lng=..  — coords come from browser geolocation
+    public async Task<IActionResult> Nearby(double? lat, double? lng)
+    {
+        var trails = await _context.Trails
+            .Include(t => t.Difficulty)
+            .Include(t => t.Region)
+            .AsNoTracking()
+            .ToListAsync();
+
+        var vm = new NearbyViewModel { Lat = lat, Lng = lng };
+
+        if (lat.HasValue && lng.HasValue)
+        {
+            vm.Trails = _geo.NearestTo(lat.Value, lng.Value, trails)
+                .Select(x => new NearbyTrail { Trail = x.Trail, DistanceKm = x.DistanceKm })
+                .ToList();
+        }
+        else
+        {
+            vm.Trails = trails
+                .OrderBy(t => t.Name)
+                .Select(t => new NearbyTrail { Trail = t })
+                .ToList();
+        }
+
+        return View(vm);
     }
 
     // GET: Trails/Create

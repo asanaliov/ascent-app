@@ -487,3 +487,24 @@ footer.footer {
     border-radius: var(--r-pill);
 }
 .badge-row.earned .progress-fill { background: var(--terracotta); }
+
+/* maps */
+.map-box {
+    height: 440px;
+    border-radius: var(--r-card);
+    border: 0.5px solid var(--border);
+    z-index: 0;
+}
+.map-box-sm {
+    height: 180px;
+    border-radius: var(--r-input);
+    border: 0.5px solid var(--border);
+    z-index: 0;
+}
+.dist-badge {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--forest);
+    margin-bottom: 4px;
+}
+.dist-badge .ti { font-size: 13px; }

@@ -1,0 +1,105 @@
+@model ascent_app.ViewModels.NearbyViewModel
+@{
+    ViewData["Title"] = "Trails near you";
+
+    var markers = Model.Trails.Select(x => new
+    {
+        name = x.Trail.Name,
+        lat = x.Trail.Latitude,
+        lng = x.Trail.Longitude,
+        region = x.Trail.Region?.Name ?? "",
+        url = Url.Action("Details", "Trails", new { id = x.Trail.Id }),
+    });
+    var markersJson = System.Text.Json.JsonSerializer.Serialize(markers);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+}
+
+<div class="d-flex align-items-end justify-content-between mt-4 mb-3">
+    <div>
+        <p class="eyebrow mb-1">EXPLORE</p>
+        <h1 class="mb-0">Trails near you</h1>
+    </div>
+    <button id="locate" class="btn-ascent" type="button">
+        <i class="ti ti-navigation"></i> Use my location
+    </button>
+</div>
+
+@if (!Model.HasLocation)
+{
+    <p class="text-secondary mb-3" style="font-size:14px">
+        Showing all trails. Tap <strong>Use my location</strong> to sort them by distance from where you are.
+    </p>
+}
+
+<div id="map" class="map-box mb-4"></div>
+
+<div class="row">
+    @foreach (var item in Model.Trails)
+    {
+        var diffClass = (item.Trail.Difficulty?.Label ?? "").ToLowerInvariant();
+        <div class="col-md-6 mb-2">
+            <a class="asc-panel d-flex justify-content-between align-items-center text-decoration-none"
+               style="padding:12px 14px" asp-action="Details" asp-route-id="@item.Trail.Id">
+                <div>
+                    <div class="tc-region"><i class="ti ti-map-pin"></i> @item.Trail.Region?.Name</div>
+                    <span class="tc-title" style="font-size:15px">@item.Trail.Name</span>
+                </div>
+                <div class="text-end">
+                    @if (item.DistanceKm.HasValue)
+                    {
+                        <div class="dist-badge"><i class="ti ti-route"></i> @item.DistanceKm km away</div>
+                    }
+                    @if (item.Trail.Difficulty is not null)
+                    {
+                        <span class="diff-inline diff-@diffClass">@item.Trail.Difficulty.Label</span>
+                    }
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        const trails = @Html.Raw(markersJson);
+        const user = @(Model.HasLocation ? Html.Raw($"[{Model.Lat}, {Model.Lng}]") : Html.Raw("null"));
+
+        const map = L.map('map');
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const points = [];
+        trails.forEach(t => {
+            L.marker([t.lat, t.lng]).addTo(map)
+                .bindPopup('<a href="' + t.url + '"><strong>' + t.name + '</strong></a><br>' + t.region);
+            points.push([t.lat, t.lng]);
+        });
+
+        if (user) {
+            L.circleMarker(user, { radius: 8, color: '#B05E3B', fillColor: '#B05E3B', fillOpacity: 1 })
+                .addTo(map).bindPopup('You are here');
+            points.push(user);
+        }
+
+        if (points.length) {
+            map.fitBounds(L.latLngBounds(points).pad(0.2));
+        } else {
+            map.setView([41.6, 21.7], 8); // North Macedonia
+        }
+
+        document.getElementById('locate').addEventListener('click', () => {
+            if (!navigator.geolocation) { alert('Geolocation is not supported by your browser.'); return; }
+            navigator.geolocation.getCurrentPosition(
+                p => window.location = '@Url.Action("Nearby", "Trails")?lat=' + p.coords.latitude + '&lng=' + p.coords.longitude,
+                () => alert('Could not get your location.'));
+        });
+    </script>
+}

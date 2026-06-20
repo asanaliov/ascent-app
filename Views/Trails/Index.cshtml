@@ -9,10 +9,13 @@
         <p class="eyebrow mb-1">ALL TRAILS</p>
         <h1 class="mb-0">Discover trails</h1>
     </div>
-    @if (User.IsInRole("Guide") || User.IsInRole("Admin"))
-    {
-        <a class="btn-ascent" asp-action="Create"><i class="ti ti-plus"></i> Add trail</a>
-    }
+    <div class="d-flex gap-2">
+        <a class="btn-ascent-outline" asp-action="Nearby"><i class="ti ti-navigation"></i> Near me</a>
+        @if (User.IsInRole("Guide") || User.IsInRole("Admin"))
+        {
+            <a class="btn-ascent" asp-action="Create"><i class="ti ti-plus"></i> Add trail</a>
+        }
+    </div>
 </div>
 
 @if (!Model.Any())
