@@ -34,6 +34,7 @@ public static class DbInitializer
 
         var guide = await userManager.FindByEmailAsync("guide@ascent.local");
         await SeedTrailsAsync(context, guide?.Id);
+        await SeedTagsAsync(context);
     }
 
     private static async Task EnsureUserAsync(
@@ -90,6 +91,33 @@ public static class DbInitializer
             new Badge { Name = "Trailblazer", Description = "Logged 10 hikes.", IconName = "ti-flame", Criteria = BadgeCriteria.HikeCount, Threshold = 10 },
             new Badge { Name = "Summit Seeker", Description = "Climbed 5,000 m in total.", IconName = "ti-mountain", Criteria = BadgeCriteria.CumulativeElevation, Threshold = 5000 },
             new Badge { Name = "Explorer", Description = "Hiked in 3 different regions.", IconName = "ti-map-2", Criteria = BadgeCriteria.DistinctRegions, Threshold = 3 });
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedTagsAsync(AscentDbContext context)
+    {
+        if (await context.Tags.AnyAsync()) return;
+
+        var names = new[] { "Forest", "Lake", "Summit", "Family-friendly", "Loop", "Panoramic", "Alpine", "Waterfall" };
+        var tags = names.Select(n => new Tag { Name = n }).ToList();
+        context.Tags.AddRange(tags);
+        await context.SaveChangesAsync();
+
+        var byName = tags.ToDictionary(t => t.Name, t => t.Id);
+        var map = new Dictionary<string, string[]>
+        {
+            ["Vodno – Millennium Cross"] = new[] { "Summit", "Forest", "Panoramic" },
+            ["Matka Canyon Loop"] = new[] { "Loop", "Lake", "Family-friendly" },
+            ["Titov Vrv"] = new[] { "Summit", "Alpine", "Panoramic" },
+            ["Galičica Ridge"] = new[] { "Panoramic", "Lake" },
+            ["Mt. Korab Summit"] = new[] { "Summit", "Alpine" },
+        };
+
+        var trails = await context.Trails.Where(t => map.Keys.Contains(t.Name)).ToListAsync();
+        foreach (var trail in trails)
+            foreach (var tagName in map[trail.Name])
+                context.TrailTags.Add(new TrailTag { TrailId = trail.Id, TagId = byName[tagName] });
 
         await context.SaveChangesAsync();
     }

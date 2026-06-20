@@ -41,4 +41,6 @@ public class TrailFormViewModel
     [Required]
     [Display(Name = "Region")]
     public int RegionId { get; set; }
+
+    public List<int> SelectedTagIds { get; set; } = new();
 }

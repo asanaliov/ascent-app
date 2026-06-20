@@ -98,6 +98,15 @@
         {
             <p class="text-secondary">@Model.Description</p>
         }
+        @if (Model.TrailTags.Any())
+        {
+            <div class="d-flex gap-2 flex-wrap mt-2">
+                @foreach (var tt in Model.TrailTags.OrderBy(x => x.Tag.Name))
+                {
+                    <span class="asc-chip"><i class="ti ti-tag"></i> @tt.Tag.Name</span>
+                }
+            </div>
+        }
     </div>
     <div class="col-md-4">
         <div class="asc-panel">

@@ -70,6 +70,8 @@
                 <span asp-validation-for="RegionId" class="text-danger"></span>
             </div>
 
+            <partial name="_TagPicker" model="Model" />
+
             <div class="d-flex gap-2 mt-2">
                 <button type="submit" class="btn-ascent">Save changes</button>
                 <a class="btn-ascent-outline" asp-action="Index">Cancel</a>

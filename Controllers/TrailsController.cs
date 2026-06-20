@@ -53,6 +53,7 @@ public class TrailsController : Controller
             .Include(t => t.Difficulty)
             .Include(t => t.Region)
             .Include(t => t.Reviews).ThenInclude(r => r.User)
+            .Include(t => t.TrailTags).ThenInclude(tt => tt.Tag)
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -95,6 +96,7 @@ public class TrailsController : Controller
     public async Task<IActionResult> Create()
     {
         await PopulateRegionsAsync();
+        await PopulateTagsAsync();
         return View(new TrailFormViewModel());
     }
 
@@ -107,6 +109,7 @@ public class TrailsController : Controller
         if (!ModelState.IsValid)
         {
             await PopulateRegionsAsync(form.RegionId);
+            await PopulateTagsAsync();
             return View(form);
         }
 
@@ -124,6 +127,7 @@ public class TrailsController : Controller
             DifficultyId = await _difficulty.ResolveDifficultyIdAsync(form.DistanceKm, form.ElevationGainM),
             AuthorId = _userManager.GetUserId(User),
             CreatedAt = DateTime.UtcNow,
+            TrailTags = form.SelectedTagIds.Select(tid => new TrailTag { TagId = tid }).ToList(),
         };
 
         _context.Add(trail);
@@ -137,11 +141,17 @@ public class TrailsController : Controller
     {
         if (id == null) return NotFound();
 
-        var trail = await _context.Trails.FindAsync(id);
+        var trail = await _context.Trails
+            .Include(t => t.TrailTags)
+            .FirstOrDefaultAsync(t => t.Id == id);
         if (trail == null) return NotFound();
 
         await PopulateRegionsAsync(trail.RegionId);
-        return View(ToForm(trail));
+        await PopulateTagsAsync();
+
+        var form = ToForm(trail);
+        form.SelectedTagIds = trail.TrailTags.Select(tt => tt.TagId).ToList();
+        return View(form);
     }
 
     // POST: Trails/Edit/5
@@ -155,10 +165,13 @@ public class TrailsController : Controller
         if (!ModelState.IsValid)
         {
             await PopulateRegionsAsync(form.RegionId);
+            await PopulateTagsAsync();
             return View(form);
         }
 
-        var trail = await _context.Trails.FindAsync(id);
+        var trail = await _context.Trails
+            .Include(t => t.TrailTags)
+            .FirstOrDefaultAsync(t => t.Id == id);
         if (trail == null) return NotFound();
 
         trail.Name = form.Name;
@@ -172,6 +185,11 @@ public class TrailsController : Controller
         trail.RegionId = form.RegionId;
         // recompute - distance/gain may have changed
         trail.DifficultyId = await _difficulty.ResolveDifficultyIdAsync(form.DistanceKm, form.ElevationGainM);
+
+        // replace tag links with the new selection
+        trail.TrailTags.Clear();
+        foreach (var tid in form.SelectedTagIds)
+            trail.TrailTags.Add(new TrailTag { TagId = tid });
 
         try
         {
@@ -238,6 +256,11 @@ public class TrailsController : Controller
     {
         var regions = await _context.Regions.OrderBy(r => r.Name).AsNoTracking().ToListAsync();
         ViewBag.RegionId = new SelectList(regions, "Id", "Name", selected);
+    }
+
+    private async Task PopulateTagsAsync()
+    {
+        ViewBag.AllTags = await _context.Tags.OrderBy(t => t.Name).AsNoTracking().ToListAsync();
     }
 
     private static TrailFormViewModel ToForm(Trail t) => new()

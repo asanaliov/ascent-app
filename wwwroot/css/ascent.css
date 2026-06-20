@@ -544,3 +544,23 @@ footer.footer {
     margin-left: 10px;
 }
 .admin-del:hover { color: var(--terracotta); }
+
+/* tag picker (trail form) */
+.tag-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--r-pill);
+    padding: 5px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+}
+.tag-check input { accent-color: var(--forest); }
+.tag-check:has(input:checked) {
+    background: var(--forest);
+    border-color: var(--forest);
+    color: var(--paper);
+}

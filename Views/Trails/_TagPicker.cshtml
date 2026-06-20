@@ -1,0 +1,25 @@
+@model ascent_app.ViewModels.TrailFormViewModel
+@{
+    var tags = ViewBag.AllTags as List<ascent_app.Models.Tag> ?? new();
+}
+
+<div class="mb-3">
+    <label class="form-label">Tags</label>
+    @if (tags.Count == 0)
+    {
+        <p class="text-muted" style="font-size:13px">No tags defined yet.</p>
+    }
+    else
+    {
+        <div class="tag-picker">
+            @foreach (var tag in tags)
+            {
+                var checkedAttr = Model.SelectedTagIds.Contains(tag.Id);
+                <label class="tag-check">
+                    <input type="checkbox" name="SelectedTagIds" value="@tag.Id" checked="@checkedAttr" />
+                    <span>@tag.Name</span>
+                </label>
+            }
+        </div>
+    }
+</div>
