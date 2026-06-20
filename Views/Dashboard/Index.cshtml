@@ -1,0 +1,108 @@
+@model ascent_app.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex align-items-end justify-content-between mt-4 mb-3">
+    <div>
+        <p class="eyebrow mb-1">YOUR PROGRESS</p>
+        <h1 class="mb-0">Welcome back, @Model.DisplayName</h1>
+    </div>
+    <a class="btn-ascent-outline" asp-controller="Trails" asp-action="Index">
+        <i class="ti ti-compass"></i> Find a trail
+    </a>
+</div>
+
+<div class="stat-row mb-4">
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-route"></i> Hikes logged</div>
+        <div class="value">@Model.TotalHikes</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-mountain"></i> Elevation gained</div>
+        <div class="value">@Model.TotalElevationM m</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-ruler-2"></i> Distance covered</div>
+        <div class="value">@Model.TotalDistanceKm km</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-map-2"></i> Regions explored</div>
+        <div class="value">@Model.DistinctRegions</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-award"></i> Badges earned</div>
+        <div class="value">@Model.BadgesEarned / @Model.Badges.Count</div>
+    </div>
+    <div class="stat-card">
+        <div class="label"><i class="ti ti-star"></i> Reviews / Saved</div>
+        <div class="value">@Model.ReviewsWritten · @Model.SavedTrails</div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <p class="eyebrow mb-3">BADGE PROGRESS</p>
+        @foreach (var bp in Model.Badges)
+        {
+            <div class="badge-row @(bp.Earned ? "earned" : "")">
+                <i class="ti @bp.Badge.IconName badge-ico"></i>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-baseline">
+                        <span class="badge-name">@bp.Badge.Name</span>
+                        @if (bp.Earned)
+                        {
+                            <span class="badge-tag"><i class="ti ti-check"></i> Earned</span>
+                        }
+                        else
+                        {
+                            <span class="badge-count">@bp.Current / @bp.Threshold</span>
+                        }
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:@bp.Percent%"></div>
+                    </div>
+                    <div class="badge-desc">@bp.Badge.Description</div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-5">
+        <p class="eyebrow mb-3">RECENT HIKES</p>
+        @if (Model.RecentHikes.Count == 0)
+        {
+            <div class="asc-panel text-center text-muted">
+                <i class="ti ti-route" style="font-size:28px;opacity:.5"></i>
+                <p class="mb-1 mt-2">No hikes logged yet.</p>
+                <a asp-controller="Trails" asp-action="Index">Find a trail to hike →</a>
+            </div>
+        }
+        else
+        {
+            foreach (var hike in Model.RecentHikes)
+            {
+                var diffClass = (hike.Trail.Difficulty?.Label ?? "").ToLowerInvariant();
+                <div class="asc-panel mb-2" style="padding:12px 14px">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <a class="tc-title" style="font-size:15px"
+                               asp-controller="Trails" asp-action="Details" asp-route-id="@hike.TrailId">@hike.Trail.Name</a>
+                            <div class="meta-row mt-1">
+                                <span><i class="ti ti-calendar"></i> @hike.HikedOn.ToString("MMM d, yyyy")</span>
+                                <span><i class="ti ti-mountain"></i> @hike.Trail.ElevationGainM m</span>
+                            </div>
+                        </div>
+                        @if (hike.Trail.Difficulty is not null)
+                        {
+                            <span class="diff-inline diff-@diffClass">@hike.Trail.Difficulty.Label</span>
+                        }
+                    </div>
+                </div>
+            }
+            <a class="asc-nav-link mt-1 d-inline-block" asp-controller="HikeLogs" asp-action="Index">
+                View all hikes <i class="ti ti-arrow-right"></i>
+            </a>
+        }
+    </div>
+</div>

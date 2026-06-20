@@ -14,6 +14,12 @@
     <input type="hidden" name="returnUrl" value="@returnUrl" />
     <button type="submit" class="fav-btn @(isFav ? "on" : "")"
             title="@(isFav ? "Remove from favorites" : "Save to favorites")">
-        <i class="ti @(isFav ? "ti-heart-filled" : "ti-heart")"></i>
+        @* no filled-heart glyph in the webfont *@
+        <svg width="20" height="20" viewBox="0 0 24 24"
+             fill="@(isFav ? "currentColor" : "none")"
+             stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.572a5 5 0 1 1 7.5 6.572z"></path>
+        </svg>
     </button>
 </form>

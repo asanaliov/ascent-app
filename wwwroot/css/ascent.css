@@ -396,8 +396,8 @@ footer.footer {
     font-size: 16px;
 }
 .rating-line .ti, .review-stars .ti { font-size: 15px; }
-.ti-star-filled.on { color: var(--terracotta); }
-.ti-star-filled.off { color: var(--border-strong); }
+.ti-star.on { color: var(--terracotta); }
+.ti-star.off { color: var(--border-strong); }
 .rating-text {
     margin-left: 6px;
     font-size: 13px;
@@ -438,7 +438,52 @@ footer.footer {
     color: var(--text-muted);
     cursor: pointer;
     font-size: 18px;
-    transition: color .15s, border-color .15s;
+    transition: color .15s, background .15s, border-color .15s;
 }
 .fav-btn:hover { color: var(--terracotta); border-color: var(--border-strong); }
-.fav-btn.on { color: var(--terracotta); }
+/* saved = filled terracotta heart (see inline SVG in _FavoriteButton) */
+.fav-btn.on { color: var(--terracotta); border-color: var(--terracotta); }
+.fav-btn svg { display: block; }
+
+/* dashboard badge progress */
+.badge-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-card);
+    background: var(--surface);
+    margin-bottom: 12px;
+}
+.badge-row.earned { border-color: var(--terracotta); }
+.badge-ico {
+    font-size: 26px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+.badge-row.earned .badge-ico { color: var(--terracotta); }
+.badge-name { font-weight: 600; color: var(--forest-dark); }
+.badge-count { font-size: 13px; color: var(--text-muted); }
+.badge-tag {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--terracotta);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+.badge-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.progress-track {
+    height: 6px;
+    background: var(--surface-alt);
+    border-radius: var(--r-pill);
+    overflow: hidden;
+    margin: 8px 0 2px;
+}
+.progress-fill {
+    height: 100%;
+    background: var(--forest);
+    border-radius: var(--r-pill);
+}
+.badge-row.earned .progress-fill { background: var(--terracotta); }
