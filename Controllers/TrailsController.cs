@@ -32,6 +32,7 @@ public class TrailsController : Controller
         var trails = await _context.Trails
             .Include(t => t.Difficulty)
             .Include(t => t.Region)
+            .Include(t => t.Reviews)
             .AsNoTracking()
             .ToListAsync();
         return View(trails);
@@ -46,6 +47,7 @@ public class TrailsController : Controller
             .Include(t => t.Author)
             .Include(t => t.Difficulty)
             .Include(t => t.Region)
+            .Include(t => t.Reviews).ThenInclude(r => r.User)
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == id);
 

@@ -51,6 +51,10 @@ else
                         <div class="tc-stats">
                             <span><i class="ti ti-route"></i> @trail.DistanceKm km</span>
                             <span><i class="ti ti-mountain"></i> @trail.ElevationGainM m</span>
+                            @if (trail.Reviews.Count > 0)
+                            {
+                                <span><i class="ti ti-star-filled on"></i> @trail.AverageRating.ToString("0.0")</span>
+                            }
                         </div>
                     </div>
                 </a>

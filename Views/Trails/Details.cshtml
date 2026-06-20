@@ -1,9 +1,18 @@
 @model ascent_app.Models.Trail
+@using Microsoft.AspNetCore.Identity
+@using ascent_app.Models
+@inject UserManager<ApplicationUser> UserManager
 
 @{
     ViewData["Title"] = Model.Name;
     var diffClass = (Model.Difficulty?.Label ?? "").ToLowerInvariant();
     var canManage = User.IsInRole("Guide") || User.IsInRole("Admin");
+    var isAdmin = User.IsInRole("Admin");
+
+    var reviews = Model.Reviews.OrderByDescending(r => r.CreatedAt).ToList();
+    var avg = Model.AverageRating;
+    var myId = UserManager.GetUserId(User);
+    var myReview = myId is null ? null : reviews.FirstOrDefault(r => r.UserId == myId);
 }
 
 <a class="asc-nav-link d-inline-flex align-items-center gap-1 mt-4" asp-action="Index">
@@ -20,6 +29,20 @@
                 <span class="diff-inline diff-@diffClass">@Model.Difficulty.Label</span>
             }
         </h1>
+        <div class="rating-line mt-1">
+            @for (var i = 1; i <= 5; i++)
+            {
+                <i class="ti ti-star-filled @(i <= Math.Round(avg) ? "on" : "off")"></i>
+            }
+            @if (reviews.Count > 0)
+            {
+                <span class="rating-text">@avg.ToString("0.0") · @reviews.Count review@(reviews.Count == 1 ? "" : "s")</span>
+            }
+            else
+            {
+                <span class="rating-text">No reviews yet</span>
+            }
+        </div>
     </div>
     <div class="d-flex gap-2">
         @if (User.Identity?.IsAuthenticated == true)
@@ -89,4 +112,95 @@
 <div class="meta-row mt-4">
     <span><i class="ti ti-user"></i> Added by @(Model.Author?.DisplayName ?? "—")</span>
     <span><i class="ti ti-calendar"></i> @Model.CreatedAt.ToString("MMM d, yyyy")</span>
+</div>
+
+<hr class="my-4" />
+
+<div class="row">
+    <div class="col-md-7">
+        <p class="eyebrow mb-3">REVIEWS</p>
+
+        @if (reviews.Count == 0)
+        {
+            <p class="text-muted" style="font-size:14px">Be the first to review this trail.</p>
+        }
+        else
+        {
+            foreach (var review in reviews)
+            {
+                <div class="review-item mb-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="review-author">@(review.User?.DisplayName ?? "Hiker")</span>
+                            <span class="review-stars">
+                                @for (var i = 1; i <= 5; i++)
+                                {
+                                    <i class="ti ti-star-filled @(i <= review.Rating ? "on" : "off")"></i>
+                                }
+                            </span>
+                        </div>
+                        @if (review.UserId == myId || isAdmin)
+                        {
+                            <form asp-controller="Reviews" asp-action="Delete" asp-route-id="@review.Id"
+                                  method="post" onsubmit="return confirm('Delete this review?');">
+                                <button type="submit" class="review-del" title="Delete review">
+                                    <i class="ti ti-trash"></i>
+                                </button>
+                            </form>
+                        }
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(review.Comment))
+                    {
+                        <p class="mb-1 mt-1" style="font-size:14px">@review.Comment</p>
+                    }
+                    <div class="text-muted" style="font-size:12px">@review.CreatedAt.ToString("MMM d, yyyy")</div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="col-md-5">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="asc-panel">
+                <p class="eyebrow mb-2">@(myReview is null ? "WRITE A REVIEW" : "UPDATE YOUR REVIEW")</p>
+
+                @if (TempData["ReviewError"] is string reviewError)
+                {
+                    <p class="text-danger" style="font-size:13px">@reviewError</p>
+                }
+
+                <form asp-controller="Reviews" asp-action="Create" method="post">
+                    <input type="hidden" name="TrailId" value="@Model.Id" />
+
+                    <div class="mb-2">
+                        <label class="form-label">Rating</label>
+                        <select name="Rating" class="form-select">
+                            @for (var i = 5; i >= 1; i--)
+                            {
+                                var selected = (myReview?.Rating ?? 5) == i;
+                                <option value="@i" selected="@selected">@i star@(i == 1 ? "" : "s")</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Comment <span class="text-muted">(optional)</span></label>
+                        <textarea name="Comment" class="form-control" rows="3" maxlength="1000">@myReview?.Comment</textarea>
+                    </div>
+                    <button type="submit" class="btn-ascent">
+                        @(myReview is null ? "Post review" : "Update review")
+                    </button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="asc-panel text-center">
+                <p class="mb-2" style="font-size:14px">Sign in to leave a review.</p>
+                <a class="btn-ascent" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Trails", new { id = Model.Id })">
+                    <i class="ti ti-user"></i> Sign in
+                </a>
+            </div>
+        }
+    </div>
 </div>
