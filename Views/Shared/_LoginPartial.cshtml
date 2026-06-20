@@ -8,6 +8,9 @@
     <a class="asc-nav-link" asp-controller="HikeLogs" asp-action="Index">
         <i class="ti ti-route"></i> My hikes
     </a>
+    <a class="asc-nav-link" asp-controller="Favorites" asp-action="Index">
+        <i class="ti ti-heart"></i> Saved
+    </a>
     @if (User.IsInRole("Guide") || User.IsInRole("Admin"))
     {
         <a class="asc-nav-link" asp-controller="Trails" asp-action="Create">

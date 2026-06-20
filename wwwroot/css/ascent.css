@@ -420,3 +420,25 @@ footer.footer {
     border-radius: var(--r-badge);
 }
 .review-del:hover { color: var(--terracotta); background: var(--surface-alt); }
+
+/* favorite (heart) toggle */
+.trail-card-wrap { position: relative; }
+.trail-card-wrap > .fav-form {
+    position: absolute;
+    top: 10px; right: 10px;
+    z-index: 2;
+}
+.fav-form { margin: 0; }
+.fav-btn {
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    border-radius: var(--r-pill);
+    border: 0.5px solid var(--border);
+    background: rgba(251, 250, 244, 0.92);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 18px;
+    transition: color .15s, border-color .15s;
+}
+.fav-btn:hover { color: var(--terracotta); border-color: var(--border-strong); }
+.fav-btn.on { color: var(--terracotta); }

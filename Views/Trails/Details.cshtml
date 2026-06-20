@@ -44,7 +44,8 @@
             }
         </div>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 align-items-center">
+        <partial name="_FavoriteButton" model="Model" />
         @if (User.Identity?.IsAuthenticated == true)
         {
             <a class="btn-ascent" asp-controller="HikeLogs" asp-action="Create" asp-route-trailId="@Model.Id">

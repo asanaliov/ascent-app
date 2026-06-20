@@ -35,6 +35,8 @@ public class TrailsController : Controller
             .Include(t => t.Reviews)
             .AsNoTracking()
             .ToListAsync();
+
+        ViewBag.FavoriteTrailIds = await GetFavoriteTrailIdsAsync();
         return View(trails);
     }
 
@@ -53,6 +55,7 @@ public class TrailsController : Controller
 
         if (trail == null) return NotFound();
 
+        ViewBag.FavoriteTrailIds = await GetFavoriteTrailIdsAsync();
         return View(trail);
     }
 
@@ -187,6 +190,18 @@ public class TrailsController : Controller
     }
 
     private bool TrailExists(int id) => _context.Trails.Any(e => e.Id == id);
+
+    // trail ids the current user has favorited (empty set when signed out) — drives the heart state
+    private async Task<HashSet<int>> GetFavoriteTrailIdsAsync()
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null) return new HashSet<int>();
+
+        return (await _context.Favorites
+            .Where(f => f.UserId == userId)
+            .Select(f => f.TrailId)
+            .ToListAsync()).ToHashSet();
+    }
 
     private async Task PopulateRegionsAsync(int? selected = null)
     {

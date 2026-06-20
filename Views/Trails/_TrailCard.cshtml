@@ -1,0 +1,45 @@
+@model ascent_app.Models.Trail
+@{
+    var diffClass = (Model.Difficulty?.Label ?? "").ToLowerInvariant();
+    var canManage = User.IsInRole("Guide") || User.IsInRole("Admin");
+}
+
+<div class="trail-card-wrap">
+    <partial name="_FavoriteButton" model="Model" />
+    <a class="trail-card" asp-controller="Trails" asp-action="Details" asp-route-id="@Model.Id">
+        <div class="tc-media">
+            @if (!string.IsNullOrEmpty(Model.PhotoUrl))
+            {
+                <img src="@Model.PhotoUrl" alt="@Model.Name">
+            }
+            else
+            {
+                <i class="ti ti-mountain placeholder"></i>
+            }
+            @if (Model.Difficulty is not null)
+            {
+                <span class="diff-badge diff-@diffClass">@Model.Difficulty.Label</span>
+            }
+        </div>
+        <div class="tc-body">
+            <div class="tc-region"><i class="ti ti-map-pin"></i> @Model.Region?.Name</div>
+            <h3 class="tc-title">@Model.Name</h3>
+            <p class="tc-desc">@Model.ShortDescription</p>
+            <div class="tc-stats">
+                <span><i class="ti ti-route"></i> @Model.DistanceKm km</span>
+                <span><i class="ti ti-mountain"></i> @Model.ElevationGainM m</span>
+                @if (Model.Reviews.Count > 0)
+                {
+                    <span><i class="ti ti-star-filled on"></i> @Model.AverageRating.ToString("0.0")</span>
+                }
+            </div>
+        </div>
+    </a>
+    @if (canManage)
+    {
+        <div class="d-flex gap-3 mt-2 px-1" style="font-size:13px">
+            <a asp-controller="Trails" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+            <a asp-controller="Trails" asp-action="Delete" asp-route-id="@Model.Id" class="text-muted">Delete</a>
+        </div>
+    }
+</div>

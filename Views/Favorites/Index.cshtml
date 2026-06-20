@@ -1,0 +1,29 @@
+@model IEnumerable<ascent_app.Models.Trail>
+@{
+    ViewData["Title"] = "Saved trails";
+}
+
+<div class="d-flex align-items-end justify-content-between mt-4 mb-3">
+    <div>
+        <p class="eyebrow mb-1">YOUR LIST</p>
+        <h1 class="mb-0">Saved trails</h1>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="asc-panel text-center text-muted my-4">
+        <i class="ti ti-heart" style="font-size:32px;opacity:.5"></i>
+        <p class="mb-1 mt-2">You haven't saved any trails yet.</p>
+        <a asp-controller="Trails" asp-action="Index">Browse trails →</a>
+    </div>
+}
+else
+{
+    <div class="trail-grid">
+        @foreach (var trail in Model)
+        {
+            <partial name="_TrailCard" model="trail" />
+        }
+    </div>
+}

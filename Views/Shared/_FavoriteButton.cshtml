@@ -1,0 +1,19 @@
+@model ascent_app.Models.Trail
+@{
+    // signed-out users don't see the heart at all
+    if (User.Identity?.IsAuthenticated != true) { return; }
+
+    var favIds = ViewBag.FavoriteTrailIds as HashSet<int> ?? new HashSet<int>();
+    var isFav = favIds.Contains(Model.Id);
+    // come back to whatever page we're on after toggling
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+}
+
+<form asp-controller="Favorites" asp-action="Toggle" method="post" class="fav-form">
+    <input type="hidden" name="trailId" value="@Model.Id" />
+    <input type="hidden" name="returnUrl" value="@returnUrl" />
+    <button type="submit" class="fav-btn @(isFav ? "on" : "")"
+            title="@(isFav ? "Remove from favorites" : "Save to favorites")">
+        <i class="ti @(isFav ? "ti-heart-filled" : "ti-heart")"></i>
+    </button>
+</form>

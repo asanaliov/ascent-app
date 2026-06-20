@@ -27,45 +27,7 @@ else
     <div class="trail-grid">
         @foreach (var trail in Model)
         {
-            var diffClass = (trail.Difficulty?.Label ?? "").ToLowerInvariant();
-            <div class="trail-card-wrap">
-                <a class="trail-card" asp-action="Details" asp-route-id="@trail.Id">
-                    <div class="tc-media">
-                        @if (!string.IsNullOrEmpty(trail.PhotoUrl))
-                        {
-                            <img src="@trail.PhotoUrl" alt="@trail.Name">
-                        }
-                        else
-                        {
-                            <i class="ti ti-mountain placeholder"></i>
-                        }
-                        @if (trail.Difficulty is not null)
-                        {
-                            <span class="diff-badge diff-@diffClass">@trail.Difficulty.Label</span>
-                        }
-                    </div>
-                    <div class="tc-body">
-                        <div class="tc-region"><i class="ti ti-map-pin"></i> @trail.Region?.Name</div>
-                        <h3 class="tc-title">@trail.Name</h3>
-                        <p class="tc-desc">@trail.ShortDescription</p>
-                        <div class="tc-stats">
-                            <span><i class="ti ti-route"></i> @trail.DistanceKm km</span>
-                            <span><i class="ti ti-mountain"></i> @trail.ElevationGainM m</span>
-                            @if (trail.Reviews.Count > 0)
-                            {
-                                <span><i class="ti ti-star-filled on"></i> @trail.AverageRating.ToString("0.0")</span>
-                            }
-                        </div>
-                    </div>
-                </a>
-                @if (User.IsInRole("Guide") || User.IsInRole("Admin"))
-                {
-                    <div class="d-flex gap-3 mt-2 px-1" style="font-size:13px">
-                        <a asp-action="Edit" asp-route-id="@trail.Id">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@trail.Id" class="text-muted">Delete</a>
-                    </div>
-                }
-            </div>
+            <partial name="_TrailCard" model="trail" />
         }
     </div>
 }
