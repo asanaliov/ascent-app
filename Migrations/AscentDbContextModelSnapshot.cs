@@ -473,6 +473,9 @@ namespace ascent_app.Migrations
                     b.Property<int>("RegionId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("RouteGeoJson")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ShortDescription")
                         .IsRequired()
                         .HasMaxLength(200)

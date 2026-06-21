@@ -58,6 +58,8 @@
                 </div>
             </div>
 
+            <partial name="_RouteEditor" model="Model" />
+
             <div class="mb-3">
                 <label asp-for="PhotoUrl" class="form-label"></label>
                 <input asp-for="PhotoUrl" class="form-control" />
@@ -81,6 +83,19 @@
     </div>
 </div>
 
+@section Styles {
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+}
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="~/js/ascent-map.js" asp-append-version="true"></script>
+    <script src="~/js/ascent-route-editor.js" asp-append-version="true"></script>
+    <script>
+        AscentRouteEditor({
+            mapId: 'routeeditor', inputId: 'RouteGeoJson',
+            undoId: 'routeundo', clearId: 'routeclear', countId: 'routecount',
+        });
+    </script>
 }

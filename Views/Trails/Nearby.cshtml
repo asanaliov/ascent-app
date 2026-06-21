@@ -8,14 +8,14 @@
         lat = x.Trail.Latitude,
         lng = x.Trail.Longitude,
         region = x.Trail.Region?.Name ?? "",
+        route = x.Trail.RouteGeoJson,
         url = Url.Action("Details", "Trails", new { id = x.Trail.Id }),
     });
     var markersJson = System.Text.Json.JsonSerializer.Serialize(markers);
 }
 
 @section Styles {
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
 }
 
 <div class="d-flex align-items-end justify-content-between mt-4 mb-3">
@@ -64,36 +64,29 @@
 </div>
 
 @section Scripts {
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="~/js/ascent-map.js" asp-append-version="true"></script>
     <script>
         const trails = @Html.Raw(markersJson);
-        const user = @(Model.HasLocation ? Html.Raw($"[{Model.Lat}, {Model.Lng}]") : Html.Raw("null"));
+        // server gives [lat, lng]; MapLibre wants [lng, lat]
+        const user = @(Model.HasLocation ? Html.Raw($"[{Model.Lng}, {Model.Lat}]") : Html.Raw("null"));
 
-        const map = L.map('map');
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        const points = [];
-        trails.forEach(t => {
-            L.marker([t.lat, t.lng]).addTo(map)
-                .bindPopup('<a href="' + t.url + '"><strong>' + t.name + '</strong></a><br>' + t.region);
-            points.push([t.lat, t.lng]);
+        const map = AscentMap.display('map', { pitch: 45, cooperative: true });
+        AscentMap.onReady(map, () => {
+            const all = [];
+            trails.forEach(t => {
+                const coords = AscentMap.addRoute(map, t.route, { width: 3 });
+                AscentMap.marker(map, [t.lng, t.lat], {
+                    popup: '<a href="' + t.url + '"><strong>' + t.name + '</strong></a><br>' + t.region
+                });
+                (coords || [[t.lng, t.lat]]).forEach(c => all.push(c));
+            });
+            if (user) {
+                AscentMap.marker(map, user, { color: AscentMap.TERRACOTTA, popup: 'You are here' });
+                all.push(user);
+            }
+            AscentMap.fit(map, all, { padding: 50, pitch: 45 });
         });
-
-        if (user) {
-            L.circleMarker(user, { radius: 8, color: '#B05E3B', fillColor: '#B05E3B', fillOpacity: 1 })
-                .addTo(map).bindPopup('You are here');
-            points.push(user);
-        }
-
-        if (points.length) {
-            map.fitBounds(L.latLngBounds(points).pad(0.2));
-        } else {
-            map.setView([41.6, 21.7], 8); // North Macedonia
-        }
 
         document.getElementById('locate').addEventListener('click', () => {
             if (!navigator.geolocation) { alert('Geolocation is not supported by your browser.'); return; }

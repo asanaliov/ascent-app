@@ -71,6 +71,18 @@
     }
 </div>
 
+<div class="d-flex align-items-center justify-content-between mb-2">
+    <p class="eyebrow mb-0"><i class="ti ti-route"></i> ROUTE</p>
+    @if (!string.IsNullOrEmpty(Model.RouteGeoJson))
+    {
+        <span class="text-muted" style="font-size:13px">
+            <i class="ti ti-map-pin-filled" style="color:var(--forest)"></i> Trailhead
+            &nbsp;<i class="ti ti-flag" style="color:var(--terracotta)"></i> Summit
+        </span>
+    }
+</div>
+<div id="routemap" class="map-box mb-4"></div>
+
 <div class="stat-row mb-4">
     <div class="stat-card">
         <div class="label"><i class="ti ti-route"></i> Distance</div>
@@ -115,7 +127,6 @@
                 <i class="ti ti-current-location"></i>
                 @Model.Latitude.ToString("0.0000"), @Model.Longitude.ToString("0.0000")
             </p>
-            <div id="trailmap" class="map-box-sm"></div>
             <a class="asc-nav-link mt-2 d-inline-block" asp-action="Nearby">
                 <i class="ti ti-navigation"></i> Find trails near you
             </a>
@@ -295,21 +306,29 @@
 </div>
 
 @section Styles {
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
 }
 
 @section Scripts {
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="~/js/ascent-map.js" asp-append-version="true"></script>
     <script>
         const lat = @Model.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
         const lng = @Model.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        const map = L.map('trailmap', { scrollWheelZoom: false }).setView([lat, lng], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-        L.marker([lat, lng]).addTo(map).bindPopup(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Name)));
+        const name = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Name));
+        const route = @Html.Raw(string.IsNullOrWhiteSpace(Model.RouteGeoJson) ? "null" : Model.RouteGeoJson);
+
+        // start pitched so the 3D terrain reads immediately
+        const map = AscentMap.display('routemap', { center: [lng, lat], zoom: 12, pitch: 60, bearing: -18, cooperative: true });
+        AscentMap.onReady(map, () => {
+            const coords = AscentMap.addRoute(map, route, { width: 5 });
+            if (coords) {
+                AscentMap.marker(map, coords[0], { color: AscentMap.GREEN, popup: 'Trailhead' });
+                AscentMap.marker(map, coords[coords.length - 1], { color: AscentMap.TERRACOTTA, popup: name + ' — summit' });
+                AscentMap.fit(map, coords, { padding: 70, pitch: 60, bearing: -18 });
+            } else {
+                AscentMap.marker(map, [lng, lat], { popup: name });
+            }
+        });
     </script>
 }

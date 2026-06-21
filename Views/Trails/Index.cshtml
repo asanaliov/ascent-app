@@ -4,6 +4,7 @@
 
 @{
     ViewData["Title"] = "Trails";
+    var mapTrails = ViewBag.MapTrails as string ?? "[]";
     var filter = ViewBag.Filter as TrailFilterViewModel ?? new TrailFilterViewModel();
     var tags = ViewBag.Tags as List<Tag> ?? new List<Tag>();
     var sort = ViewBag.Sort as string ?? "newest";
@@ -98,6 +99,19 @@
     }
 </form>
 
+@if (totalCount > 0)
+{
+    <div class="asc-panel mb-3" style="padding:14px">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+            <p class="eyebrow mb-0"><i class="ti ti-map-2"></i> EXPLORE ON THE MAP</p>
+            <span class="text-muted" style="font-size:12px">
+                <i class="ti ti-hand-finger"></i> Drag to pan · right-drag to tilt · Ctrl+scroll to zoom · click a pin to open
+            </span>
+        </div>
+        <div id="overviewmap" class="map-box"></div>
+    </div>
+}
+
 <p class="text-muted mb-3">Showing @Model.Count() of @totalCount @(totalCount == 1 ? "trail" : "trails")</p>
 
 @if (!Model.Any())
@@ -136,4 +150,31 @@ else
             }
         </div>
     }
+}
+
+@section Styles {
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="~/js/ascent-map.js" asp-append-version="true"></script>
+    <script>
+        const trails = @Html.Raw(mapTrails);
+        const el = document.getElementById('overviewmap');
+        if (el && trails.length) {
+            const map = AscentMap.display('overviewmap', { pitch: 45, cooperative: true });
+            AscentMap.onReady(map, () => {
+                const all = [];
+                trails.forEach(t => {
+                    // colour each route by difficulty; fall back to a pin when there's no route
+                    const coords = AscentMap.addRoute(map, t.route, { color: AscentMap.colorFor(t.diff), width: 3 });
+                    const popup = '<a href="' + t.url + '"><strong>' + t.name + '</strong></a>';
+                    AscentMap.marker(map, [t.lng, t.lat], { color: AscentMap.colorFor(t.diff), popup: popup });
+                    (coords || [[t.lng, t.lat]]).forEach(c => all.push(c));
+                });
+                AscentMap.fit(map, all, { padding: 50, pitch: 45 });
+            });
+        }
+    </script>
 }

@@ -493,14 +493,42 @@ footer.footer {
     height: 440px;
     border-radius: var(--r-card);
     border: 0.5px solid var(--border);
+    overflow: hidden; /* clip the MapLibre canvas to the rounded corners */
     z-index: 0;
 }
 .map-box-sm {
     height: 180px;
     border-radius: var(--r-input);
     border: 0.5px solid var(--border);
+    overflow: hidden;
     z-index: 0;
 }
+.map-box-edit {
+    height: 340px;
+    border-radius: var(--r-card);
+    border: 0.5px solid var(--border);
+    overflow: hidden;
+    z-index: 0;
+}
+
+/* Street / Terrain / Satellite basemap switcher (a MapLibre control) */
+.asc-basemap {
+    display: flex;
+}
+.asc-basemap button {
+    width: auto;
+    height: auto;
+    padding: 5px 11px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #fff;
+    border: none;
+    border-right: 1px solid var(--border);
+    color: var(--forest);
+    cursor: pointer;
+}
+.asc-basemap button:last-child { border-right: none; }
+.asc-basemap button.active { background: var(--forest); color: #fff; }
 .dist-badge {
     font-size: 13px;
     font-weight: 600;

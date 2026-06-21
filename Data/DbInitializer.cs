@@ -212,22 +212,58 @@ public static class DbInitializer
             return bin.Id;
         }
 
-        var samples = new (string Name, string Region, string Short, double Dist, int Gain, double Lat, double Lon)[]
+        // Each route is a representative track of waypoints (lat, lon) from the
+        // trailhead to the summit/turnaround — the first point is the trailhead.
+        var samples = new (string Name, string Region, string Short, double Dist, int Gain, (double Lat, double Lon)[] Route)[]
         {
-            ("Vodno – Millennium Cross", "Skopje", "City-edge climb to the giant cross above Skopje.", 6.5, 580, 41.9628, 21.4280),
-            ("Matka Canyon Loop", "Skopje", "Riverside path through a dramatic limestone gorge.", 8.0, 350, 41.9560, 21.3010),
-            ("Vodno – Middle Peak", "Skopje", "Shorter forest route to the lower Vodno summit.", 4.0, 300, 41.9700, 21.4330),
-            ("Titov Vrv", "Šar Planina", "Long alpine ascent to the highest peak of the Šar range.", 15.0, 1300, 41.9900, 20.8300),
-            ("Ljuboten Peak", "Šar Planina", "Iconic pyramid summit with sweeping ridge views.", 12.0, 1150, 42.1800, 21.1300),
-            ("Mt. Korab Summit", "Mavrovo", "The country's highest point, on the Albanian border.", 18.0, 1600, 41.7900, 20.5500),
-            ("Bistra Ridge", "Mavrovo", "Rolling highland ridge above Mavrovo lake.", 11.0, 700, 41.6500, 20.7500),
-            ("Galičica Ridge", "Galičica", "Panoramic ridge walk between Ohrid and Prespa lakes.", 10.0, 700, 40.9500, 20.8300),
-            ("Magaro Peak", "Galičica", "Top of the Galičica massif with twin-lake views.", 9.0, 600, 40.9600, 20.8100),
+            ("Vodno – Millennium Cross", "Skopje", "City-edge climb to the giant cross above Skopje.", 6.5, 580, new[]
+            {
+                (41.9628, 21.4280), (41.9631, 21.4255), (41.9625, 21.4230), (41.9629, 21.4205),
+                (41.9634, 21.4182), (41.9630, 21.4163), (41.9633, 21.4147),
+            }),
+            ("Matka Canyon Loop", "Skopje", "Riverside path through a dramatic limestone gorge.", 8.0, 350, new[]
+            {
+                (41.9560, 21.3010), (41.9548, 21.2995), (41.9532, 21.2978), (41.9519, 21.2960),
+                (41.9505, 21.2944), (41.9512, 21.2968), (41.9527, 21.2986), (41.9544, 21.3002), (41.9560, 21.3010),
+            }),
+            ("Vodno – Middle Peak", "Skopje", "Shorter forest route to the lower Vodno summit.", 4.0, 300, new[]
+            {
+                (41.9700, 21.4330), (41.9697, 21.4318), (41.9693, 21.4307), (41.9689, 21.4298), (41.9686, 21.4289),
+            }),
+            ("Titov Vrv", "Šar Planina", "Long alpine ascent to the highest peak of the Šar range.", 15.0, 1300, new[]
+            {
+                (41.9900, 20.8300), (41.9860, 20.8295), (41.9810, 20.8288), (41.9760, 20.8285),
+                (41.9710, 20.8282), (41.9670, 20.8280), (41.9628, 20.8278),
+            }),
+            ("Ljuboten Peak", "Šar Planina", "Iconic pyramid summit with sweeping ridge views.", 12.0, 1150, new[]
+            {
+                (42.1800, 21.1300), (42.1850, 21.1340), (42.1905, 21.1378), (42.1960, 21.1415),
+                (42.2015, 21.1448), (42.2075, 21.1475), (42.2120, 21.1490), (42.2167, 21.1500),
+            }),
+            ("Mt. Korab Summit", "Mavrovo", "The country's highest point, on the Albanian border.", 18.0, 1600, new[]
+            {
+                (41.7900, 20.5700), (41.7902, 20.5650), (41.7898, 20.5600), (41.7896, 20.5550),
+                (41.7895, 20.5510), (41.7894, 20.5475),
+            }),
+            ("Bistra Ridge", "Mavrovo", "Rolling highland ridge above Mavrovo lake.", 11.0, 700, new[]
+            {
+                (41.6500, 20.7500), (41.6520, 20.7460), (41.6545, 20.7420), (41.6570, 20.7385),
+                (41.6595, 20.7350), (41.6620, 20.7320),
+            }),
+            ("Galičica Ridge", "Galičica", "Panoramic ridge walk between Ohrid and Prespa lakes.", 10.0, 700, new[]
+            {
+                (40.9500, 20.8300), (40.9530, 20.8280), (40.9560, 20.8255), (40.9585, 20.8230), (40.9610, 20.8205),
+            }),
+            ("Magaro Peak", "Galičica", "Top of the Galičica massif with twin-lake views.", 9.0, 600, new[]
+            {
+                (40.9600, 20.8160), (40.9595, 20.8140), (40.9588, 20.8122), (40.9580, 20.8108), (40.9572, 20.8100),
+            }),
         };
 
         foreach (var s in samples)
         {
             var slug = s.Name.ToLowerInvariant().Replace(' ', '-').Replace("–", "").Replace(".", "");
+            var head = s.Route[0]; // trailhead = first route point
             context.Trails.Add(new Trail
             {
                 Name = s.Name,
@@ -235,9 +271,10 @@ public static class DbInitializer
                 Description = $"{s.Short} A {s.Dist} km route in the {s.Region} region with about {s.Gain} m of climbing.",
                 DistanceKm = s.Dist,
                 ElevationGainM = s.Gain,
-                Latitude = s.Lat,
-                Longitude = s.Lon,
+                Latitude = head.Lat,
+                Longitude = head.Lon,
                 PhotoUrl = $"https://picsum.photos/seed/{slug}/800/500",
+                RouteGeoJson = ToGeoJsonLine(s.Route),
                 RegionId = regionIds[s.Region],
                 DifficultyId = DifficultyId(s.Dist, s.Gain),
                 AuthorId = authorId,
@@ -246,5 +283,16 @@ public static class DbInitializer
         }
 
         await context.SaveChangesAsync();
+    }
+
+    // waypoints (lat, lon) -> GeoJSON LineString string. GeoJSON orders coords [lng, lat].
+    private static string ToGeoJsonLine((double Lat, double Lon)[] points)
+    {
+        var line = new
+        {
+            type = "LineString",
+            coordinates = points.Select(p => new[] { p.Lon, p.Lat }).ToArray(),
+        };
+        return System.Text.Json.JsonSerializer.Serialize(line);
     }
 }

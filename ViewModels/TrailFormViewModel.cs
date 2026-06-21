@@ -42,5 +42,8 @@ public class TrailFormViewModel
     [Display(Name = "Region")]
     public int RegionId { get; set; }
 
+    // GeoJSON LineString built by the click-to-draw map editor. Optional.
+    public string? RouteGeoJson { get; set; }
+
     public List<int> SelectedTagIds { get; set; } = new();
 }

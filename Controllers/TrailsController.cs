@@ -71,6 +71,18 @@ public class TrailsController : Controller
             _ => trails.OrderByDescending(t => t.CreatedAt).ToList(),
         };
 
+        // overview-map data for the whole filtered set (before paging, so the map
+        // shows every match, not just this page's 9)
+        ViewBag.MapTrails = System.Text.Json.JsonSerializer.Serialize(trails.Select(t => new
+        {
+            name = t.Name,
+            lat = t.Latitude,
+            lng = t.Longitude,
+            route = t.RouteGeoJson,
+            diff = t.Difficulty?.Label ?? "",
+            url = Url.Action("Details", new { id = t.Id }),
+        }));
+
         // paginate (page size 9), counts from filtered/pre-paged list
         var totalCount = trails.Count;
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
@@ -163,6 +175,8 @@ public class TrailsController : Controller
     [Authorize(Roles = "Guide,Admin")]
     public async Task<IActionResult> Create(TrailFormViewModel form)
     {
+        NormalizeRoute(form);
+
         if (!ModelState.IsValid)
         {
             await PopulateRegionsAsync(form.RegionId);
@@ -180,6 +194,7 @@ public class TrailsController : Controller
             Latitude = form.Latitude,
             Longitude = form.Longitude,
             PhotoUrl = form.PhotoUrl,
+            RouteGeoJson = form.RouteGeoJson,
             RegionId = form.RegionId,
             DifficultyId = await _difficulty.ResolveDifficultyIdAsync(form.DistanceKm, form.ElevationGainM),
             AuthorId = _userManager.GetUserId(User),
@@ -219,6 +234,8 @@ public class TrailsController : Controller
     {
         if (id != form.Id) return NotFound();
 
+        NormalizeRoute(form);
+
         if (!ModelState.IsValid)
         {
             await PopulateRegionsAsync(form.RegionId);
@@ -239,6 +256,7 @@ public class TrailsController : Controller
         trail.Latitude = form.Latitude;
         trail.Longitude = form.Longitude;
         trail.PhotoUrl = form.PhotoUrl;
+        trail.RouteGeoJson = form.RouteGeoJson;
         trail.RegionId = form.RegionId;
         // recompute - distance/gain may have changed
         trail.DifficultyId = await _difficulty.ResolveDifficultyIdAsync(form.DistanceKm, form.ElevationGainM);
@@ -297,6 +315,34 @@ public class TrailsController : Controller
 
     private bool TrailExists(int id) => _context.Trails.Any(e => e.Id == id);
 
+    // The route comes from the click-to-draw map editor as a GeoJSON LineString.
+    // Blank it if empty; reject anything that isn't a valid LineString with 2+ points.
+    private void NormalizeRoute(TrailFormViewModel form)
+    {
+        if (string.IsNullOrWhiteSpace(form.RouteGeoJson))
+        {
+            form.RouteGeoJson = null;
+            return;
+        }
+
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(form.RouteGeoJson);
+            var root = doc.RootElement;
+            var isLine = root.TryGetProperty("type", out var type)
+                         && type.GetString() == "LineString"
+                         && root.TryGetProperty("coordinates", out var coords)
+                         && coords.ValueKind == System.Text.Json.JsonValueKind.Array
+                         && coords.GetArrayLength() >= 2;
+            if (!isLine)
+                ModelState.AddModelError(nameof(form.RouteGeoJson), "Draw at least two points to define a route.");
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            ModelState.AddModelError(nameof(form.RouteGeoJson), "The route data is not valid.");
+        }
+    }
+
     // trail ids the current user has favorited (empty set when signed out) — drives the heart state
     private async Task<HashSet<int>> GetFavoriteTrailIdsAsync()
     {
@@ -331,6 +377,7 @@ public class TrailsController : Controller
         Latitude = t.Latitude,
         Longitude = t.Longitude,
         PhotoUrl = t.PhotoUrl,
+        RouteGeoJson = t.RouteGeoJson,
         RegionId = t.RegionId,
     };
 }

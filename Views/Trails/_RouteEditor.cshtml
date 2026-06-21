@@ -1,0 +1,22 @@
+@model ascent_app.ViewModels.TrailFormViewModel
+
+@* Click-to-draw route editor. The hidden RouteGeoJson field is filled in by ascent-route-editor.js. *@
+<div class="mb-3">
+    <label class="form-label">Route <span class="text-muted">(optional)</span></label>
+    <p class="text-muted mb-2" style="font-size:13px">
+        <i class="ti ti-pencil"></i>
+        Click the map to drop points along the trail — the first click is the trailhead.
+    </p>
+    <div id="routeeditor" class="map-box-edit mb-2"></div>
+    <input type="hidden" asp-for="RouteGeoJson" />
+    <div class="d-flex gap-2 align-items-center">
+        <button type="button" id="routeundo" class="btn-ascent-outline" style="padding:4px 10px;font-size:13px">
+            <i class="ti ti-arrow-back-up"></i> Undo point
+        </button>
+        <button type="button" id="routeclear" class="btn-ascent-outline" style="padding:4px 10px;font-size:13px">
+            <i class="ti ti-trash"></i> Clear
+        </button>
+        <span class="text-muted" style="font-size:13px"><span id="routecount">0</span> points</span>
+    </div>
+    <span asp-validation-for="RouteGeoJson" class="text-danger d-block mt-1"></span>
+</div>
