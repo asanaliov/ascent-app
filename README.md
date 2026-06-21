@@ -8,21 +8,31 @@ Identity · Leaflet · Bootstrap 5.
 
 ## Features
 
-- **Trails** — browse the grid and open detail pages with photo, stats, tags, and an
-  embedded trailhead map. Guides and Admins create/edit trails.
+- **Trails** — browse the grid and open detail pages with stats, tags, a multi-photo
+  gallery, and an embedded trailhead map (Leaflet). Guides and Admins create/edit trails.
 - **Computed difficulty** — Easy → Strenuous is derived from distance and elevation
   gain (`DifficultyService`), never entered by hand.
-- **Hike logs** — any signed-in user logs hikes against a trail.
+- **Filtering, search, sort & pagination** — the trail list filters by region,
+  difficulty, tag, and free text, with sorting and paged results.
+- **Photo galleries** — Guides upload multiple photos per trail; files live under
+  `wwwroot/uploads` (gitignored) and paths are stored in the DB.
+- **Hike logs** — any signed-in user logs hikes against a trail, with optional photo
+  uploads.
 - **Badges** — awarded automatically after each hike by `BadgeService` (hike count,
   cumulative elevation, distinct regions); never awarded twice.
-- **Reviews** — one rating + comment per user per trail; Admins can moderate.
+- **Reviews** — one rating (1–5 stars) + comment per user per trail; Admins can moderate.
 - **Favorites** — save trails to a personal list.
 - **Dashboard** — your totals, badge progress, and recent hikes.
+- **Public profiles** (`/Profile/Index/{id}`) — a hiker's public stats, badges, and
+  recent activity.
+- **My Trails** (`/Guide`) — a guide's own trails with quick management links.
+- **Community** (`/Community`) — a public leaderboard ranking hikers.
+- **Account profile** (`/Manage`) — edit your own display name and account details.
 - **Trails near you** — browser geolocation + Haversine distance (`GeoService`) sorts
   trails by distance, shown on a Leaflet map.
 - **Tags** — trails can be tagged; tags are managed in the admin area.
-- **Admin area** (`/Admin`) — CRUD for regions, tags, and badges, plus user role
-  management. Admin-only.
+- **Admin area** (`/Admin`) — CRUD for regions, tags, badges, users, trails, and
+  reviews, plus role management and review moderation. Admin-only.
 
 ## Roles
 
@@ -56,14 +66,16 @@ New registrations are assigned the **Hiker** role by default.
 ## Project layout
 
 ```
-Controllers/            site controllers (Trails, HikeLogs, Reviews, Favorites, Dashboard, Account, Home)
-Areas/Admin/            admin area (Regions, Tags, Badges, Users CRUD)
+Controllers/            site controllers (Trails, HikeLogs, Reviews, Favorites,
+                        Dashboard, Profile, Guide, Community, Manage, Account, Home)
+Areas/Admin/            admin area (Regions, Tags, Badges, Users, Trails, Reviews CRUD)
 Models/                 13 EF entities
 ViewModels/             form/page models (entities aren't bound directly)
 Services/               DifficultyService, BadgeService, GeoService
 Data/                   AscentDbContext + DbInitializer (seeding)
 Views/                  Razor views
 wwwroot/css/ascent.css  design system
+wwwroot/uploads/        uploaded trail & hike photos (gitignored)
 ```
 
 ## EF Core commands

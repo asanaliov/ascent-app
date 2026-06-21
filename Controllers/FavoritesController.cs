@@ -24,15 +24,23 @@ public class FavoritesController : Controller
     {
         var userId = _userManager.GetUserId(User)!;
 
-        var trails = await _context.Favorites
+        // favorite trail ids, most recently saved first
+        var orderedIds = await _context.Favorites
             .Where(f => f.UserId == userId)
             .OrderByDescending(f => f.CreatedAt)
-            .Select(f => f.Trail)
+            .Select(f => f.TrailId)
+            .ToListAsync();
+
+        var trails = await _context.Trails
+            .Where(t => orderedIds.Contains(t.Id))
             .Include(t => t.Region)
             .Include(t => t.Difficulty)
             .Include(t => t.Reviews)
             .AsNoTracking()
             .ToListAsync();
+
+        // re-apply saved order (the Where above doesn't preserve it)
+        trails = orderedIds.Select(id => trails.First(t => t.Id == id)).ToList();
 
         // every trail on this page is, by definition, a favorite
         ViewBag.FavoriteTrailIds = trails.Select(t => t.Id).ToHashSet();

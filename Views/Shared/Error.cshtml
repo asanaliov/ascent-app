@@ -1,19 +1,28 @@
-@model ErrorViewModel
+@model ascent_app.Models.ErrorViewModel
 @{
     ViewData["Title"] = "Error";
 }
 
-<div class="auth-wrap text-center">
-    <i class="ti ti-alert-triangle" style="font-size:40px;color:var(--terracotta)"></i>
-    <h1 class="mt-3 mb-2">Something went wrong</h1>
-    <p class="text-muted mb-4">An error occurred while processing your request.</p>
-
-    @if (Model.ShowRequestId)
-    {
-        <p class="text-muted" style="font-size:13px">
-            Request ID: <code>@Model.RequestId</code>
+<div class="auth-wrap">
+    <div class="asc-panel text-center">
+        <i class="ti ti-mountain" style="font-size:42px;color:var(--terracotta)"></i>
+        <p class="eyebrow mt-3 mb-2">SOMETHING WENT WRONG</p>
+        <h1 class="mb-2">That trail took an unexpected turn</h1>
+        <p class="text-muted mb-4">
+            We hit a snag while loading this page. Try heading back to base and
+            picking up the trail again.
         </p>
-    }
 
-    <a class="btn-ascent" asp-controller="Home" asp-action="Index">Back to home</a>
+        <div class="d-flex justify-content-center gap-2">
+            <a class="btn-ascent" asp-controller="Home" asp-action="Index">Back to home</a>
+            <a class="btn-ascent-outline" asp-controller="Trails" asp-action="Index">Browse trails</a>
+        </div>
+
+        @if (Model.ShowRequestId)
+        {
+            <p class="text-muted mt-4 mb-0" style="font-size:13px">
+                Request ID: <code>@Model.RequestId</code>
+            </p>
+        }
+    </div>
 </div>

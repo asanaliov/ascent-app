@@ -1,6 +1,8 @@
 @model ascent_app.ViewModels.DashboardViewModel
+@inject Microsoft.AspNetCore.Identity.UserManager<ascent_app.Models.ApplicationUser> UserManager
 @{
     ViewData["Title"] = "Dashboard";
+    var currentUserId = UserManager.GetUserId(User);
 }
 
 <div class="d-flex align-items-end justify-content-between mt-4 mb-3">
@@ -8,9 +10,14 @@
         <p class="eyebrow mb-1">YOUR PROGRESS</p>
         <h1 class="mb-0">Welcome back, @Model.DisplayName</h1>
     </div>
-    <a class="btn-ascent-outline" asp-controller="Trails" asp-action="Index">
-        <i class="ti ti-compass"></i> Find a trail
-    </a>
+    <div class="d-flex gap-2 align-items-center">
+        <a class="btn-ascent-outline" asp-controller="Profile" asp-action="Index" asp-route-id="@currentUserId">
+            <i class="ti ti-user"></i> View my public profile
+        </a>
+        <a class="btn-ascent-outline" asp-controller="Trails" asp-action="Index">
+            <i class="ti ti-compass"></i> Find a trail
+        </a>
+    </div>
 </div>
 
 <div class="stat-row mb-4">

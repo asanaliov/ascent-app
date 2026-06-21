@@ -1,0 +1,43 @@
+@model List<ascent_app.Models.Review>
+@{
+    ViewData["Title"] = "Reviews";
+}
+
+<partial name="_AdminNav" />
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0" style="font-size:22px">Reviews</h2>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="asc-panel text-center text-muted">No reviews yet.</div>
+}
+else
+{
+    <table class="admin-table">
+        <thead>
+            <tr><th>Trail</th><th>Reviewer</th><th>Rating</th><th>Comment</th><th>Posted</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var review in Model)
+            {
+                var comment = review.Comment ?? "";
+                var truncated = comment.Length > 80 ? comment.Substring(0, 80) + "…" : comment;
+                <tr>
+                    <td><strong>@review.Trail?.Name</strong></td>
+                    <td class="text-secondary">@review.User?.DisplayName</td>
+                    <td class="text-nowrap">@review.Rating/5</td>
+                    <td class="text-secondary">@truncated</td>
+                    <td class="text-secondary text-nowrap">@review.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    <td class="text-end text-nowrap">
+                        <form asp-action="Delete" asp-route-id="@review.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete this review?');">
+                            <button type="submit" class="admin-del"><i class="ti ti-trash"></i> Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -29,9 +29,10 @@ public class TrailsController : Controller
         _userManager = userManager;
     }
 
-    // GET: Trails?q=&regionId=&difficultyId=&tagId=
-    public async Task<IActionResult> Index(string? q, int? regionId, int? difficultyId, int? tagId)
+    // GET: Trails?q=&regionId=&difficultyId=&tagId=&sort=&page=
+    public async Task<IActionResult> Index(string? q, int? regionId, int? difficultyId, int? tagId, string? sort, int page = 1)
     {
+        const int pageSize = 9;
         var query = _context.Trails
             .Include(t => t.Difficulty)
             .Include(t => t.Region)
@@ -59,6 +60,24 @@ public class TrailsController : Controller
 
         var trails = await query.ToListAsync();
 
+        // sort in-memory (AverageRating is [NotMapped])
+        sort = string.IsNullOrWhiteSpace(sort) ? "newest" : sort;
+        trails = sort switch
+        {
+            "name" => trails.OrderBy(t => t.Name).ToList(),
+            "distance" => trails.OrderBy(t => t.DistanceKm).ToList(),
+            "elevation" => trails.OrderByDescending(t => t.ElevationGainM).ToList(),
+            "rating" => trails.OrderByDescending(t => t.AverageRating).ToList(),
+            _ => trails.OrderByDescending(t => t.CreatedAt).ToList(),
+        };
+
+        // paginate (page size 9), counts from filtered/pre-paged list
+        var totalCount = trails.Count;
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        if (page < 1) page = 1;
+        if (totalPages > 0 && page > totalPages) page = totalPages;
+        trails = trails.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
         var regions = await _context.Regions.OrderBy(r => r.Name).AsNoTracking().ToListAsync();
         var difficulties = await _context.Difficulties.AsNoTracking().ToListAsync();
         ViewBag.Regions = new SelectList(regions, "Id", "Name", regionId);
@@ -71,6 +90,10 @@ public class TrailsController : Controller
             DifficultyId = difficultyId,
             TagId = tagId,
         };
+        ViewBag.Sort = sort;
+        ViewBag.Page = page;
+        ViewBag.TotalPages = totalPages;
+        ViewBag.TotalCount = totalCount;
 
         ViewBag.FavoriteTrailIds = await GetFavoriteTrailIdsAsync();
         return View(trails);

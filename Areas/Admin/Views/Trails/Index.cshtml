@@ -1,0 +1,44 @@
+@model List<ascent_app.Models.Trail>
+@{
+    ViewData["Title"] = "Trails";
+}
+
+<partial name="_AdminNav" />
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0" style="font-size:22px">Trails</h2>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="asc-panel text-center text-muted">No trails yet.</div>
+}
+else
+{
+    <table class="admin-table">
+        <thead>
+            <tr><th>Name</th><th>Region</th><th>Difficulty</th><th>Author</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var trail in Model)
+            {
+                <tr>
+                    <td>
+                        <a class="asc-nav-link" asp-area="" asp-controller="Trails" asp-action="Details" asp-route-id="@trail.Id">
+                            <strong>@trail.Name</strong>
+                        </a>
+                    </td>
+                    <td class="text-secondary">@trail.Region?.Name</td>
+                    <td class="text-secondary">@trail.Difficulty?.Label</td>
+                    <td class="text-secondary">@trail.Author?.DisplayName</td>
+                    <td class="text-end text-nowrap">
+                        <form asp-action="Delete" asp-route-id="@trail.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete @trail.Name?');">
+                            <button type="submit" class="admin-del"><i class="ti ti-trash"></i> Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

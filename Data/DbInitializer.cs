@@ -35,6 +35,7 @@ public static class DbInitializer
         var guide = await userManager.FindByEmailAsync("guide@ascent.local");
         await SeedTrailsAsync(context, guide?.Id);
         await SeedTagsAsync(context);
+        await SeedActivityAsync(context, userManager);
     }
 
     private static async Task EnsureUserAsync(
@@ -118,6 +119,79 @@ public static class DbInitializer
         foreach (var trail in trails)
             foreach (var tagName in map[trail.Name])
                 context.TrailTags.Add(new TrailTag { TrailId = trail.Id, TagId = byName[tagName] });
+
+        await context.SaveChangesAsync();
+    }
+
+    // demo hike logs + reviews so the leaderboard and profiles aren't empty
+    private static async Task SeedActivityAsync(
+        AscentDbContext context, UserManager<ApplicationUser> userManager)
+    {
+        if (await context.HikeLogs.AnyAsync()) return;
+
+        var admin = await userManager.FindByEmailAsync("admin@ascent.local");
+        var guide = await userManager.FindByEmailAsync("guide@ascent.local");
+        if (admin is null || guide is null) return;
+
+        var trails = await context.Trails.ToDictionaryAsync(t => t.Name, t => t.Id);
+        int Trail(string name) => trails[name];
+
+        // (userId, trailName, daysAgo, durationMinutes, notes)
+        var logs = new (string UserId, string Trail, int DaysAgo, int? Duration, string? Notes)[]
+        {
+            (guide.Id, "Vodno – Millennium Cross", 168, 150, "Led a small group up; clear skies all morning."),
+            (guide.Id, "Matka Canyon Loop", 154, 190, "Boat tour after the loop, lovely day."),
+            (guide.Id, "Titov Vrv", 140, 410, "Long but rewarding alpine push."),
+            (guide.Id, "Galičica Ridge", 121, 240, "Twin-lake views were unreal."),
+            (guide.Id, "Mt. Korab Summit", 98, 520, "Country's roof. Started before dawn."),
+            (guide.Id, "Ljuboten Peak", 76, 360, "Windy on the ridge, great pyramid summit."),
+            (guide.Id, "Bistra Ridge", 54, 210, null),
+            (guide.Id, "Vodno – Middle Peak", 33, 95, "Quick afternoon scouting run."),
+            (guide.Id, "Magaro Peak", 12, 220, "Recon for a guided trip next month."),
+            (admin.Id, "Vodno – Middle Peak", 132, 90, "Easy reset hike after work."),
+            (admin.Id, "Vodno – Millennium Cross", 110, 165, "Pushed the pace today."),
+            (admin.Id, "Matka Canyon Loop", 88, 180, null),
+            (admin.Id, "Bistra Ridge", 61, 200, "Quiet trail, saw a few horses."),
+            (admin.Id, "Galičica Ridge", 40, 250, "Packed lunch at the saddle."),
+            (admin.Id, "Magaro Peak", 21, 215, "Clouds rolled in near the top."),
+            (admin.Id, "Ljuboten Peak", 6, 375, "Tough but cleared the summit before noon."),
+        };
+
+        var hikeLogs = logs.Select(l => new HikeLog
+        {
+            UserId = l.UserId,
+            TrailId = Trail(l.Trail),
+            HikedOn = DateTime.Today.AddDays(-l.DaysAgo),
+            DurationMinutes = l.Duration,
+            Notes = l.Notes,
+            CreatedAt = DateTime.UtcNow,
+        });
+        await context.HikeLogs.AddRangeAsync(hikeLogs);
+
+        // at most one review per (user, trail); ratings 3..5
+        var reviews = new (string UserId, string Trail, int Rating, string? Comment)[]
+        {
+            (guide.Id, "Vodno – Millennium Cross", 5, "Best city-edge climb around. Great for beginners too."),
+            (guide.Id, "Titov Vrv", 5, "A serious day out but the views pay you back."),
+            (guide.Id, "Galičica Ridge", 4, "Stunning ridge, just bring sun protection."),
+            (guide.Id, "Mt. Korab Summit", 5, "Bucket-list summit. Long approach."),
+            (guide.Id, "Matka Canyon Loop", 4, "Family-friendly and scenic."),
+            (admin.Id, "Vodno – Millennium Cross", 4, "Busy on weekends but worth it."),
+            (admin.Id, "Matka Canyon Loop", 5, "Gorgeous gorge, easy underfoot."),
+            (admin.Id, "Bistra Ridge", 3, "Pleasant but a bit featureless in places."),
+            (admin.Id, "Galičica Ridge", 4, "Loved the twin-lake panorama."),
+            (admin.Id, "Ljuboten Peak", 5, "Iconic summit, exposed ridge near the top."),
+        };
+
+        var trailReviews = reviews.Select(r => new Review
+        {
+            UserId = r.UserId,
+            TrailId = Trail(r.Trail),
+            Rating = r.Rating,
+            Comment = r.Comment,
+            CreatedAt = DateTime.UtcNow,
+        });
+        await context.Reviews.AddRangeAsync(trailReviews);
 
         await context.SaveChangesAsync();
     }

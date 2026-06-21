@@ -1,0 +1,47 @@
+@model ascent_app.ViewModels.EditProfileViewModel
+@{
+    ViewData["Title"] = "Edit profile";
+}
+
+<div class="auth-wrap">
+    <p class="eyebrow mb-1">ACCOUNT</p>
+    <h1 class="mb-3">Edit profile</h1>
+
+    <div class="asc-panel">
+        @if (TempData["Ok"] != null)
+        {
+            <div class="alert alert-success" role="alert">@TempData["Ok"]</div>
+        }
+
+        <form asp-action="Index" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+            <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="MemberSince" />
+
+            <div class="mb-3">
+                <label asp-for="DisplayName" class="form-label"></label>
+                <input asp-for="DisplayName" class="form-control" />
+                <span asp-validation-for="DisplayName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Bio" class="form-label"></label>
+                <textarea asp-for="Bio" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Bio" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" readonly disabled />
+                <small class="text-muted">Email can't be changed here.</small>
+            </div>
+
+            <div class="d-flex gap-2 mt-2">
+                <button type="submit" class="btn-ascent">Save</button>
+                <a class="btn-ascent-outline" asp-controller="Profile" asp-action="Index" asp-route-id="@Model.UserId">View public profile</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
