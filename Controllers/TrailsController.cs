@@ -29,8 +29,8 @@ public class TrailsController : Controller
         _userManager = userManager;
     }
 
-    // GET: Trails?q=&regionId=&difficultyId=&tagId=&sort=&page=
-    public async Task<IActionResult> Index(string? q, int? regionId, int? difficultyId, int? tagId, string? sort, int page = 1)
+    // GET: Trails?q=&regionId=&difficultyId=&tagId=&sort=&lat=&lng=&page=
+    public async Task<IActionResult> Index(string? q, int? regionId, int? difficultyId, int? tagId, string? sort, double? lat, double? lng, int page = 1)
     {
         const int pageSize = 9;
         var query = _context.Trails
@@ -60,10 +60,18 @@ public class TrailsController : Controller
 
         var trails = await query.ToListAsync();
 
-        // sort in-memory (AverageRating is [NotMapped])
-        sort = string.IsNullOrWhiteSpace(sort) ? "newest" : sort;
+        // distance from the visitor's location, when the browser shared it (global app:
+        // the catalogue spans continents, so "nearest to me" is the natural default view)
+        Dictionary<int, double>? distances = null;
+        if (lat.HasValue && lng.HasValue)
+            distances = trails.ToDictionary(
+                t => t.Id, t => _geo.DistanceKm(lat.Value, lng.Value, t.Latitude, t.Longitude));
+
+        // sort in-memory (AverageRating is [NotMapped]); default to nearest when located
+        sort = string.IsNullOrWhiteSpace(sort) ? (distances != null ? "nearest" : "newest") : sort;
         trails = sort switch
         {
+            "nearest" when distances != null => trails.OrderBy(t => distances[t.Id]).ToList(),
             "name" => trails.OrderBy(t => t.Name).ToList(),
             "distance" => trails.OrderBy(t => t.DistanceKm).ToList(),
             "elevation" => trails.OrderByDescending(t => t.ElevationGainM).ToList(),
@@ -90,9 +98,11 @@ public class TrailsController : Controller
         if (totalPages > 0 && page > totalPages) page = totalPages;
         trails = trails.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-        var regions = await _context.Regions.OrderBy(r => r.Name).AsNoTracking().ToListAsync();
+        var regions = await _context.Regions
+            .OrderBy(r => r.Country).ThenBy(r => r.Name).AsNoTracking().ToListAsync();
         var difficulties = await _context.Difficulties.AsNoTracking().ToListAsync();
-        ViewBag.Regions = new SelectList(regions, "Id", "Name", regionId);
+        ViewBag.Regions = new SelectList(
+            regions.Select(r => new { r.Id, Label = $"{r.Name} ({r.Country})" }), "Id", "Label", regionId);
         ViewBag.Difficulties = new SelectList(difficulties, "Id", "Label", difficultyId);
         ViewBag.Tags = await _context.Tags.OrderBy(t => t.Name).AsNoTracking().ToListAsync();
         ViewBag.Filter = new TrailFilterViewModel
@@ -106,6 +116,10 @@ public class TrailsController : Controller
         ViewBag.Page = page;
         ViewBag.TotalPages = totalPages;
         ViewBag.TotalCount = totalCount;
+        ViewBag.UserLat = lat;
+        ViewBag.UserLng = lng;
+        // distances shown on cards, rounded to 0.1 km (keyed by trail id)
+        ViewBag.Distances = distances?.ToDictionary(kv => kv.Key, kv => Math.Round(kv.Value, 1));
 
         ViewBag.FavoriteTrailIds = await GetFavoriteTrailIdsAsync();
         return View(trails);

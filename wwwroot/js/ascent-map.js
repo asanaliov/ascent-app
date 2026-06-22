@@ -62,6 +62,7 @@ window.AscentMap = (function () {
                     const b = document.createElement('button');
                     b.type = 'button';
                     b.textContent = opt.label;
+                    b.dataset.layer = opt.id;
                     if (i === 0) b.classList.add('active');
                     b.addEventListener('click', () => {
                         options.forEach(o => map.setLayoutProperty(o.id, 'visibility', o === opt ? 'visible' : 'none'));
@@ -141,6 +142,103 @@ window.AscentMap = (function () {
         return m;
     }
 
+    // programmatically switch basemap (used by the route simulation) + sync the toggle
+    function setBasemap(map, layerId) {
+        ['bm-topo', 'bm-satellite', 'bm-street'].forEach(id =>
+            map.setLayoutProperty(id, 'visibility', id === layerId ? 'visible' : 'none'));
+        document.querySelectorAll('.asc-basemap button').forEach(b =>
+            b.classList.toggle('active', b.dataset.layer === layerId));
+    }
+
+    // --- geo helpers for the simulation ---
+    function toRad(d) { return d * Math.PI / 180; }
+    function haversineKm(a, b) {
+        const R = 6371, dLat = toRad(b[1] - a[1]), dLon = toRad(b[0] - a[0]);
+        const s = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a[1])) * Math.cos(toRad(b[1])) * Math.sin(dLon / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
+    }
+    function lerp(a, b, f) { return a + (b - a) * f; }
+
+    // Fly a marker along the route with a chase camera, drawing the traveled portion.
+    // Returns { start, stop, isRunning }. Coarse routes are interpolated for smoothness.
+    function simulate(map, coords, opts) {
+        opts = opts || {};
+        const segs = [];
+        let total = 0;
+        for (let i = 1; i < coords.length; i++) {
+            const d = haversineKm(coords[i - 1], coords[i]) || 0;
+            segs.push({ a: coords[i - 1], b: coords[i], d: d, start: total });
+            total += d;
+        }
+        if (total === 0) total = 1;
+
+        const PROG = 'sim-progress';
+        // a clearly-visible moving dot (custom element, not the default pin)
+        const dot = document.createElement('div');
+        dot.className = 'asc-sim-dot';
+        const marker = new maplibregl.Marker({ element: dot });
+        let raf = null, running = false;
+
+        function posAt(dist) {
+            for (const s of segs) {
+                if (dist <= s.start + s.d) {
+                    const f = s.d ? (dist - s.start) / s.d : 0;
+                    return [lerp(s.a[0], s.b[0], f), lerp(s.a[1], s.b[1], f)];
+                }
+            }
+            return segs[segs.length - 1].b;
+        }
+        function progressLine(dist) {
+            const pts = [coords[0]];
+            for (const s of segs) {
+                if (dist >= s.start + s.d) { pts.push(s.b); }
+                else {
+                    const f = s.d ? Math.max(0, (dist - s.start) / s.d) : 0;
+                    pts.push([lerp(s.a[0], s.b[0], f), lerp(s.a[1], s.b[1], f)]);
+                    break;
+                }
+            }
+            return { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: pts } };
+        }
+        function ensureLayer() {
+            if (map.getSource(PROG)) return;
+            map.addSource(PROG, { type: 'geojson', data: progressLine(0) });
+            map.addLayer({
+                id: PROG + '-l', type: 'line', source: PROG,
+                layout: { 'line-cap': 'round', 'line-join': 'round' },
+                paint: { 'line-color': opts.progressColor || TERRACOTTA, 'line-width': 6 },
+            });
+        }
+
+        function start() {
+            if (running) return;
+            ensureLayer();
+            running = true;
+            marker.setLngLat(coords[0]).addTo(map);
+            const dur = opts.duration || 14000;
+            const t0 = performance.now();
+            // The camera stays framed on the whole route (set by the caller); we just
+            // animate the dot + the growing traveled line, so the motion reads clearly.
+            function frame(now) {
+                if (!running) return;
+                const k = Math.min(1, (now - t0) / dur);
+                const dist = k * total;
+                marker.setLngLat(posAt(dist));
+                map.getSource(PROG).setData(progressLine(dist));
+                if (k < 1) raf = requestAnimationFrame(frame);
+                else { running = false; if (opts.onEnd) opts.onEnd(); }
+            }
+            raf = requestAnimationFrame(frame);
+        }
+        function stop() {
+            running = false;
+            if (raf) cancelAnimationFrame(raf);
+            marker.remove();
+            if (map.getSource(PROG)) map.getSource(PROG).setData(progressLine(0));
+        }
+        return { start, stop, isRunning: () => running };
+    }
+
     // frame the map around a set of [lng,lat] points, keeping a 3D pitch if asked
     function fit(map, coords, opts) {
         opts = opts || {};
@@ -152,5 +250,5 @@ window.AscentMap = (function () {
         if (opts.bearing != null) map.setBearing(opts.bearing);
     }
 
-    return { GREEN, TERRACOTTA, NM_CENTER, NM_ZOOM, colorFor, display, onReady, normalize, addRoute, marker, fit };
+    return { GREEN, TERRACOTTA, NM_CENTER, NM_ZOOM, colorFor, display, onReady, normalize, addRoute, marker, fit, setBasemap, simulate };
 })();

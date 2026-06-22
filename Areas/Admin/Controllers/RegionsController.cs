@@ -35,7 +35,7 @@ public class RegionsController : Controller
     {
         if (!ModelState.IsValid) return View(form);
 
-        _context.Regions.Add(new Region { Name = form.Name, Description = form.Description });
+        _context.Regions.Add(new Region { Name = form.Name, Country = form.Country, Description = form.Description });
         await _context.SaveChangesAsync();
         TempData["Ok"] = $"Region \"{form.Name}\" created.";
         return RedirectToAction(nameof(Index));
@@ -46,7 +46,7 @@ public class RegionsController : Controller
         var region = await _context.Regions.FindAsync(id);
         if (region == null) return NotFound();
 
-        return View(new RegionFormViewModel { Id = region.Id, Name = region.Name, Description = region.Description });
+        return View(new RegionFormViewModel { Id = region.Id, Name = region.Name, Country = region.Country, Description = region.Description });
     }
 
     [HttpPost]
@@ -59,6 +59,7 @@ public class RegionsController : Controller
         if (region == null) return NotFound();
 
         region.Name = form.Name;
+        region.Country = form.Country;
         region.Description = form.Description;
         await _context.SaveChangesAsync();
         TempData["Ok"] = $"Region \"{form.Name}\" updated.";

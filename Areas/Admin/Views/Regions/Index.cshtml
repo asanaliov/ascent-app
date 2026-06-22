@@ -19,7 +19,7 @@ else
 {
     <table class="admin-table">
         <thead>
-            <tr><th>Name</th><th>Description</th><th>Trails</th><th></th></tr>
+            <tr><th>Name</th><th>Country</th><th>Description</th><th>Trails</th><th></th></tr>
         </thead>
         <tbody>
             @foreach (var region in Model)
@@ -27,6 +27,7 @@ else
                 var used = counts.GetValueOrDefault(region.Id);
                 <tr>
                     <td><strong>@region.Name</strong></td>
+                    <td class="text-secondary">@region.Country</td>
                     <td class="text-secondary">@region.Description</td>
                     <td>@used</td>
                     <td class="text-end text-nowrap">

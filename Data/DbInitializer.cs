@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using ascent_app.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -28,12 +30,15 @@ public static class DbInitializer
         await EnsureUserAsync(userManager, "admin@ascent.local", "Admin", "Admin1!");
         await EnsureUserAsync(userManager, "guide@ascent.local", "Guide", "Guide1!", displayName: "Demo Guide");
 
+        var env = sp.GetRequiredService<IHostEnvironment>();
+        var seedTrails = LoadSeedTrails(env.ContentRootPath);
+
         await SeedDifficultiesAsync(context);
-        await SeedRegionsAsync(context);
+        await SeedRegionsAsync(context, seedTrails);
         await SeedBadgesAsync(context);
 
         var guide = await userManager.FindByEmailAsync("guide@ascent.local");
-        await SeedTrailsAsync(context, guide?.Id);
+        await SeedTrailsAsync(context, guide?.Id, seedTrails);
         await SeedTagsAsync(context);
         await SeedActivityAsync(context, userManager);
     }
@@ -70,16 +75,16 @@ public static class DbInitializer
         await context.SaveChangesAsync();
     }
 
-    private static async Task SeedRegionsAsync(AscentDbContext context)
+    // regions are derived from the trail seed file — one per distinct (country, region)
+    private static async Task SeedRegionsAsync(AscentDbContext context, List<SeedTrail> seeds)
     {
         if (await context.Regions.AnyAsync()) return;
 
-        context.Regions.AddRange(
-            new Region { Name = "Skopje" },
-            new Region { Name = "Šar Planina" },
-            new Region { Name = "Mavrovo" },
-            new Region { Name = "Galičica" });
+        var regions = seeds
+            .GroupBy(s => (s.Country, s.Region))
+            .Select(g => new Region { Name = g.Key.Region, Country = g.Key.Country });
 
+        context.Regions.AddRange(regions);
         await context.SaveChangesAsync();
     }
 
@@ -108,11 +113,15 @@ public static class DbInitializer
         var byName = tags.ToDictionary(t => t.Name, t => t.Id);
         var map = new Dictionary<string, string[]>
         {
-            ["Vodno – Millennium Cross"] = new[] { "Summit", "Forest", "Panoramic" },
-            ["Matka Canyon Loop"] = new[] { "Loop", "Lake", "Family-friendly" },
-            ["Titov Vrv"] = new[] { "Summit", "Alpine", "Panoramic" },
-            ["Galičica Ridge"] = new[] { "Panoramic", "Lake" },
-            ["Mt. Korab Summit"] = new[] { "Summit", "Alpine" },
+            ["Matka – Shishevo Monastery"] = new[] { "Lake", "Family-friendly", "Forest" },
+            ["Popova Šapka – Titov Vrv"] = new[] { "Summit", "Alpine", "Panoramic" },
+            ["Plat Ridge"] = new[] { "Alpine", "Panoramic" },
+            ["Karanikolica Lake"] = new[] { "Lake", "Alpine" },
+            ["Mount Korab"] = new[] { "Summit", "Alpine", "Panoramic" },
+            ["Strezimir – Golem Korab"] = new[] { "Summit", "Alpine", "Panoramic" },
+            ["Magaro Peak"] = new[] { "Summit", "Panoramic", "Lake" },
+            ["Galičica H-6 Ridge"] = new[] { "Panoramic", "Forest" },
+            ["Galičica G-2"] = new[] { "Forest", "Family-friendly" },
         };
 
         var trails = await context.Trails.Where(t => map.Keys.Contains(t.Name)).ToListAsync();
@@ -139,22 +148,22 @@ public static class DbInitializer
         // (userId, trailName, daysAgo, durationMinutes, notes)
         var logs = new (string UserId, string Trail, int DaysAgo, int? Duration, string? Notes)[]
         {
-            (guide.Id, "Vodno – Millennium Cross", 168, 150, "Led a small group up; clear skies all morning."),
-            (guide.Id, "Matka Canyon Loop", 154, 190, "Boat tour after the loop, lovely day."),
-            (guide.Id, "Titov Vrv", 140, 410, "Long but rewarding alpine push."),
-            (guide.Id, "Galičica Ridge", 121, 240, "Twin-lake views were unreal."),
-            (guide.Id, "Mt. Korab Summit", 98, 520, "Country's roof. Started before dawn."),
-            (guide.Id, "Ljuboten Peak", 76, 360, "Windy on the ridge, great pyramid summit."),
-            (guide.Id, "Bistra Ridge", 54, 210, null),
-            (guide.Id, "Vodno – Middle Peak", 33, 95, "Quick afternoon scouting run."),
-            (guide.Id, "Magaro Peak", 12, 220, "Recon for a guided trip next month."),
-            (admin.Id, "Vodno – Middle Peak", 132, 90, "Easy reset hike after work."),
-            (admin.Id, "Vodno – Millennium Cross", 110, 165, "Pushed the pace today."),
-            (admin.Id, "Matka Canyon Loop", 88, 180, null),
-            (admin.Id, "Bistra Ridge", 61, 200, "Quiet trail, saw a few horses."),
-            (admin.Id, "Galičica Ridge", 40, 250, "Packed lunch at the saddle."),
-            (admin.Id, "Magaro Peak", 21, 215, "Clouds rolled in near the top."),
-            (admin.Id, "Ljuboten Peak", 6, 375, "Tough but cleared the summit before noon."),
+            (guide.Id, "Matka – Shishevo Monastery", 168, 110, "Led a small group along the canyon; calm water all morning."),
+            (guide.Id, "Galičica G-2", 154, 95, "Easy warm-up loop through the meadows."),
+            (guide.Id, "Popova Šapka – Titov Vrv", 140, 410, "Long but rewarding alpine push to the Šar high point."),
+            (guide.Id, "Magaro Peak", 121, 200, "Twin views over Ohrid and Prespa were unreal."),
+            (guide.Id, "Mount Korab", 98, 520, "Country's roof. Started before dawn."),
+            (guide.Id, "Karanikolica Lake", 76, 165, "Short climb up to the cirque lake, windy on top."),
+            (guide.Id, "Galičica H-6 Ridge", 54, 235, null),
+            (guide.Id, "Plat Ridge", 33, 175, "Quick scouting run on the upper plateau."),
+            (guide.Id, "Strezimir – Golem Korab", 12, 690, "Recon for a guided border traverse next month."),
+            (admin.Id, "Galičica G-2", 132, 90, "Easy reset hike after work."),
+            (admin.Id, "Matka – Shishevo Monastery", 110, 120, "Pushed the pace along the gorge today."),
+            (admin.Id, "Magaro Peak", 88, 210, null),
+            (admin.Id, "Galičica H-6 Ridge", 61, 240, "Quiet trail, saw a few horses."),
+            (admin.Id, "Plat Ridge", 40, 185, "Packed lunch at the saddle."),
+            (admin.Id, "Karanikolica Lake", 21, 170, "Clouds rolled in near the lake."),
+            (admin.Id, "Popova Šapka – Titov Vrv", 6, 430, "Tough but cleared the summit before noon."),
         };
 
         var hikeLogs = logs.Select(l => new HikeLog
@@ -171,16 +180,16 @@ public static class DbInitializer
         // at most one review per (user, trail); ratings 3..5
         var reviews = new (string UserId, string Trail, int Rating, string? Comment)[]
         {
-            (guide.Id, "Vodno – Millennium Cross", 5, "Best city-edge climb around. Great for beginners too."),
-            (guide.Id, "Titov Vrv", 5, "A serious day out but the views pay you back."),
-            (guide.Id, "Galičica Ridge", 4, "Stunning ridge, just bring sun protection."),
-            (guide.Id, "Mt. Korab Summit", 5, "Bucket-list summit. Long approach."),
-            (guide.Id, "Matka Canyon Loop", 4, "Family-friendly and scenic."),
-            (admin.Id, "Vodno – Millennium Cross", 4, "Busy on weekends but worth it."),
-            (admin.Id, "Matka Canyon Loop", 5, "Gorgeous gorge, easy underfoot."),
-            (admin.Id, "Bistra Ridge", 3, "Pleasant but a bit featureless in places."),
-            (admin.Id, "Galičica Ridge", 4, "Loved the twin-lake panorama."),
-            (admin.Id, "Ljuboten Peak", 5, "Iconic summit, exposed ridge near the top."),
+            (guide.Id, "Matka – Shishevo Monastery", 5, "Gorgeous canyon walk. Great for beginners too."),
+            (guide.Id, "Popova Šapka – Titov Vrv", 5, "A serious day out but the views pay you back."),
+            (guide.Id, "Magaro Peak", 4, "Stunning twin-lake panorama, just bring sun protection."),
+            (guide.Id, "Mount Korab", 5, "Bucket-list summit. Long approach."),
+            (guide.Id, "Galičica G-2", 4, "Family-friendly and scenic."),
+            (admin.Id, "Matka – Shishevo Monastery", 4, "Busy on weekends but worth it."),
+            (admin.Id, "Karanikolica Lake", 5, "Lovely little glacial lake under the peaks."),
+            (admin.Id, "Galičica H-6 Ridge", 3, "Pleasant but a bit featureless in places."),
+            (admin.Id, "Magaro Peak", 4, "Loved the view over both lakes."),
+            (admin.Id, "Popova Šapka – Titov Vrv", 5, "Iconic summit, exposed ridge near the top."),
         };
 
         var trailReviews = reviews.Select(r => new Review
@@ -196,11 +205,38 @@ public static class DbInitializer
         await context.SaveChangesAsync();
     }
 
-    private static async Task SeedTrailsAsync(AscentDbContext context, string? authorId)
+    // shape of each entry in Data/seed/trails.json (real OpenStreetMap routes)
+    private sealed class SeedTrail
+    {
+        public string Name { get; set; } = "";
+        public string Region { get; set; } = "";
+        public string Country { get; set; } = "";
+        public string Short { get; set; } = "";
+        public double DistanceKm { get; set; }
+        public int ElevationGainM { get; set; }
+        public int? TrailheadEle { get; set; }
+        public int? SummitEle { get; set; }
+        public long OsmRelationId { get; set; }
+        public JsonElement Route { get; set; } // GeoJSON LineString
+    }
+
+    // Real trails: geometry, distance and elevation all derived from OpenStreetMap
+    // hiking-route relations + a DEM (see Data/seed/trails.json, generated offline).
+    private static List<SeedTrail> LoadSeedTrails(string contentRoot)
+    {
+        var path = Path.Combine(contentRoot, "Data", "seed", "trails.json");
+        var json = File.ReadAllText(path);
+        return JsonSerializer.Deserialize<List<SeedTrail>>(json,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+    }
+
+    private static async Task SeedTrailsAsync(AscentDbContext context, string? authorId, List<SeedTrail> seeds)
     {
         if (await context.Trails.AnyAsync()) return;
 
-        var regionIds = await context.Regions.ToDictionaryAsync(r => r.Name, r => r.Id);
+        // key regions by country+name so identically named regions can't collide
+        var regionIds = await context.Regions
+            .ToDictionaryAsync(r => $"{r.Country}|{r.Name}", r => r.Id);
         var difficulties = await context.Difficulties.OrderBy(d => d.MinScore).ToListAsync();
 
         // resolve the difficulty bin from the same formula DifficultyService uses
@@ -212,87 +248,34 @@ public static class DbInitializer
             return bin.Id;
         }
 
-        // Each route is a representative track of waypoints (lat, lon) from the
-        // trailhead to the summit/turnaround — the first point is the trailhead.
-        var samples = new (string Name, string Region, string Short, double Dist, int Gain, (double Lat, double Lon)[] Route)[]
+        foreach (var s in seeds)
         {
-            ("Vodno – Millennium Cross", "Skopje", "City-edge climb to the giant cross above Skopje.", 6.5, 580, new[]
-            {
-                (41.9628, 21.4280), (41.9631, 21.4255), (41.9625, 21.4230), (41.9629, 21.4205),
-                (41.9634, 21.4182), (41.9630, 21.4163), (41.9633, 21.4147),
-            }),
-            ("Matka Canyon Loop", "Skopje", "Riverside path through a dramatic limestone gorge.", 8.0, 350, new[]
-            {
-                (41.9560, 21.3010), (41.9548, 21.2995), (41.9532, 21.2978), (41.9519, 21.2960),
-                (41.9505, 21.2944), (41.9512, 21.2968), (41.9527, 21.2986), (41.9544, 21.3002), (41.9560, 21.3010),
-            }),
-            ("Vodno – Middle Peak", "Skopje", "Shorter forest route to the lower Vodno summit.", 4.0, 300, new[]
-            {
-                (41.9700, 21.4330), (41.9697, 21.4318), (41.9693, 21.4307), (41.9689, 21.4298), (41.9686, 21.4289),
-            }),
-            ("Titov Vrv", "Šar Planina", "Long alpine ascent to the highest peak of the Šar range.", 15.0, 1300, new[]
-            {
-                (41.9900, 20.8300), (41.9860, 20.8295), (41.9810, 20.8288), (41.9760, 20.8285),
-                (41.9710, 20.8282), (41.9670, 20.8280), (41.9628, 20.8278),
-            }),
-            ("Ljuboten Peak", "Šar Planina", "Iconic pyramid summit with sweeping ridge views.", 12.0, 1150, new[]
-            {
-                (42.1800, 21.1300), (42.1850, 21.1340), (42.1905, 21.1378), (42.1960, 21.1415),
-                (42.2015, 21.1448), (42.2075, 21.1475), (42.2120, 21.1490), (42.2167, 21.1500),
-            }),
-            ("Mt. Korab Summit", "Mavrovo", "The country's highest point, on the Albanian border.", 18.0, 1600, new[]
-            {
-                (41.7900, 20.5700), (41.7902, 20.5650), (41.7898, 20.5600), (41.7896, 20.5550),
-                (41.7895, 20.5510), (41.7894, 20.5475),
-            }),
-            ("Bistra Ridge", "Mavrovo", "Rolling highland ridge above Mavrovo lake.", 11.0, 700, new[]
-            {
-                (41.6500, 20.7500), (41.6520, 20.7460), (41.6545, 20.7420), (41.6570, 20.7385),
-                (41.6595, 20.7350), (41.6620, 20.7320),
-            }),
-            ("Galičica Ridge", "Galičica", "Panoramic ridge walk between Ohrid and Prespa lakes.", 10.0, 700, new[]
-            {
-                (40.9500, 20.8300), (40.9530, 20.8280), (40.9560, 20.8255), (40.9585, 20.8230), (40.9610, 20.8205),
-            }),
-            ("Magaro Peak", "Galičica", "Top of the Galičica massif with twin-lake views.", 9.0, 600, new[]
-            {
-                (40.9600, 20.8160), (40.9595, 20.8140), (40.9588, 20.8122), (40.9580, 20.8108), (40.9572, 20.8100),
-            }),
-        };
-
-        foreach (var s in samples)
-        {
-            var slug = s.Name.ToLowerInvariant().Replace(' ', '-').Replace("–", "").Replace(".", "");
-            var head = s.Route[0]; // trailhead = first route point
+            var coords = s.Route.GetProperty("coordinates");
+            var head = coords[0]; // GeoJSON order is [lng, lat]; first point = trailhead
+            double lng = head[0].GetDouble(), lat = head[1].GetDouble();
+            var slug = Regex.Replace(s.Name.ToLowerInvariant(), "[^a-z0-9]+", "-").Trim('-');
+            var climb = s.TrailheadEle is int lo && s.SummitEle is int hi
+                ? $" Climbs from about {lo} m to {hi} m."
+                : "";
             context.Trails.Add(new Trail
             {
                 Name = s.Name,
                 ShortDescription = s.Short,
-                Description = $"{s.Short} A {s.Dist} km route in the {s.Region} region with about {s.Gain} m of climbing.",
-                DistanceKm = s.Dist,
-                ElevationGainM = s.Gain,
-                Latitude = head.Lat,
-                Longitude = head.Lon,
+                Description = $"{s.Short} A {s.DistanceKm} km marked route in the {s.Region} region " +
+                              $"with about {s.ElevationGainM} m of climbing.{climb} Route geometry from OpenStreetMap.",
+                DistanceKm = s.DistanceKm,
+                ElevationGainM = s.ElevationGainM,
+                Latitude = lat,
+                Longitude = lng,
                 PhotoUrl = $"https://picsum.photos/seed/{slug}/800/500",
-                RouteGeoJson = ToGeoJsonLine(s.Route),
-                RegionId = regionIds[s.Region],
-                DifficultyId = DifficultyId(s.Dist, s.Gain),
+                RouteGeoJson = s.Route.GetRawText(),
+                RegionId = regionIds[$"{s.Country}|{s.Region}"],
+                DifficultyId = DifficultyId(s.DistanceKm, s.ElevationGainM),
                 AuthorId = authorId,
                 CreatedAt = DateTime.UtcNow,
             });
         }
 
         await context.SaveChangesAsync();
-    }
-
-    // waypoints (lat, lon) -> GeoJSON LineString string. GeoJSON orders coords [lng, lat].
-    private static string ToGeoJsonLine((double Lat, double Lon)[] points)
-    {
-        var line = new
-        {
-            type = "LineString",
-            coordinates = points.Select(p => new[] { p.Lon, p.Lat }).ToArray(),
-        };
-        return System.Text.Json.JsonSerializer.Serialize(line);
     }
 }

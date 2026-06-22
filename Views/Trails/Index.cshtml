@@ -12,14 +12,20 @@
     var totalPages = ViewBag.TotalPages is int tp ? tp : 0;
     var totalCount = ViewBag.TotalCount is int tc ? tc : Model.Count();
 
-    var sortOptions = new[]
+    var userLat = ViewBag.UserLat as double?;
+    var userLng = ViewBag.UserLng as double?;
+    var located = userLat.HasValue && userLng.HasValue;
+
+    var sortOptions = new List<(string, string)>();
+    if (located) sortOptions.Add(("nearest", "Nearest to me"));
+    sortOptions.AddRange(new[]
     {
         ("newest", "Newest"),
         ("name", "Name"),
         ("distance", "Distance"),
         ("elevation", "Elevation"),
         ("rating", "Rating"),
-    };
+    });
 
     // preserve the non-tag filters when building tag chip links
     var tagRoute = new Dictionary<string, string>();
@@ -27,6 +33,12 @@
     if (filter.RegionId.HasValue) tagRoute["regionId"] = filter.RegionId.Value.ToString();
     if (filter.DifficultyId.HasValue) tagRoute["difficultyId"] = filter.DifficultyId.Value.ToString();
     if (sort != "newest") tagRoute["sort"] = sort;
+    // keep the visitor's location pinned across every filter/sort/page link
+    if (located)
+    {
+        tagRoute["lat"] = userLat!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        tagRoute["lng"] = userLng!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    }
 
     // full active filter set for pager links (every param except page)
     var pageRoute = new Dictionary<string, string>(tagRoute);
@@ -39,13 +51,28 @@
         <h1 class="mb-0">Discover trails</h1>
     </div>
     <div class="d-flex gap-2">
-        <a class="btn-ascent-outline" asp-action="Nearby"><i class="ti ti-navigation"></i> Near me</a>
+        @if (located)
+        {
+            <a class="btn-ascent-outline" asp-action="Index"><i class="ti ti-x"></i> Clear location</a>
+        }
+        else
+        {
+            <button id="uselocation" type="button" class="btn-ascent-outline"><i class="ti ti-navigation"></i> Use my location</button>
+        }
         @if (User.IsInRole("Guide") || User.IsInRole("Admin"))
         {
             <a class="btn-ascent" asp-action="Create"><i class="ti ti-plus"></i> Add trail</a>
         }
     </div>
 </div>
+
+@if (located)
+{
+    <div class="asc-panel mb-3 d-flex align-items-center gap-2" style="padding:10px 14px">
+        <i class="ti ti-current-location" style="color:var(--terracotta)"></i>
+        <span style="font-size:14px">Showing trails <strong>nearest to you</strong> first — closest at the top.</span>
+    </div>
+}
 
 <form asp-action="Index" method="get" class="asc-panel mb-3">
     <div class="row g-2 align-items-end">
@@ -70,6 +97,12 @@
         {
             <input type="hidden" name="tagId" value="@filter.TagId" />
         }
+        @* keep the visitor's location across a filter submit *@
+        @if (located)
+        {
+            <input type="hidden" name="lat" value="@tagRoute["lat"]" />
+            <input type="hidden" name="lng" value="@tagRoute["lng"]" />
+        }
         <div class="col-6 col-md-auto">
             <label class="eyebrow mb-1">Sort</label>
             <select name="sort" class="form-select">
@@ -81,7 +114,8 @@
         </div>
         <div class="col-12 col-md-auto">
             <button type="submit" class="btn-ascent">Filter</button>
-            <a class="btn-ascent-outline" asp-action="Index">Clear</a>
+            @{ var clearRoute = located ? new Dictionary<string, string> { ["lat"] = tagRoute["lat"], ["lng"] = tagRoute["lng"] } : new Dictionary<string, string>(); }
+            <a class="btn-ascent-outline" asp-action="Index" asp-all-route-data="clearRoute">Clear</a>
         </div>
     </div>
 
@@ -161,6 +195,8 @@ else
     <script src="~/js/ascent-map.js" asp-append-version="true"></script>
     <script>
         const trails = @Html.Raw(mapTrails);
+        // the visitor's shared location ([lng, lat] for MapLibre), or null
+        const user = @(located ? Html.Raw($"[{userLng!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}, {userLat!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}]") : Html.Raw("null"));
         const el = document.getElementById('overviewmap');
         if (el && trails.length) {
             const map = AscentMap.display('overviewmap', { pitch: 45, cooperative: true });
@@ -173,7 +209,35 @@ else
                     AscentMap.marker(map, [t.lng, t.lat], { color: AscentMap.colorFor(t.diff), popup: popup });
                     (coords || [[t.lng, t.lat]]).forEach(c => all.push(c));
                 });
+                if (user) {
+                    AscentMap.marker(map, user, { color: AscentMap.TERRACOTTA, popup: 'You are here' });
+                    all.push(user);
+                }
                 AscentMap.fit(map, all, { padding: 50, pitch: 45 });
+            });
+        }
+
+        // "Use my location": geolocate, then reload keeping current filters + sort by nearest
+        const locBtn = document.getElementById('uselocation');
+        if (locBtn) {
+            locBtn.addEventListener('click', () => {
+                if (!navigator.geolocation) { alert('Geolocation is not supported by your browser.'); return; }
+                locBtn.disabled = true;
+                locBtn.innerHTML = '<i class="ti ti-loader"></i> Locating…';
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        const u = new URL(window.location);
+                        u.searchParams.set('lat', pos.coords.latitude);
+                        u.searchParams.set('lng', pos.coords.longitude);
+                        u.searchParams.set('sort', 'nearest');
+                        u.searchParams.delete('page');
+                        window.location = u;
+                    },
+                    () => {
+                        alert('Could not get your location.');
+                        locBtn.disabled = false;
+                        locBtn.innerHTML = '<i class="ti ti-navigation"></i> Use my location';
+                    });
             });
         }
     </script>

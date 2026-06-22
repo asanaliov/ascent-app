@@ -2,6 +2,8 @@
 @{
     var diffClass = (Model.Difficulty?.Label ?? "").ToLowerInvariant();
     var canManage = User.IsInRole("Guide") || User.IsInRole("Admin");
+    var distances = ViewBag.Distances as Dictionary<int, double>;
+    double? awayKm = distances != null && distances.TryGetValue(Model.Id, out var d) ? d : null;
 }
 
 <div class="trail-card-wrap">
@@ -20,9 +22,15 @@
             {
                 <span class="diff-badge diff-@diffClass">@Model.Difficulty.Label</span>
             }
+            @if (awayKm is double km)
+            {
+                <span class="dist-badge tc-dist"><i class="ti ti-navigation"></i> @km km away</span>
+            }
         </div>
         <div class="tc-body">
-            <div class="tc-region"><i class="ti ti-map-pin"></i> @Model.Region?.Name</div>
+            <div class="tc-region">
+                <i class="ti ti-map-pin"></i> @Model.Region?.Name<span class="tc-country">@Model.Region?.Country</span>
+            </div>
             <h3 class="tc-title">@Model.Name</h3>
             <p class="tc-desc">@Model.ShortDescription</p>
             <div class="tc-stats">
