@@ -1,5 +1,5 @@
-using System.Text.Json;
 using ascent_app.Models;
+using ascent_app.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,17 +37,21 @@ public static class DbInitializer
             await EnsureUserAsync(userManager, m.Email, "Hiker", "Hiker1!", m.Name,
                 bio: m.Bio, home: m.Home, createdDaysAgo: m.JoinedDaysAgo);
 
-        var env = sp.GetRequiredService<IHostEnvironment>();
-        var seedTrails = LoadSeedTrails(env.ContentRootPath);
+        IReadOnlyList<ExternalTrail> externalTrails = Array.Empty<ExternalTrail>();
+        if (!await context.Trails.AnyAsync())
+        {
+            var trailSource = sp.GetRequiredService<IExternalTrailSource>();
+            externalTrails = await trailSource.GetTrailsAsync();
+        }
 
         await SeedDifficultiesAsync(context);
-        await SeedRegionsAsync(context, seedTrails);
+        await SeedRegionsAsync(context, externalTrails);
         await SeedBadgesAsync(context);
 
         var guide = await userManager.FindByEmailAsync("guide@ascent.local");
-        await SeedTrailsAsync(context, guide?.Id, seedTrails);
-        await SeedTrailPhotosAsync(context, seedTrails);
-        await SeedTagsAsync(context);
+        await SeedTrailsAsync(context, guide?.Id, externalTrails);
+        await SeedTagsAsync(context, externalTrails);
+        await EnrichTrailPhotosAsync(context, sp.GetRequiredService<ITrailPhotoSource>());
         await SeedActivityAsync(context, userManager);
     }
 
@@ -98,12 +102,12 @@ public static class DbInitializer
         await context.SaveChangesAsync();
     }
 
-    private static async Task SeedRegionsAsync(AscentDbContext context, List<SeedTrail> seeds)
+    private static async Task SeedRegionsAsync(AscentDbContext context, IReadOnlyList<ExternalTrail> trails)
     {
         if (await context.Regions.AnyAsync()) return;
 
-        var regions = seeds
-            .GroupBy(s => (s.Country, s.Region))
+        var regions = trails
+            .GroupBy(t => (t.Country, t.Region))
             .Select(g => new Region { Name = g.Key.Region, Country = g.Key.Country });
 
         context.Regions.AddRange(regions);
@@ -123,34 +127,26 @@ public static class DbInitializer
         await context.SaveChangesAsync();
     }
 
-    private static async Task SeedTagsAsync(AscentDbContext context)
+    private static async Task SeedTagsAsync(AscentDbContext context, IReadOnlyList<ExternalTrail> externalTrails)
     {
         if (await context.Tags.AnyAsync()) return;
 
-        var names = new[] { "Forest", "Lake", "Summit", "Family-friendly", "Loop", "Panoramic", "Alpine", "Waterfall" };
+        var names = externalTrails
+            .SelectMany(t => t.Tags)
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(t => t)
+            .ToList();
         var tags = names.Select(n => new Tag { Name = n }).ToList();
         context.Tags.AddRange(tags);
         await context.SaveChangesAsync();
 
-        var byName = tags.ToDictionary(t => t.Name, t => t.Id);
-        var map = new Dictionary<string, string[]>
-        {
-            ["Matka – Shishevo Monastery"] = new[] { "Lake", "Family-friendly", "Forest" },
-            ["Popova Šapka – Titov Vrv"] = new[] { "Summit", "Alpine", "Panoramic" },
-            ["Plat Ridge"] = new[] { "Alpine", "Panoramic" },
-            ["Karanikolica Lake"] = new[] { "Lake", "Alpine" },
-            ["Mount Korab"] = new[] { "Summit", "Alpine", "Panoramic" },
-            ["Strezimir – Golem Korab"] = new[] { "Summit", "Alpine", "Panoramic" },
-            ["Bozovce – Lešnica Waterfalls"] = new[] { "Waterfall", "Forest", "Alpine" },
-            ["Magaro Peak"] = new[] { "Summit", "Panoramic", "Lake" },
-            ["Galičica H-6 Ridge"] = new[] { "Panoramic", "Forest" },
-            ["Galičica G-2"] = new[] { "Forest", "Family-friendly" },
-        };
-
-        var trails = await context.Trails.Where(t => map.Keys.Contains(t.Name)).ToListAsync();
-        foreach (var trail in trails)
-            foreach (var tagName in map[trail.Name])
-                context.TrailTags.Add(new TrailTag { TrailId = trail.Id, TagId = byName[tagName] });
+        var tagIds = tags.ToDictionary(t => t.Name, t => t.Id, StringComparer.OrdinalIgnoreCase);
+        var tagMap = externalTrails.ToDictionary(t => t.Name, t => t.Tags, StringComparer.OrdinalIgnoreCase);
+        var trails = await context.Trails.ToListAsync();
+        foreach (var trail in trails.Where(t => tagMap.ContainsKey(t.Name)))
+            foreach (var tagName in tagMap[trail.Name].Where(tagIds.ContainsKey))
+                context.TrailTags.Add(new TrailTag { TrailId = trail.Id, TagId = tagIds[tagName] });
 
         await context.SaveChangesAsync();
     }
@@ -170,123 +166,49 @@ public static class DbInitializer
         foreach (var e in emails)
             if (await userManager.FindByEmailAsync(e) is { } u) users[e] = u;
 
-        var trails = await context.Trails.ToDictionaryAsync(t => t.Name, t => t.Id);
-        int Trail(string name) => trails[name];
+        var trailIds = await context.Trails
+            .OrderBy(t => t.Name)
+            .Select(t => t.Id)
+            .ToListAsync();
+        if (trailIds.Count == 0) return;
 
-        var logs = new (string User, string Trail, int DaysAgo, int? Duration, string? Notes)[]
-        {
-            ("guide@ascent.local", "Matka – Shishevo Monastery", 168, 110, "Led a small group along the canyon; calm water all morning."),
-            ("guide@ascent.local", "Popova Šapka – Titov Vrv", 140, 410, "Long but rewarding alpine push to the Šar high point."),
-            ("guide@ascent.local", "Mount Korab", 98, 520, "Country's roof. Started before dawn."),
-            ("guide@ascent.local", "Strezimir – Golem Korab", 12, 690, "Recon for a guided border traverse next month."),
-            ("admin@ascent.local", "Galičica G-2", 132, 90, "Easy reset hike after work."),
-            ("admin@ascent.local", "Magaro Peak", 88, 210, null),
-            ("admin@ascent.local", "Plat Ridge", 40, 185, "Packed lunch at the saddle."),
-            ("demo@ascent.local", "Matka – Shishevo Monastery", 205, 115, "First proper hike of the season."),
-            ("demo@ascent.local", "Galičica G-2", 176, 100, "Quick lakeside loop."),
-            ("demo@ascent.local", "Popova Šapka – Titov Vrv", 150, 425, "Bucket-list Šar summit — finally!"),
-            ("demo@ascent.local", "Pelister – Kratero Ridge", 119, 305, "Big ridge day down in Pelister."),
-            ("demo@ascent.local", "Magaro Peak", 88, 205, "Twin-lake views never get old."),
-            ("demo@ascent.local", "Mavrovo MK-6 Trail", 57, 160, "Cool forest air, saw deer."),
-            ("demo@ascent.local", "St. George Monastery Path", 29, 110, "Short Sunday hike to the monastery."),
-            ("demo@ascent.local", "Galičica T-3", 9, 95, "Legs felt good today."),
-            ("demo@ascent.local", "Bozovce – Lešnica Waterfalls", 47, 230, "Followed the valley up to the falls — gorgeous."),
-            ("bojan@ascent.local", "Bozovce – Lešnica Waterfalls", 71, 240, "Local favourite, the waterfall was roaring."),
-            ("ana@ascent.local", "Plat Ridge", 160, 170, "Trail-run reps on the plateau."),
-            ("ana@ascent.local", "Karanikolica Lake", 95, 160, null),
-            ("ana@ascent.local", "Popova Šapka – Titov Vrv", 35, 405, "PR on the climb."),
-            ("bojan@ascent.local", "Popova Šapka – Titov Vrv", 200, 430, "Home mountain."),
-            ("bojan@ascent.local", "Mount Korab", 120, 540, "Long day on the border ridge."),
-            ("bojan@ascent.local", "Plat Ridge", 44, 175, null),
-            ("elena@ascent.local", "Pelister – Kratero Ridge", 150, 300, "Pelister in autumn colours."),
-            ("elena@ascent.local", "Magaro Peak", 70, 210, "Drove up from Bitola."),
-            ("elena@ascent.local", "Galičica H-6 Ridge", 25, 235, null),
-            ("marko@ascent.local", "Magaro Peak", 130, 200, "Sunset over Ohrid."),
-            ("marko@ascent.local", "Galičica G-2", 80, 95, null),
-            ("marko@ascent.local", "Galičica T-3", 33, 100, "Short evening leg-stretch."),
-            ("sara@ascent.local", "Triglav via Kredarica", 180, 480, "Home in the Julian Alps."),
-            ("sara@ascent.local", "Mount Korab", 60, 545, "Balkan road trip highlight."),
-            ("sara@ascent.local", "Tongariro Alpine Crossing", 20, 410, "On holiday in NZ!"),
-        };
-
-        var hikeLogs = logs
-            .Where(l => users.ContainsKey(l.User))
-            .Select(l => new HikeLog
-            {
-                UserId = users[l.User].Id,
-                TrailId = Trail(l.Trail),
-                HikedOn = DateTime.Today.AddDays(-l.DaysAgo),
-                DurationMinutes = l.Duration,
-                Notes = l.Notes,
-                CreatedAt = DateTime.UtcNow,
-            });
+        var emailsWithUsers = emails.Where(users.ContainsKey).ToList();
+        var hikeLogs = emailsWithUsers
+            .SelectMany((email, userIndex) => trailIds
+                .Take(4)
+                .Select((trailId, trailIndex) => new HikeLog
+                {
+                    UserId = users[email].Id,
+                    TrailId = trailIds[(trailIndex + userIndex) % trailIds.Count],
+                    HikedOn = DateTime.Today.AddDays(-20 - userIndex * 11 - trailIndex * 17),
+                    DurationMinutes = 90 + trailIndex * 35,
+                    Notes = trailIndex % 2 == 0 ? "Clear trail and great views." : null,
+                    CreatedAt = DateTime.UtcNow,
+                }));
         await context.HikeLogs.AddRangeAsync(hikeLogs);
 
-        var reviews = new (string User, string Trail, int Rating, string? Comment)[]
-        {
-            ("guide@ascent.local", "Matka – Shishevo Monastery", 5, "Gorgeous canyon walk. Great for beginners too."),
-            ("guide@ascent.local", "Mount Korab", 5, "Bucket-list summit. Long approach."),
-            ("admin@ascent.local", "Galičica G-2", 4, "Family-friendly and scenic."),
-            ("admin@ascent.local", "Magaro Peak", 4, "Loved the view over both lakes."),
-            ("demo@ascent.local", "Popova Šapka – Titov Vrv", 5, "Hardest day I've done, worth every step."),
-            ("demo@ascent.local", "Matka – Shishevo Monastery", 4, "Lovely and easy, gets busy on weekends."),
-            ("demo@ascent.local", "Pelister – Kratero Ridge", 5, "Pelister is underrated — incredible ridge."),
-            ("demo@ascent.local", "Mavrovo MK-6 Trail", 4, "Quiet, shady, well-marked."),
-            ("ana@ascent.local", "Plat Ridge", 4, "Great runnable terrain up top."),
-            ("ana@ascent.local", "Popova Šapka – Titov Vrv", 5, "The Šar classic. Start early."),
-            ("bojan@ascent.local", "Bozovce – Lešnica Waterfalls", 5, "Best waterfall hike in the Šar. Bring sturdy shoes."),
-            ("bojan@ascent.local", "Mount Korab", 5, "Nothing beats the roof of the country."),
-            ("bojan@ascent.local", "Plat Ridge", 3, "Nice but exposed when it's windy."),
-            ("elena@ascent.local", "Pelister – Kratero Ridge", 5, "My favourite, right on my doorstep."),
-            ("elena@ascent.local", "Galičica H-6 Ridge", 4, "Big open views over both lakes."),
-            ("marko@ascent.local", "Magaro Peak", 5, "Best sunset spot in the country."),
-            ("marko@ascent.local", "Galičica G-2", 4, "Easy and scenic, perfect after work."),
-            ("sara@ascent.local", "Mount Korab", 4, "Tough approach but stunning. Bring water."),
-            ("sara@ascent.local", "Triglav via Kredarica", 5, "Steep, exposed, unforgettable."),
-        };
-
-        var trailReviews = reviews
-            .Where(r => users.ContainsKey(r.User))
-            .Select(r => new Review
-            {
-                UserId = users[r.User].Id,
-                TrailId = Trail(r.Trail),
-                Rating = r.Rating,
-                Comment = r.Comment,
-                CreatedAt = DateTime.UtcNow,
-            });
+        var trailReviews = emailsWithUsers
+            .SelectMany((email, userIndex) => trailIds
+                .Take(2)
+                .Select((trailId, trailIndex) => new Review
+                {
+                    UserId = users[email].Id,
+                    TrailId = trailIds[(trailIndex + userIndex) % trailIds.Count],
+                    Rating = 4 + (trailIndex + userIndex) % 2,
+                    Comment = trailIndex == 0 ? "Beautiful route and worth repeating." : "Good day out with solid views.",
+                    CreatedAt = DateTime.UtcNow,
+                }))
+            .GroupBy(r => new { r.UserId, r.TrailId })
+            .Select(g => g.First());
         await context.Reviews.AddRangeAsync(trailReviews);
 
         await context.SaveChangesAsync();
     }
 
-    private sealed class SeedTrail
-    {
-        public string Name { get; set; } = "";
-        public string Region { get; set; } = "";
-        public string Country { get; set; } = "";
-        public string Short { get; set; } = "";
-        public double DistanceKm { get; set; }
-        public int ElevationGainM { get; set; }
-        public int? TrailheadEle { get; set; }
-        public int? SummitEle { get; set; }
-        public long OsmRelationId { get; set; }
-        public string? PhotoUrl { get; set; }
-        public List<string>? Photos { get; set; }
-        public JsonElement Route { get; set; }
-    }
-
-    private static List<SeedTrail> LoadSeedTrails(string contentRoot)
-    {
-        var path = Path.Combine(contentRoot, "Data", "seed", "trails.json");
-        var json = File.ReadAllText(path);
-        return JsonSerializer.Deserialize<List<SeedTrail>>(json,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
-    }
-
-    private static async Task SeedTrailsAsync(AscentDbContext context, string? authorId, List<SeedTrail> seeds)
+    private static async Task SeedTrailsAsync(AscentDbContext context, string? authorId, IReadOnlyList<ExternalTrail> externalTrails)
     {
         if (await context.Trails.AnyAsync()) return;
+        if (externalTrails.Count == 0) return;
 
         var regionIds = await context.Regions
             .ToDictionaryAsync(r => $"{r.Country}|{r.Name}", r => r.Id);
@@ -300,28 +222,21 @@ public static class DbInitializer
             return bin.Id;
         }
 
-        foreach (var s in seeds)
+        foreach (var external in externalTrails)
         {
-            var coords = s.Route.GetProperty("coordinates");
-            var head = coords[0];
-            double lng = head[0].GetDouble(), lat = head[1].GetDouble();
-            var climb = s.TrailheadEle is int lo && s.SummitEle is int hi
-                ? $" Climbs from about {lo} m to {hi} m."
-                : "";
             context.Trails.Add(new Trail
             {
-                Name = s.Name,
-                ShortDescription = s.Short,
-                Description = $"{s.Short} A {s.DistanceKm} km marked route in the {s.Region} region " +
-                              $"with about {s.ElevationGainM} m of climbing.{climb} Route geometry from OpenStreetMap.",
-                DistanceKm = s.DistanceKm,
-                ElevationGainM = s.ElevationGainM,
-                Latitude = lat,
-                Longitude = lng,
-                PhotoUrl = s.PhotoUrl,
-                RouteGeoJson = s.Route.GetRawText(),
-                RegionId = regionIds[$"{s.Country}|{s.Region}"],
-                DifficultyId = DifficultyId(s.DistanceKm, s.ElevationGainM),
+                Name = external.Name,
+                ShortDescription = external.ShortDescription,
+                Description = $"{external.ShortDescription} Route data imported from OpenStreetMap.",
+                DistanceKm = external.DistanceKm,
+                ElevationGainM = external.ElevationGainM,
+                Latitude = external.Latitude,
+                Longitude = external.Longitude,
+                PhotoUrl = external.PhotoUrl,
+                RouteGeoJson = external.RouteGeoJson,
+                RegionId = regionIds[$"{external.Country}|{external.Region}"],
+                DifficultyId = DifficultyId(external.DistanceKm, external.ElevationGainM),
                 AuthorId = authorId,
                 CreatedAt = DateTime.UtcNow,
             });
@@ -330,16 +245,20 @@ public static class DbInitializer
         await context.SaveChangesAsync();
     }
 
-    private static async Task SeedTrailPhotosAsync(AscentDbContext context, List<SeedTrail> seeds)
+    private static async Task EnrichTrailPhotosAsync(AscentDbContext context, ITrailPhotoSource photoSource)
     {
-        if (await context.TrailPhotos.AnyAsync()) return;
+        var trails = await context.Trails
+            .Include(t => t.Region)
+            .Where(t => string.IsNullOrWhiteSpace(t.PhotoUrl))
+            .OrderBy(t => t.Name)
+            .Take(16)
+            .ToListAsync();
 
-        var trailIds = await context.Trails.ToDictionaryAsync(t => t.Name, t => t.Id);
-        foreach (var s in seeds)
+        foreach (var trail in trails)
         {
-            if (s.Photos is null || !trailIds.TryGetValue(s.Name, out var trailId)) continue;
-            foreach (var url in s.Photos)
-                context.TrailPhotos.Add(new TrailPhoto { TrailId = trailId, Url = url });
+            var photoUrl = await photoSource.FindPhotoAsync(trail);
+            if (!string.IsNullOrWhiteSpace(photoUrl))
+                trail.PhotoUrl = photoUrl;
         }
 
         await context.SaveChangesAsync();
