@@ -176,6 +176,16 @@ namespace ascent_app.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("INTEGER");
 
+                    b.Property<double?>("HomeLat")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("HomeLng")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("HomeLocationName")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
 
