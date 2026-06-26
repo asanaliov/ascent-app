@@ -1,17 +1,11 @@
 # Ascent
 
 Ascent is a polished hiking trail app for discovering, saving, reviewing, and
-logging mountain routes. The demo is seeded with trails, users, reviews, badges,
-and hike logs so it feels like a live outdoor community from the first run.
+logging mountain routes. Trail data comes from OpenStreetMap through the
+Overpass API instead of a hardcoded seed file.
 
 ASP.NET Core MVC (.NET 10) · EF Core 10 · SQLite · Identity · MapLibre GL ·
 Bootstrap 5
-
-## Design
-
-Ascent uses a warm editorial outdoor style: soft paper tones, forest green,
-terracotta accents, serif headings, photo-first trail cards, compact stats, and
-map-led discovery.
 
 The app is built around clear trail confidence signals: difficulty, distance,
 elevation, region, photos, reviews, favorites, route geometry, and 3D terrain
@@ -53,7 +47,7 @@ Areas/Admin/            Admin area
 Models/                 EF Core entities
 ViewModels/             Page and form models
 Services/               Difficulty, badges, geo, image storage
-Data/                   DbContext and seed data
+Data/                   DbContext and external trail models
 Views/                  Razor views
 wwwroot/css/ascent.css  Main visual system
 wwwroot/js/             Map and route editor scripts
