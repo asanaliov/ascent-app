@@ -4,7 +4,6 @@ namespace ascent_app.Services;
 
 public interface IImageStorage
 {
-    // saves under wwwroot/uploads/<subfolder>, returns the web path or an error
     Task<(bool Ok, string? Url, string? Error)> SaveAsync(IFormFile file, string subfolder);
 }
 

@@ -1,6 +1,5 @@
 namespace ascent_app.Models;
 
-// join: Trail <-> Tag, composite key in OnModelCreating
 public class TrailTag
 {
     public int TrailId { get; set; }

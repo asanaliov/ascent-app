@@ -6,7 +6,6 @@ public class HikeLogFormViewModel
 {
     public int TrailId { get; set; }
 
-    // shown on the form, not posted back as the source of truth
     public string? TrailName { get; set; }
 
     [Required]

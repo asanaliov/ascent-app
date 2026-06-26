@@ -45,7 +45,6 @@ public class UsersController : Controller
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null) return NotFound();
 
-        // don't let an admin strip their own admin role and lock themselves out
         if (role == "Admin" && userId == _userManager.GetUserId(User))
         {
             TempData["Err"] = "You can't change your own admin role.";

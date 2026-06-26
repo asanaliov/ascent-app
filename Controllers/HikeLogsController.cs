@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ascent_app.Controllers;
 
-[Authorize] // any signed-in user (Hiker and up) can log hikes
+[Authorize]
 public class HikeLogsController : Controller
 {
     private readonly AscentDbContext _context;
@@ -29,7 +29,6 @@ public class HikeLogsController : Controller
         _userManager = userManager;
     }
 
-    // GET: /HikeLogs  — "My hikes"
     public async Task<IActionResult> Index()
     {
         var userId = _userManager.GetUserId(User)!;
@@ -43,7 +42,6 @@ public class HikeLogsController : Controller
             .AsNoTracking()
             .ToListAsync();
 
-        // earned badges for the sidebar
         ViewBag.Badges = await _context.UserBadges
             .Where(ub => ub.UserId == userId)
             .Include(ub => ub.Badge)
@@ -55,7 +53,6 @@ public class HikeLogsController : Controller
         return View(hikes);
     }
 
-    // GET: /HikeLogs/Create?trailId=5
     public async Task<IActionResult> Create(int trailId)
     {
         var trail = await _context.Trails.FindAsync(trailId);
@@ -64,7 +61,6 @@ public class HikeLogsController : Controller
         return View(new HikeLogFormViewModel { TrailId = trail.Id, TrailName = trail.Name });
     }
 
-    // POST: /HikeLogs/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(HikeLogFormViewModel form)
@@ -107,7 +103,6 @@ public class HikeLogsController : Controller
         _context.HikeLogs.Add(hike);
         await _context.SaveChangesAsync();
 
-        // award any newly-earned badges and surface them
         var earned = await _badges.EvaluateAsync(userId);
         if (earned.Count > 0)
             TempData["NewBadges"] = string.Join(", ", earned.Select(b => b.Name));
@@ -115,14 +110,13 @@ public class HikeLogsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // POST: /HikeLogs/Delete/5
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
         var userId = _userManager.GetUserId(User)!;
         var hike = await _context.HikeLogs
-            .FirstOrDefaultAsync(h => h.Id == id && h.UserId == userId); // ownership check
+            .FirstOrDefaultAsync(h => h.Id == id && h.UserId == userId);
 
         if (hike != null)
         {
@@ -133,14 +127,13 @@ public class HikeLogsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // POST: /HikeLogs/AddPhoto  — attach a photo to one of my hikes
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddPhoto(int hikeLogId, IFormFile? photoFile, string? caption)
     {
         var userId = _userManager.GetUserId(User)!;
         var hike = await _context.HikeLogs
-            .FirstOrDefaultAsync(h => h.Id == hikeLogId && h.UserId == userId); // ownership check
+            .FirstOrDefaultAsync(h => h.Id == hikeLogId && h.UserId == userId);
         if (hike == null) return NotFound();
 
         if (photoFile == null)
@@ -161,14 +154,13 @@ public class HikeLogsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // POST: /HikeLogs/DeletePhoto/5
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeletePhoto(int id)
     {
         var userId = _userManager.GetUserId(User)!;
         var photo = await _context.Photos
-            .FirstOrDefaultAsync(p => p.Id == id && p.HikeLog.UserId == userId); // owned via the hike
+            .FirstOrDefaultAsync(p => p.Id == id && p.HikeLog.UserId == userId);
 
         if (photo != null)
         {

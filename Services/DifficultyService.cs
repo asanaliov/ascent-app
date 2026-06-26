@@ -19,7 +19,6 @@ public class DifficultyService : IDifficultyService
         _context = context;
     }
 
-    // Shenandoah-style formula, metric.
     public double Score(double distanceKm, int elevationGainM)
         => Math.Sqrt(2 * elevationGainM * distanceKm);
 
@@ -32,7 +31,6 @@ public class DifficultyService : IDifficultyService
             _ => "Strenuous",
         };
 
-    // Maps the computed label to a row in the seeded Difficulty table.
     public async Task<int> ResolveDifficultyIdAsync(double distanceKm, int elevationGainM)
     {
         var label = GetLabel(distanceKm, elevationGainM);

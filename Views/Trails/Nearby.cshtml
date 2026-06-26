@@ -68,7 +68,6 @@
     <script src="~/js/ascent-map.js" asp-append-version="true"></script>
     <script>
         const trails = @Html.Raw(markersJson);
-        // server gives [lat, lng]; MapLibre wants [lng, lat]
         const user = @(Model.HasLocation ? Html.Raw($"[{Model.Lng}, {Model.Lat}]") : Html.Raw("null"));
 
         const map = AscentMap.display('map', { pitch: 45, cooperative: true });

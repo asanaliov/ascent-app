@@ -20,7 +20,6 @@ public class GuideController : Controller
         _userManager = userManager;
     }
 
-    // GET: Guide — trails authored by the current guide/admin + quick stats
     public async Task<IActionResult> Index()
     {
         var userId = _userManager.GetUserId(User);

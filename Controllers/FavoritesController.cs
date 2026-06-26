@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ascent_app.Controllers;
 
-[Authorize] // favoriting is per-user, so you must be signed in
+[Authorize]
 public class FavoritesController : Controller
 {
     private readonly AscentDbContext _context;
@@ -19,12 +19,10 @@ public class FavoritesController : Controller
         _userManager = userManager;
     }
 
-    // GET: /Favorites  — "Saved trails"
     public async Task<IActionResult> Index()
     {
         var userId = _userManager.GetUserId(User)!;
 
-        // favorite trail ids, most recently saved first
         var orderedIds = await _context.Favorites
             .Where(f => f.UserId == userId)
             .OrderByDescending(f => f.CreatedAt)
@@ -39,15 +37,12 @@ public class FavoritesController : Controller
             .AsNoTracking()
             .ToListAsync();
 
-        // re-apply saved order (the Where above doesn't preserve it)
         trails = orderedIds.Select(id => trails.First(t => t.Id == id)).ToList();
 
-        // every trail on this page is, by definition, a favorite
         ViewBag.FavoriteTrailIds = trails.Select(t => t.Id).ToHashSet();
         return View(trails);
     }
 
-    // POST: /Favorites/Toggle  — add if missing, remove if present
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Toggle(int trailId, string? returnUrl = null)
@@ -59,7 +54,6 @@ public class FavoritesController : Controller
 
         if (existing == null)
         {
-            // guard against favoriting a trail that doesn't exist
             if (!await _context.Trails.AnyAsync(t => t.Id == trailId)) return NotFound();
 
             _context.Favorites.Add(new Favorite

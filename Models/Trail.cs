@@ -24,7 +24,6 @@ public class Trail
     [Range(0, 10000)]
     public int ElevationGainM { get; set; }
 
-    // trailhead coords, used by GeoService
     [Range(-90, 90)]
     public double Latitude { get; set; }
 
@@ -34,8 +33,6 @@ public class Trail
     [MaxLength(400)]
     public string? PhotoUrl { get; set; }
 
-    // the hikeable path as a GeoJSON LineString ([lng,lat] pairs); null = point-only.
-    // drawn as a polyline on the trail map. Latitude/Longitude above is the trailhead (route start).
     public string? RouteGeoJson { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -43,7 +40,6 @@ public class Trail
     public int RegionId { get; set; }
     public Region Region { get; set; } = null!;
 
-    // derived from DifficultyService, don't bind on forms
     public int DifficultyId { get; set; }
     public Difficulty Difficulty { get; set; } = null!;
 

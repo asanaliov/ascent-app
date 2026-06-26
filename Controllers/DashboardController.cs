@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ascent_app.Controllers;
 
-[Authorize] // your own stats, so sign-in required
+[Authorize]
 public class DashboardController : Controller
 {
     private readonly AscentDbContext _context;
@@ -20,13 +20,11 @@ public class DashboardController : Controller
         _userManager = userManager;
     }
 
-    // GET: /Dashboard
     public async Task<IActionResult> Index()
     {
         var user = await _userManager.GetUserAsync(User);
         var userId = user!.Id;
 
-        // pull this user's hikes once, with the trail data the totals need
         var hikes = await _context.HikeLogs
             .Where(h => h.UserId == userId)
             .Include(h => h.Trail).ThenInclude(t => t.Region)
@@ -35,7 +33,6 @@ public class DashboardController : Controller
             .AsNoTracking()
             .ToListAsync();
 
-        // same three metrics BadgeService evaluates
         var totalHikes = hikes.Count;
         var totalElevation = hikes.Sum(h => h.Trail.ElevationGainM);
         var totalDistance = hikes.Sum(h => h.Trail.DistanceKm);

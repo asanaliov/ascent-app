@@ -12,6 +12,12 @@ public class ApplicationUser : IdentityUser
     [MaxLength(500)]
     public string? Bio { get; set; }
 
+    public double? HomeLat { get; set; }
+    public double? HomeLng { get; set; }
+
+    [MaxLength(100)]
+    public string? HomeLocationName { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<Trail> AuthoredTrails { get; set; } = new List<Trail>();

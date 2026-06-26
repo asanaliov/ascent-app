@@ -1,6 +1,5 @@
 namespace ascent_app.Models;
 
-// join: User <-> Badge, composite key in OnModelCreating
 public class UserBadge
 {
     public string UserId { get; set; } = string.Empty;

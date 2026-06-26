@@ -15,6 +15,12 @@
     var userLat = ViewBag.UserLat as double?;
     var userLng = ViewBag.UserLng as double?;
     var located = userLat.HasValue && userLng.HasValue;
+    var isLive = ViewBag.IsLiveLocation is true;
+    var homeName = ViewBag.HomeName as string;
+    var focusLat = ViewBag.FocusLat is double fla ? fla : 41.6;
+    var focusLng = ViewBag.FocusLng is double flo ? flo : 21.7;
+    var focusZoom = ViewBag.FocusZoom is double fz ? fz : 6.5;
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
 
     var sortOptions = new List<(string, string)>();
     if (located) sortOptions.Add(("nearest", "Nearest to me"));
@@ -27,20 +33,17 @@
         ("rating", "Rating"),
     });
 
-    // preserve the non-tag filters when building tag chip links
     var tagRoute = new Dictionary<string, string>();
     if (!string.IsNullOrWhiteSpace(filter.Q)) tagRoute["q"] = filter.Q!;
     if (filter.RegionId.HasValue) tagRoute["regionId"] = filter.RegionId.Value.ToString();
     if (filter.DifficultyId.HasValue) tagRoute["difficultyId"] = filter.DifficultyId.Value.ToString();
     if (sort != "newest") tagRoute["sort"] = sort;
-    // keep the visitor's location pinned across every filter/sort/page link
-    if (located)
+    if (isLive)
     {
-        tagRoute["lat"] = userLat!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        tagRoute["lng"] = userLng!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        tagRoute["lat"] = userLat!.Value.ToString(inv);
+        tagRoute["lng"] = userLng!.Value.ToString(inv);
     }
 
-    // full active filter set for pager links (every param except page)
     var pageRoute = new Dictionary<string, string>(tagRoute);
     if (filter.TagId.HasValue) pageRoute["tagId"] = filter.TagId.Value.ToString();
 }
@@ -51,7 +54,7 @@
         <h1 class="mb-0">Discover trails</h1>
     </div>
     <div class="d-flex gap-2">
-        @if (located)
+        @if (isLive)
         {
             <a class="btn-ascent-outline" asp-action="Index"><i class="ti ti-x"></i> Clear location</a>
         }
@@ -70,7 +73,17 @@
 {
     <div class="asc-panel mb-3 d-flex align-items-center gap-2" style="padding:10px 14px">
         <i class="ti ti-current-location" style="color:var(--terracotta)"></i>
-        <span style="font-size:14px">Showing trails <strong>nearest to you</strong> first — closest at the top.</span>
+        @if (isLive)
+        {
+            <span style="font-size:14px">Showing trails <strong>nearest to you</strong> first — closest at the top.</span>
+        }
+        else
+        {
+            <span style="font-size:14px">
+                Showing trails near your home<strong>@(string.IsNullOrEmpty(homeName) ? "" : $", {homeName}")</strong> first.
+                <a asp-controller="Manage" asp-action="Index">Change</a>
+            </span>
+        }
     </div>
 }
 
@@ -92,13 +105,11 @@
                 <option value="">All</option>
             </select>
         </div>
-        @* keep the active tag selection across a search/region/difficulty submit *@
         @if (filter.TagId.HasValue)
         {
             <input type="hidden" name="tagId" value="@filter.TagId" />
         }
-        @* keep the visitor's location across a filter submit *@
-        @if (located)
+        @if (isLive)
         {
             <input type="hidden" name="lat" value="@tagRoute["lat"]" />
             <input type="hidden" name="lng" value="@tagRoute["lng"]" />
@@ -114,7 +125,7 @@
         </div>
         <div class="col-12 col-md-auto">
             <button type="submit" class="btn-ascent">Filter</button>
-            @{ var clearRoute = located ? new Dictionary<string, string> { ["lat"] = tagRoute["lat"], ["lng"] = tagRoute["lng"] } : new Dictionary<string, string>(); }
+            @{ var clearRoute = isLive ? new Dictionary<string, string> { ["lat"] = tagRoute["lat"], ["lng"] = tagRoute["lng"] } : new Dictionary<string, string>(); }
             <a class="btn-ascent-outline" asp-action="Index" asp-all-route-data="clearRoute">Clear</a>
         </div>
     </div>
@@ -133,58 +144,68 @@
     }
 </form>
 
-@if (totalCount > 0)
-{
-    <div class="asc-panel mb-3" style="padding:14px">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-            <p class="eyebrow mb-0"><i class="ti ti-map-2"></i> EXPLORE ON THE MAP</p>
-            <span class="text-muted" style="font-size:12px">
-                <i class="ti ti-hand-finger"></i> Drag to pan · right-drag to tilt · Ctrl+scroll to zoom · click a pin to open
-            </span>
+<div class="trails-layout" id="trailsLayout">
+    <div class="trails-main">
+        <div class="results-bar">
+            <p class="text-muted mb-0">Showing @Model.Count() of @totalCount @(totalCount == 1 ? "trail" : "trails")</p>
+            @if (totalCount > 0)
+            {
+                <button type="button" id="toggleMap" class="btn-ascent-outline" style="padding:6px 12px;font-size:13px">
+                    <i class="ti ti-map"></i> <span data-maplabel>Hide map</span>
+                </button>
+            }
         </div>
-        <div id="overviewmap" class="map-box"></div>
-    </div>
-}
 
-<p class="text-muted mb-3">Showing @Model.Count() of @totalCount @(totalCount == 1 ? "trail" : "trails")</p>
-
-@if (!Model.Any())
-{
-    <div class="asc-panel text-center text-muted my-4">
-        <i class="ti ti-mountain" style="font-size:32px;opacity:.5"></i>
-        <p class="mb-0 mt-2">No trails match your filters.</p>
-    </div>
-}
-else
-{
-    <div class="trail-grid">
-        @foreach (var trail in Model)
+        @if (!Model.Any())
         {
-            <partial name="_TrailCard" model="trail" />
+            <div class="asc-panel text-center text-muted my-4">
+                <i class="ti ti-mountain" style="font-size:32px;opacity:.5"></i>
+                <p class="mb-0 mt-2">No trails match your filters.</p>
+            </div>
+        }
+        else
+        {
+            <div class="trail-grid">
+                @foreach (var trail in Model)
+                {
+                    <partial name="_TrailCard" model="trail" />
+                }
+            </div>
+
+            @if (totalPages > 1)
+            {
+                <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mt-4">
+                    @if (currentPage > 1)
+                    {
+                        var prev = new Dictionary<string, string>(pageRoute) { ["page"] = (currentPage - 1).ToString() };
+                        <a class="btn-ascent-outline" asp-action="Index" asp-all-route-data="prev"><i class="ti ti-chevron-left"></i> Prev</a>
+                    }
+                    @for (var i = 1; i <= totalPages; i++)
+                    {
+                        var pg = new Dictionary<string, string>(pageRoute) { ["page"] = i.ToString() };
+                        <a class="asc-chip @(i == currentPage ? "active" : "")" asp-action="Index" asp-all-route-data="pg">@i</a>
+                    }
+                    @if (currentPage < totalPages)
+                    {
+                        var next = new Dictionary<string, string>(pageRoute) { ["page"] = (currentPage + 1).ToString() };
+                        <a class="btn-ascent-outline" asp-action="Index" asp-all-route-data="next">Next <i class="ti ti-chevron-right"></i></a>
+                    }
+                </div>
+            }
         }
     </div>
 
-    @if (totalPages > 1)
+    @if (totalCount > 0)
     {
-        <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mt-4">
-            @if (currentPage > 1)
-            {
-                var prev = new Dictionary<string, string>(pageRoute) { ["page"] = (currentPage - 1).ToString() };
-                <a class="btn-ascent-outline" asp-action="Index" asp-all-route-data="prev"><i class="ti ti-chevron-left"></i> Prev</a>
-            }
-            @for (var i = 1; i <= totalPages; i++)
-            {
-                var pg = new Dictionary<string, string>(pageRoute) { ["page"] = i.ToString() };
-                <a class="asc-chip @(i == currentPage ? "active" : "")" asp-action="Index" asp-all-route-data="pg">@i</a>
-            }
-            @if (currentPage < totalPages)
-            {
-                var next = new Dictionary<string, string>(pageRoute) { ["page"] = (currentPage + 1).ToString() };
-                <a class="btn-ascent-outline" asp-action="Index" asp-all-route-data="next">Next <i class="ti ti-chevron-right"></i></a>
-            }
-        </div>
+        <aside class="trails-aside" id="trailsAside">
+            <div class="map-side-head">
+                <p class="eyebrow mb-0"><i class="ti ti-map-2"></i> Map</p>
+                <span class="text-muted" style="font-size:11px">Drag to rotate · Ctrl+scroll to zoom</span>
+            </div>
+            <div id="overviewmap" class="map-side"></div>
+        </aside>
     }
-}
+</div>
 
 @section Styles {
     <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
@@ -195,29 +216,41 @@ else
     <script src="~/js/ascent-map.js" asp-append-version="true"></script>
     <script>
         const trails = @Html.Raw(mapTrails);
-        // the visitor's shared location ([lng, lat] for MapLibre), or null
-        const user = @(located ? Html.Raw($"[{userLng!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}, {userLat!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}]") : Html.Raw("null"));
+        const user = @(located ? Html.Raw($"[{userLng!.Value.ToString(inv)}, {userLat!.Value.ToString(inv)}]") : Html.Raw("null"));
+        const userLabel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(isLive ? "You are here" : (string.IsNullOrEmpty(homeName) ? "Your home" : $"Your home — {homeName}")));
+        const focus = [@focusLng.ToString(inv), @focusLat.ToString(inv)];
+        const focusZoom = @focusZoom.ToString(inv);
         const el = document.getElementById('overviewmap');
+        let overviewMap = null;
         if (el && trails.length) {
-            const map = AscentMap.display('overviewmap', { pitch: 45, cooperative: true });
-            AscentMap.onReady(map, () => {
-                const all = [];
+            overviewMap = AscentMap.display('overviewmap', { center: focus, zoom: focusZoom, pitch: 40, cooperative: true });
+            AscentMap.onReady(overviewMap, () => {
                 trails.forEach(t => {
-                    // colour each route by difficulty; fall back to a pin when there's no route
-                    const coords = AscentMap.addRoute(map, t.route, { color: AscentMap.colorFor(t.diff), width: 3 });
+                    AscentMap.addRoute(overviewMap, t.route, { color: AscentMap.colorFor(t.diff), width: 3 });
                     const popup = '<a href="' + t.url + '"><strong>' + t.name + '</strong></a>';
-                    AscentMap.marker(map, [t.lng, t.lat], { color: AscentMap.colorFor(t.diff), popup: popup });
-                    (coords || [[t.lng, t.lat]]).forEach(c => all.push(c));
+                    AscentMap.marker(overviewMap, [t.lng, t.lat], { color: AscentMap.colorFor(t.diff), popup: popup });
                 });
-                if (user) {
-                    AscentMap.marker(map, user, { color: AscentMap.TERRACOTTA, popup: 'You are here' });
-                    all.push(user);
-                }
-                AscentMap.fit(map, all, { padding: 50, pitch: 45 });
+                if (user) AscentMap.marker(overviewMap, user, { color: AscentMap.TERRACOTTA, popup: userLabel });
             });
         }
 
-        // "Use my location": geolocate, then reload keeping current filters + sort by nearest
+        const layout = document.getElementById('trailsLayout');
+        const toggle = document.getElementById('toggleMap');
+        if (layout && toggle) {
+            const label = toggle.querySelector('[data-maplabel]');
+            const apply = hidden => {
+                layout.classList.toggle('map-hidden', hidden);
+                if (label) label.textContent = hidden ? 'Show map' : 'Hide map';
+                if (!hidden && overviewMap) setTimeout(() => overviewMap.resize(), 50);
+            };
+            apply(localStorage.getItem('ascentMapHidden') === '1');
+            toggle.addEventListener('click', () => {
+                const hidden = !layout.classList.contains('map-hidden');
+                localStorage.setItem('ascentMapHidden', hidden ? '1' : '0');
+                apply(hidden);
+            });
+        }
+
         const locBtn = document.getElementById('uselocation');
         if (locBtn) {
             locBtn.addEventListener('click', () => {

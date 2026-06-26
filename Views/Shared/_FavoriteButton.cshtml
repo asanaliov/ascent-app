@@ -1,11 +1,9 @@
 @model ascent_app.Models.Trail
 @{
-    // signed-out users don't see the heart at all
     if (User.Identity?.IsAuthenticated != true) { return; }
 
     var favIds = ViewBag.FavoriteTrailIds as HashSet<int> ?? new HashSet<int>();
     var isFav = favIds.Contains(Model.Id);
-    // come back to whatever page we're on after toggling
     var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
 }
 
@@ -14,7 +12,6 @@
     <input type="hidden" name="returnUrl" value="@returnUrl" />
     <button type="submit" class="fav-btn @(isFav ? "on" : "")"
             title="@(isFav ? "Remove from favorites" : "Save to favorites")">
-        @* no filled-heart glyph in the webfont *@
         <svg width="20" height="20" viewBox="0 0 24 24"
              fill="@(isFav ? "currentColor" : "none")"
              stroke="currentColor" stroke-width="2"

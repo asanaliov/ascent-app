@@ -19,7 +19,6 @@ public class DashboardViewModel
     public int BadgesEarned => Badges.Count(b => b.Earned);
 }
 
-// one badge + how close the user is to it
 public class BadgeProgress
 {
     public Badge Badge { get; set; } = null!;

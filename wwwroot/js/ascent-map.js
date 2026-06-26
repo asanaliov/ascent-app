@@ -1,11 +1,7 @@
-// Shared MapLibre GL helpers for every trail map (overview, details, nearby, editor).
-// Gives each map: Street / Terrain / Satellite basemaps + real 3D terrain (free AWS
-// terrarium DEM, no API key), navigation/terrain/scale controls, and route drawing.
-// Routes are GeoJSON LineStrings ([lng, lat]) — the same order MapLibre uses.
 window.AscentMap = (function () {
     const GREEN = '#2F4A2C';
     const TERRACOTTA = '#B05E3B';
-    const NM_CENTER = [21.7, 41.6]; // North Macedonia [lng, lat]
+    const NM_CENTER = [21.7, 41.6];
     const NM_ZOOM = 7;
 
     const DIFF_COLORS = { Easy: '#3E7C4F', Moderate: '#B8860B', Hard: '#B05E3B', Strenuous: '#7A2E2E' };
@@ -13,7 +9,6 @@ window.AscentMap = (function () {
 
     let routeSeq = 0;
 
-    // raster basemaps + a raster-dem source that powers the 3D terrain
     function baseStyle() {
         return {
             version: 8,
@@ -48,11 +43,10 @@ window.AscentMap = (function () {
                 { id: 'bm-satellite', type: 'raster', source: 'satellite', layout: { visibility: 'none' } },
                 { id: 'bm-street', type: 'raster', source: 'street', layout: { visibility: 'none' } },
             ],
-            terrain: { source: 'dem', exaggeration: 1.3 }, // the 3D
+            terrain: { source: 'dem', exaggeration: 1.3 },
         };
     }
 
-    // a little Street/Terrain/Satellite toggle, rendered as a MapLibre control
     function basemapControl(options) {
         return {
             onAdd(map) {
@@ -78,7 +72,6 @@ window.AscentMap = (function () {
         };
     }
 
-    // build a fully-loaded interactive map with all the controls
     function display(elId, opts) {
         opts = opts || {};
         const map = new maplibregl.Map({
@@ -89,10 +82,13 @@ window.AscentMap = (function () {
             pitch: opts.pitch != null ? opts.pitch : 0,
             bearing: opts.bearing || 0,
             maxPitch: 85,
-            cooperativeGestures: !!opts.cooperative, // stops the page-scroll hijack
+            cooperativeGestures: !!opts.cooperative,
             attributionControl: { compact: true },
+            dragRotate: true,
+            pitchWithRotate: true,
         });
-        map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+        if (map.touchZoomRotate) map.touchZoomRotate.enableRotation();
+        map.addControl(new maplibregl.NavigationControl({ visualizePitch: true, showCompass: true }), 'top-right');
         map.addControl(new maplibregl.TerrainControl({ source: 'dem', exaggeration: 1.3 }), 'top-right');
         map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
         map.addControl(basemapControl([
@@ -108,7 +104,6 @@ window.AscentMap = (function () {
         else map.on('load', cb);
     }
 
-    // accept a GeoJSON LineString (object/string/Feature) -> geometry or null
     function normalize(geojson) {
         if (!geojson) return null;
         if (typeof geojson === 'string') {
@@ -119,7 +114,6 @@ window.AscentMap = (function () {
         return geojson;
     }
 
-    // draw a route line; returns its [lng,lat] coords (or null). Call after onReady.
     function addRoute(map, geojson, opts) {
         opts = opts || {};
         const g = normalize(geojson);
@@ -142,7 +136,6 @@ window.AscentMap = (function () {
         return m;
     }
 
-    // programmatically switch basemap (used by the route simulation) + sync the toggle
     function setBasemap(map, layerId) {
         ['bm-topo', 'bm-satellite', 'bm-street'].forEach(id =>
             map.setLayoutProperty(id, 'visibility', id === layerId ? 'visible' : 'none'));
@@ -150,17 +143,21 @@ window.AscentMap = (function () {
             b.classList.toggle('active', b.dataset.layer === layerId));
     }
 
-    // --- geo helpers for the simulation ---
     function toRad(d) { return d * Math.PI / 180; }
+    function toDeg(r) { return r * 180 / Math.PI; }
     function haversineKm(a, b) {
         const R = 6371, dLat = toRad(b[1] - a[1]), dLon = toRad(b[0] - a[0]);
         const s = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a[1])) * Math.cos(toRad(b[1])) * Math.sin(dLon / 2) ** 2;
         return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
     }
     function lerp(a, b, f) { return a + (b - a) * f; }
+    function bearing(a, b) {
+        const y = Math.sin(toRad(b[0] - a[0])) * Math.cos(toRad(b[1]));
+        const x = Math.cos(toRad(a[1])) * Math.sin(toRad(b[1]))
+                - Math.sin(toRad(a[1])) * Math.cos(toRad(b[1])) * Math.cos(toRad(b[0] - a[0]));
+        return (toDeg(Math.atan2(y, x)) + 360) % 360;
+    }
 
-    // Fly a marker along the route with a chase camera, drawing the traveled portion.
-    // Returns { start, stop, isRunning }. Coarse routes are interpolated for smoothness.
     function simulate(map, coords, opts) {
         opts = opts || {};
         const segs = [];
@@ -173,7 +170,6 @@ window.AscentMap = (function () {
         if (total === 0) total = 1;
 
         const PROG = 'sim-progress';
-        // a clearly-visible moving dot (custom element, not the default pin)
         const dot = document.createElement('div');
         dot.className = 'asc-sim-dot';
         const marker = new maplibregl.Marker({ element: dot });
@@ -210,15 +206,38 @@ window.AscentMap = (function () {
             });
         }
 
-        function start() {
+        function headingAt(dist) {
+            const ahead = Math.min(total, dist + Math.max(0.04, total * 0.015));
+            return bearing(posAt(dist), posAt(ahead));
+        }
+
+        let camTimer = null;
+        function stopCam() { if (camTimer) { clearInterval(camTimer); camTimer = null; } }
+
+        function start(mode) {
             if (running) return;
             ensureLayer();
             running = true;
+            const follow = !!(mode && mode.follow);
+            const speed = (mode && mode.speed) || 1;
             marker.setLngLat(coords[0]).addTo(map);
-            const dur = opts.duration || 14000;
+            const dur = (opts.duration || (follow ? 22000 : 14000)) / speed;
             const t0 = performance.now();
-            // The camera stays framed on the whole route (set by the caller); we just
-            // animate the dot + the growing traveled line, so the motion reads clearly.
+
+            if (follow) {
+                map.easeTo({ center: posAt(0), bearing: headingAt(0), pitch: 70, zoom: 15.2, duration: 900 });
+                const tick = Math.max(220, 600 / speed);
+                camTimer = setInterval(() => {
+                    if (!running) return;
+                    const k = Math.min(1, (performance.now() - t0) / dur);
+                    const dist = k * total;
+                    map.easeTo({
+                        center: posAt(dist), bearing: headingAt(dist),
+                        pitch: 70, zoom: 15.2, duration: tick + 60, easing: t => t,
+                    });
+                }, tick);
+            }
+
             function frame(now) {
                 if (!running) return;
                 const k = Math.min(1, (now - t0) / dur);
@@ -226,12 +245,13 @@ window.AscentMap = (function () {
                 marker.setLngLat(posAt(dist));
                 map.getSource(PROG).setData(progressLine(dist));
                 if (k < 1) raf = requestAnimationFrame(frame);
-                else { running = false; if (opts.onEnd) opts.onEnd(); }
+                else { stopCam(); running = false; if (opts.onEnd) opts.onEnd(); }
             }
             raf = requestAnimationFrame(frame);
         }
         function stop() {
             running = false;
+            stopCam();
             if (raf) cancelAnimationFrame(raf);
             marker.remove();
             if (map.getSource(PROG)) map.getSource(PROG).setData(progressLine(0));
@@ -239,7 +259,6 @@ window.AscentMap = (function () {
         return { start, stop, isRunning: () => running };
     }
 
-    // frame the map around a set of [lng,lat] points, keeping a 3D pitch if asked
     function fit(map, coords, opts) {
         opts = opts || {};
         if (!coords || !coords.length) { map.jumpTo({ center: NM_CENTER, zoom: NM_ZOOM }); return; }

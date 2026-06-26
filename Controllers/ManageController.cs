@@ -16,7 +16,6 @@ public class ManageController : Controller
         _userManager = userManager;
     }
 
-    // GET: /Manage/Index — edit own profile
     [HttpGet]
     public async Task<IActionResult> Index()
     {
@@ -27,6 +26,9 @@ public class ManageController : Controller
         {
             DisplayName = user.DisplayName,
             Bio = user.Bio,
+            HomeLocationName = user.HomeLocationName,
+            HomeLat = user.HomeLat,
+            HomeLng = user.HomeLng,
             Email = user.Email,
             MemberSince = user.CreatedAt,
             UserId = user.Id,
@@ -42,7 +44,6 @@ public class ManageController : Controller
         var user = await _userManager.GetUserAsync(User);
         if (user == null) return Challenge();
 
-        // re-fill read-only fields so the view renders correctly on any return
         form.Email = user.Email;
         form.MemberSince = user.CreatedAt;
         form.UserId = user.Id;
@@ -51,6 +52,9 @@ public class ManageController : Controller
 
         user.DisplayName = form.DisplayName;
         user.Bio = form.Bio;
+        user.HomeLocationName = form.HomeLocationName;
+        user.HomeLat = form.HomeLat;
+        user.HomeLng = form.HomeLng;
 
         var result = await _userManager.UpdateAsync(user);
         if (!result.Succeeded)

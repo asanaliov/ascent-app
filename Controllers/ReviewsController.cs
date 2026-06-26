@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ascent_app.Controllers;
 
-[Authorize] // must be signed in to post or delete a review
+[Authorize]
 public class ReviewsController : Controller
 {
     private readonly AscentDbContext _context;
@@ -20,7 +20,6 @@ public class ReviewsController : Controller
         _userManager = userManager;
     }
 
-    // POST: /Reviews/Create  (form lives on the trail Details page)
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ReviewFormViewModel form)
@@ -30,7 +29,6 @@ public class ReviewsController : Controller
 
         if (!ModelState.IsValid)
         {
-            // bounce the first validation message back to the page via TempData
             TempData["ReviewError"] = ModelState.Values
                 .SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage
                 ?? "Please check your review and try again.";
@@ -39,7 +37,6 @@ public class ReviewsController : Controller
 
         var userId = _userManager.GetUserId(User)!;
 
-        // unique index = one review per user per trail, so upsert instead of insert
         var existing = await _context.Reviews
             .FirstOrDefaultAsync(r => r.TrailId == form.TrailId && r.UserId == userId);
 
@@ -58,14 +55,13 @@ public class ReviewsController : Controller
         {
             existing.Rating = form.Rating;
             existing.Comment = form.Comment;
-            existing.CreatedAt = DateTime.UtcNow; // bump so edits resurface
+            existing.CreatedAt = DateTime.UtcNow;
         }
 
         await _context.SaveChangesAsync();
         return RedirectToTrail(form.TrailId);
     }
 
-    // POST: /Reviews/Delete/5
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
@@ -73,7 +69,6 @@ public class ReviewsController : Controller
         var review = await _context.Reviews.FindAsync(id);
         if (review == null) return NotFound();
 
-        // owner can remove their own; Admin can moderate anyone's
         var userId = _userManager.GetUserId(User)!;
         if (review.UserId != userId && !User.IsInRole("Admin"))
             return Forbid();

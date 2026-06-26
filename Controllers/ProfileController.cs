@@ -15,7 +15,6 @@ public class ProfileController : Controller
         _context = context;
     }
 
-    // GET: /Profile/Index/{id}  — public hiker profile
     [AllowAnonymous]
     public async Task<IActionResult> Index(string id)
     {
@@ -26,7 +25,6 @@ public class ProfileController : Controller
             .FirstOrDefaultAsync(u => u.Id == id);
         if (user == null) return NotFound();
 
-        // all hikes with trail nav loaded once, aggregates computed in memory
         var hikes = await _context.HikeLogs
             .Where(h => h.UserId == id)
             .Include(h => h.Trail).ThenInclude(t => t.Region)

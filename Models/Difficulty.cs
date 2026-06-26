@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ascent_app.Models;
 
-// seeded lookup, keep bins in sync with DifficultyService
 public class Difficulty
 {
     public int Id { get; set; }
@@ -12,10 +11,10 @@ public class Difficulty
     public string Label { get; set; } = string.Empty;
 
     public double MinScore { get; set; }
-    public double? MaxScore { get; set; } // null = open-ended top bin
+    public double? MaxScore { get; set; }
 
     [MaxLength(30)]
-    public string BadgeClass { get; set; } = string.Empty; // e.g. "diff-easy"
+    public string BadgeClass { get; set; } = string.Empty;
 
     public ICollection<Trail> Trails { get; set; } = new List<Trail>();
 }

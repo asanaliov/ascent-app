@@ -2,10 +2,8 @@ using ascent_app.Models;
 
 namespace ascent_app.ViewModels;
 
-// site-wide stats + leaderboards for the public /Community page
 public class CommunityViewModel
 {
-    // site totals
     public int TotalTrails { get; set; }
     public int TotalHikes { get; set; }
     public int TotalHikers { get; set; }
@@ -16,7 +14,6 @@ public class CommunityViewModel
     public List<Trail> RecentTrails { get; set; } = new();
 }
 
-// one row in the top-hikers leaderboard
 public class LeaderRow
 {
     public string UserId { get; set; } = string.Empty;
@@ -25,7 +22,6 @@ public class LeaderRow
     public int ElevationM { get; set; }
 }
 
-// a trail + how many users favorited it
 public class PopularTrail
 {
     public Trail Trail { get; set; } = null!;

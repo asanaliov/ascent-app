@@ -28,6 +28,18 @@
                 <textarea asp-for="Bio" class="form-control" rows="4"></textarea>
                 <span asp-validation-for="Bio" class="text-danger"></span>
             </div>
+
+            <div class="mb-3">
+                <label asp-for="HomeLocationName" class="form-label"></label>
+                <div class="input-group">
+                    <input asp-for="HomeLocationName" class="form-control" placeholder="e.g. Skopje, North Macedonia" />
+                    <button type="button" id="useloc" class="btn-ascent-outline"><i class="ti ti-navigation"></i> Use current</button>
+                </div>
+                <input type="hidden" asp-for="HomeLat" />
+                <input type="hidden" asp-for="HomeLng" />
+                <small class="text-muted">Sets the default "nearest to me" view on the trails page. <span id="locstatus"></span></small>
+            </div>
+
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
                 <input asp-for="Email" class="form-control" readonly disabled />
@@ -44,4 +56,26 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.getElementById('useloc')?.addEventListener('click', function () {
+            const status = document.getElementById('locstatus');
+            if (!navigator.geolocation) { status.textContent = 'Geolocation not supported.'; return; }
+            status.textContent = 'Locating…';
+            navigator.geolocation.getCurrentPosition(async pos => {
+                const lat = pos.coords.latitude, lng = pos.coords.longitude;
+                document.querySelector('[name="HomeLat"]').value = lat.toFixed(5);
+                document.querySelector('[name="HomeLng"]').value = lng.toFixed(5);
+                const nameInput = document.querySelector('[name="HomeLocationName"]');
+                try {
+                    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`);
+                    const d = await r.json();
+                    const a = d.address || {};
+                    const place = a.city || a.town || a.village || a.county || a.state || '';
+                    if (place && a.country) nameInput.value = `${place}, ${a.country}`;
+                    else if (a.country) nameInput.value = a.country;
+                } catch (e) { }
+                status.textContent = `Set to ${lat.toFixed(3)}, ${lng.toFixed(3)}. Save to apply.`;
+            }, () => { status.textContent = 'Could not get your location.'; });
+        });
+    </script>
 }

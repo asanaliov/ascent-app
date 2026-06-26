@@ -90,7 +90,6 @@ public class BadgesController : Controller
         var badge = await _context.Badges.FindAsync(id);
         if (badge == null) return NotFound();
 
-        // UserBadge rows cascade away with the badge
         _context.Badges.Remove(badge);
         await _context.SaveChangesAsync();
         TempData["Ok"] = $"Badge \"{badge.Name}\" deleted.";

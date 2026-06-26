@@ -2,8 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ascent_app.ViewModels;
 
-// Form model for create/edit. Difficulty is computed from distance + gain, and
-// the author is the current user - neither is on the form.
 public class TrailFormViewModel
 {
     public int Id { get; set; }
@@ -42,7 +40,6 @@ public class TrailFormViewModel
     [Display(Name = "Region")]
     public int RegionId { get; set; }
 
-    // GeoJSON LineString built by the click-to-draw map editor. Optional.
     public string? RouteGeoJson { get; set; }
 
     public List<int> SelectedTagIds { get; set; } = new();

@@ -21,11 +21,10 @@ public class Badge
     public string? Description { get; set; }
 
     [MaxLength(40)]
-    public string? IconName { get; set; } // tabler icon, e.g. "ti-mountain"
+    public string? IconName { get; set; }
 
     public BadgeCriteria Criteria { get; set; }
 
-    // award when Criteria value >= this
     public int Threshold { get; set; }
 
     public ICollection<UserBadge> UserBadges { get; set; } = new List<UserBadge>();

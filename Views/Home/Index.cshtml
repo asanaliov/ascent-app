@@ -1,26 +1,380 @@
+@model List<Trail>
 @{
     ViewData["Title"] = "Home";
 }
 
-<section class="asc-hero">
-    <span class="asc-pill"><i class="ti ti-compass"></i> ASCENT · TRAILS REGISTER</span>
-    <h1>The mountains of <em>North Macedonia</em>, hike by hike.</h1>
-    <p class="lead">A curated register of trails, auto-rated for difficulty from
-        distance and climb.</p>
-    <div class="d-flex gap-2">
-        <a class="btn-ascent" asp-controller="Trails" asp-action="Index">Browse all trails</a>
-        <a class="btn-ascent-outline" asp-controller="Trails" asp-action="Nearby"><i class="ti ti-navigation"></i> Trails near me</a>
+<div class="row align-items-center py-4 py-md-5">
+    <div class="col-lg-7 mb-5 mb-lg-0">
+        <section class="asc-hero p-0">
+            <span class="asc-pill"><i class="ti ti-compass"></i> ASCENT · TRAILS REGISTER</span>
+            <h1>The mountains of <em>North Macedonia</em>, hike by hike.</h1>
+            <p class="lead">A curated register of trails, auto-rated for difficulty from distance and climb.</p>
+            <div class="d-flex gap-2">
+                <a class="btn-ascent" asp-controller="Trails" asp-action="Index">Browse all trails</a>
+                <a class="btn-ascent-outline" asp-controller="Trails" asp-action="Nearby"><i class="ti ti-navigation"></i> Trails near me</a>
+            </div>
+        </section>
     </div>
-</section>
-
-<div class="asc-featured">
-    <div class="fp-shadow"></div>
-    <div class="fp-panel">
-        <partial name="_TopoRings" />
-        <div class="fp-strip">
-            <p class="eyebrow mb-1">FEATURED PEAK</p>
-            <h3 class="mb-0" style="font-size:18px">Mt. Korab · 2,764 m</h3>
-            <p class="mb-0 text-muted" style="font-size:13px">The highest summit in the country</p>
+    
+    <div class="col-lg-5 d-flex justify-content-center position-relative">
+        <div class="stack-wrapper">
+            <div class="stack-topo-bg">
+                <partial name="_TopoRings" />
+            </div>
+            
+            <div class="trail-stack">
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var trail = Model[i];
+                    var diffClass = trail.Difficulty?.Label.ToLower() ?? "easy";
+                    if (i >= 4) break;
+                    
+                    <a class="stacked-card card-index-@i" draggable="false" ondragstart="return false;" asp-controller="Trails" asp-action="Details" asp-route-id="@trail.Id">
+                        <div class="sc-img-wrapper">
+                            @if (!string.IsNullOrEmpty(trail.PhotoUrl))
+                            {
+                                <img src="@trail.PhotoUrl" alt="@trail.Name" draggable="false" />
+                            }
+                            else
+                            {
+                                <div class="sc-placeholder">
+                                    <i class="ti ti-mountain"></i>
+                                </div>
+                            }
+                            <span class="diff-badge diff-@diffClass">@trail.Difficulty?.Label</span>
+                        </div>
+                        <div class="sc-content">
+                            <span class="sc-eyebrow"><i class="ti ti-map-pin"></i> @trail.Region?.Name</span>
+                            <h3 class="sc-title">@trail.Name</h3>
+                            <div class="sc-stats">
+                                <span><i class="ti ti-route"></i> @trail.DistanceKm.ToString("0.#") km</span>
+                                <span><i class="ti ti-mountain"></i> @trail.ElevationGainM m</span>
+                                @if (trail.AverageRating > 0)
+                                {
+                                    <span><i class="ti ti-star"></i> @trail.AverageRating.ToString("0.#")</span>
+                                }
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+            <button type="button" class="btn-stack-next" id="btn-next-card" title="Next Trail">
+                <i class="ti ti-arrow-right"></i>
+            </button>
         </div>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        .stack-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 340px;
+            height: 460px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .stack-topo-bg {
+            position: absolute;
+            inset: -40px;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .stack-topo-bg svg {
+            width: 100%;
+            height: 100%;
+        }
+        .stack-topo-bg svg g {
+            stroke: var(--forest) !important;
+            opacity: 0.12 !important;
+        }
+
+        .trail-stack {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .stacked-card {
+            position: absolute;
+            width: 100%;
+            height: 380px;
+            top: 20px;
+            left: 0;
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: var(--r-card);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: var(--text);
+            box-shadow: 0 10px 30px -18px rgba(33, 48, 28, 0.25);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+                        box-shadow 0.4s ease, 
+                        z-index 0.4s ease, 
+                        border-color 0.3s ease,
+                        opacity 0.4s ease;
+            cursor: pointer;
+        }
+
+        .stacked-card:hover {
+            color: var(--text);
+            border-color: var(--border-strong);
+        }
+
+        .card-index-0 {
+            transform: translate3d(0, 0, 0) rotate(-2deg);
+            z-index: 4;
+        }
+        .card-index-1 {
+            transform: translate3d(12px, 8px, 0) rotate(2.5deg);
+            z-index: 3;
+        }
+        .card-index-2 {
+            transform: translate3d(-8px, 16px, 0) rotate(-1deg);
+            z-index: 2;
+        }
+        .card-index-3 {
+            transform: translate3d(6px, 24px, 0) rotate(3deg);
+            z-index: 1;
+        }
+
+        .trail-stack:hover .card-index-0 {
+            transform: translate3d(-45px, -15px, 0) rotate(-7deg);
+            box-shadow: 0 16px 40px -15px rgba(33, 48, 28, 0.35);
+            z-index: 10;
+        }
+        .trail-stack:hover .card-index-1 {
+            transform: translate3d(45px, -5px, 0) rotate(6deg);
+            box-shadow: 0 16px 40px -15px rgba(33, 48, 28, 0.35);
+            z-index: 9;
+        }
+        .trail-stack:hover .card-index-2 {
+            transform: translate3d(-20px, 25px, 0) rotate(-3deg);
+            box-shadow: 0 12px 30px -15px rgba(33, 48, 28, 0.3);
+            z-index: 8;
+        }
+        .trail-stack:hover .card-index-3 {
+            transform: translate3d(20px, 35px, 0) rotate(4deg);
+            box-shadow: 0 12px 30px -15px rgba(33, 48, 28, 0.3);
+            z-index: 7;
+        }
+
+        .sc-img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 52%;
+            overflow: hidden;
+            background: var(--surface-alt);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .sc-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .stacked-card:hover .sc-img-wrapper img {
+            transform: scale(1.06);
+        }
+        .sc-placeholder {
+            font-size: 40px;
+            color: var(--text-muted);
+            opacity: 0.4;
+        }
+        .sc-content {
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .sc-eyebrow {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .sc-title {
+            font-family: var(--font-display);
+            font-size: 17px;
+            color: var(--forest-dark);
+            margin: 0 0 6px 0;
+            line-height: 1.25;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .sc-stats {
+            margin-top: auto;
+            display: flex;
+            gap: 14px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            border-top: 0.5px solid var(--border);
+            padding-top: 8px;
+        }
+        .sc-stats span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-stack-next {
+            position: absolute;
+            right: -24px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(251, 250, 244, 0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 0.5px solid var(--border);
+            color: var(--forest);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            cursor: pointer;
+            z-index: 20;
+            transition: background 0.3s, color 0.3s, transform 0.2s, border-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px -5px rgba(33, 48, 28, 0.2);
+        }
+        .btn-stack-next:hover {
+            background: var(--forest);
+            color: var(--paper);
+            border-color: var(--forest);
+            transform: translateY(-50%) scale(1.08);
+            box-shadow: 0 8px 20px -5px rgba(33, 48, 28, 0.4);
+        }
+        .btn-stack-next:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        
+        @@media (max-width: 991px) {
+            .stack-wrapper {
+                margin: 40px auto 20px;
+            }
+            .btn-stack-next {
+                right: -16px;
+            }
+        }
+        @@media (max-width: 480px) {
+            .stack-wrapper {
+                height: 410px;
+                max-width: 290px;
+            }
+            .stacked-card {
+                height: 330px;
+            }
+            .btn-stack-next {
+                right: -12px;
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            .trail-stack:hover .card-index-0 {
+                transform: translate3d(-25px, -10px, 0) rotate(-5deg);
+            }
+            .trail-stack:hover .card-index-1 {
+                transform: translate3d(25px, -5px, 0) rotate(4deg);
+            }
+            .trail-stack:hover .card-index-2 {
+                transform: translate3d(-10px, 15px, 0) rotate(-2deg);
+            }
+            .trail-stack:hover .card-index-3 {
+                transform: translate3d(10px, 20px, 0) rotate(3deg);
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const btnNext = document.getElementById("btn-next-card");
+            const stack = document.querySelector(".trail-stack");
+            if (!btnNext || !stack) return;
+
+            let isTransitioning = false;
+
+            btnNext.addEventListener("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (isTransitioning) return;
+                isTransitioning = true;
+
+                const cards = Array.from(stack.querySelectorAll(".stacked-card"));
+                
+                cards.sort((a, b) => {
+                    const getIdx = (el) => {
+                        for (let c of el.classList) {
+                            if (c.startsWith("card-index-")) {
+                                return parseInt(c.split("-")[2]);
+                            }
+                        }
+                        return 0;
+                    };
+                    return getIdx(a) - getIdx(b);
+                });
+
+                if (cards.length < 2) {
+                    isTransitioning = false;
+                    return;
+                }
+
+                const topCard = cards[0];
+                
+                topCard.style.transition = "transform 0.4s ease, opacity 0.4s ease";
+                topCard.style.transform = "translate3d(130%, -20px, 0) rotate(15deg)";
+                topCard.style.opacity = "0";
+
+                setTimeout(() => {
+                    cycleStack();
+                }, 400);
+
+                function cycleStack() {
+                    const lastIdx = cards.length - 1;
+
+                    topCard.style.transition = "none";
+                    topCard.style.opacity = "0";
+                    topCard.style.transform = "";
+
+                    cards.forEach((card, idx) => {
+                        card.classList.remove(`card-index-${idx}`);
+                        let newIdx = idx - 1;
+                        if (newIdx < 0) {
+                            newIdx = lastIdx;
+                        }
+                        card.classList.add(`card-index-${newIdx}`);
+                    });
+
+                    topCard.offsetHeight;
+
+                    topCard.style.transition = "opacity 0.4s ease";
+                    topCard.style.opacity = "1";
+
+                    setTimeout(() => {
+                        topCard.removeAttribute("style");
+                        isTransitioning = false;
+                    }, 400);
+                }
+            });
+        });
+    </script>
+}

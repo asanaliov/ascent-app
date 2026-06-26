@@ -26,32 +26,27 @@ public class AscentDbContext : IdentityDbContext<ApplicationUser>
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(builder); // Identity tables
+        base.OnModelCreating(builder);
 
-        // composite keys on the join tables
         builder.Entity<TrailTag>().HasKey(tt => new { tt.TrailId, tt.TagId });
         builder.Entity<UserBadge>().HasKey(ub => new { ub.UserId, ub.BadgeId });
         builder.Entity<Favorite>().HasKey(f => new { f.UserId, f.TrailId });
 
-        // one review per user per trail
         builder.Entity<Review>()
             .HasIndex(r => new { r.UserId, r.TrailId })
             .IsUnique();
 
-        // store enum by name rather than int
         builder.Entity<Badge>()
             .Property(b => b.Criteria)
             .HasConversion<string>()
             .HasMaxLength(40);
 
-        // trailhead author is optional; keep the trail if the user goes away
         builder.Entity<Trail>()
             .HasOne(t => t.Author)
             .WithMany(u => u.AuthoredTrails)
             .HasForeignKey(t => t.AuthorId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // restrict the Trail leg of each User->...->Trail path (User leg cascades)
         builder.Entity<HikeLog>()
             .HasOne(h => h.Trail)
             .WithMany(t => t.HikeLogs)
@@ -70,7 +65,6 @@ public class AscentDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(f => f.TrailId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // don't let a Region/Difficulty delete take its trails with it
         builder.Entity<Trail>()
             .HasOne(t => t.Region)
             .WithMany(r => r.Trails)

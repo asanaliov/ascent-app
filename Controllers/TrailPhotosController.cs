@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ascent_app.Controllers;
 
-[Authorize(Roles = "Guide,Admin")] // only guides/admins manage trail galleries
+[Authorize(Roles = "Guide,Admin")]
 public class TrailPhotosController : Controller
 {
     private readonly AscentDbContext _context;
@@ -19,7 +19,6 @@ public class TrailPhotosController : Controller
         _images = images;
     }
 
-    // POST: /TrailPhotos/Add  — attach a photo to a trail gallery
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Add(int trailId, IFormFile? photoFile, string? caption)
@@ -45,7 +44,6 @@ public class TrailPhotosController : Controller
         return RedirectToAction("Details", "Trails", new { id = trailId });
     }
 
-    // POST: /TrailPhotos/Delete/5
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)

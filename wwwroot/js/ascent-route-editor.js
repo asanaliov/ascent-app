@@ -1,10 +1,7 @@
-// Click-to-draw route editor for the trail Create/Edit forms, on a MapLibre map.
-// Clicking the map drops waypoints; the hidden input is kept in sync as a GeoJSON
-// LineString so it posts back with the form. Depends on maplibre-gl + ascent-map.js.
 window.AscentRouteEditor = function (opts) {
     const input = document.getElementById(opts.inputId);
-    const map = AscentMap.display(opts.mapId, { pitch: 0 }); // top-down is best for drawing
-    let pts = [];        // [lng, lat] in click order (same order GeoJSON wants)
+    const map = AscentMap.display(opts.mapId, { pitch: 0 });
+    let pts = [];
     let startMarker = null;
     let ready = false;
 
@@ -30,7 +27,6 @@ window.AscentRouteEditor = function (opts) {
             startMarker = null;
         }
 
-        // fewer than 2 points = no route
         input.value = pts.length >= 2 ? JSON.stringify({ type: 'LineString', coordinates: pts }) : '';
         if (opts.countId) document.getElementById(opts.countId).textContent = pts.length;
     }

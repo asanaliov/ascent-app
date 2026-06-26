@@ -6,7 +6,6 @@ namespace ascent_app.Services;
 
 public interface IBadgeService
 {
-    // Awards any newly-earned badges and returns them (empty if none).
     Task<IReadOnlyList<Badge>> EvaluateAsync(string userId);
 }
 
@@ -21,7 +20,6 @@ public class BadgeService : IBadgeService
 
     public async Task<IReadOnlyList<Badge>> EvaluateAsync(string userId)
     {
-        // the user's hikes, with each trail's elevation + region
         var hikes = await _context.HikeLogs
             .Where(h => h.UserId == userId)
             .Include(h => h.Trail)
@@ -32,7 +30,6 @@ public class BadgeService : IBadgeService
         var cumulativeElevation = hikes.Sum(h => h.Trail.ElevationGainM);
         var distinctRegions = hikes.Select(h => h.Trail.RegionId).Distinct().Count();
 
-        // badges the user already has, so we never award twice
         var earnedIds = await _context.UserBadges
             .Where(ub => ub.UserId == userId)
             .Select(ub => ub.BadgeId)

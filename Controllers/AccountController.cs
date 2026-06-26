@@ -71,7 +71,7 @@ public class AccountController : Controller
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {
-            await _userManager.AddToRoleAsync(user, "Hiker"); // new users default to Hiker
+            await _userManager.AddToRoleAsync(user, "Hiker");
             await _signInManager.SignInAsync(user, isPersistent: false);
             return RedirectToLocal(returnUrl);
         }

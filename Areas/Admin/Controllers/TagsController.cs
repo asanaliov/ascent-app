@@ -71,7 +71,6 @@ public class TagsController : Controller
         var tag = await _context.Tags.FindAsync(id);
         if (tag == null) return NotFound();
 
-        // TrailTag rows cascade away with the tag
         _context.Tags.Remove(tag);
         await _context.SaveChangesAsync();
         TempData["Ok"] = $"Tag \"{tag.Name}\" deleted.";

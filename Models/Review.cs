@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ascent_app.Models;
 
-// one per user per trail (unique index in OnModelCreating)
 public class Review
 {
     public int Id { get; set; }

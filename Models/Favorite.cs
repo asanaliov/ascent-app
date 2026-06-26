@@ -1,6 +1,5 @@
 namespace ascent_app.Models;
 
-// join: User <-> Trail, composite key in OnModelCreating
 public class Favorite
 {
     public string UserId { get; set; } = string.Empty;

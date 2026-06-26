@@ -73,7 +73,6 @@ public class RegionsController : Controller
         var region = await _context.Regions.FindAsync(id);
         if (region == null) return NotFound();
 
-        // Region->Trail is Restrict, so block instead of letting EF throw
         if (await _context.Trails.AnyAsync(t => t.RegionId == id))
         {
             TempData["Err"] = $"Can't delete \"{region.Name}\" — trails still use it.";

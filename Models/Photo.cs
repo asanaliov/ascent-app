@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ascent_app.Models;
 
-// hike-log photos. part of the Trail/HikeLog/Photo cascade cycle - restrict in OnModelCreating
 public class Photo
 {
     public int Id { get; set; }

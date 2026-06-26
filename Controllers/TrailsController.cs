@@ -29,7 +29,6 @@ public class TrailsController : Controller
         _userManager = userManager;
     }
 
-    // GET: Trails?q=&regionId=&difficultyId=&tagId=&sort=&lat=&lng=&page=
     public async Task<IActionResult> Index(string? q, int? regionId, int? difficultyId, int? tagId, string? sort, double? lat, double? lng, int page = 1)
     {
         const int pageSize = 9;
@@ -60,14 +59,25 @@ public class TrailsController : Controller
 
         var trails = await query.ToListAsync();
 
-        // distance from the visitor's location, when the browser shared it (global app:
-        // the catalogue spans continents, so "nearest to me" is the natural default view)
-        Dictionary<int, double>? distances = null;
-        if (lat.HasValue && lng.HasValue)
-            distances = trails.ToDictionary(
-                t => t.Id, t => _geo.DistanceKm(lat.Value, lng.Value, t.Latitude, t.Longitude));
+        var liveLocation = lat.HasValue && lng.HasValue;
+        double? effLat = lat, effLng = lng;
+        string? homeName = null;
+        if (!liveLocation && User.Identity?.IsAuthenticated == true)
+        {
+            var me = await _userManager.GetUserAsync(User);
+            if (me?.HomeLat is double hLat && me.HomeLng is double hLng)
+            {
+                effLat = hLat;
+                effLng = hLng;
+                homeName = me.HomeLocationName;
+            }
+        }
 
-        // sort in-memory (AverageRating is [NotMapped]); default to nearest when located
+        Dictionary<int, double>? distances = null;
+        if (effLat.HasValue && effLng.HasValue)
+            distances = trails.ToDictionary(
+                t => t.Id, t => _geo.DistanceKm(effLat.Value, effLng.Value, t.Latitude, t.Longitude));
+
         sort = string.IsNullOrWhiteSpace(sort) ? (distances != null ? "nearest" : "newest") : sort;
         trails = sort switch
         {
@@ -79,8 +89,6 @@ public class TrailsController : Controller
             _ => trails.OrderByDescending(t => t.CreatedAt).ToList(),
         };
 
-        // overview-map data for the whole filtered set (before paging, so the map
-        // shows every match, not just this page's 9)
         ViewBag.MapTrails = System.Text.Json.JsonSerializer.Serialize(trails.Select(t => new
         {
             name = t.Name,
@@ -91,7 +99,6 @@ public class TrailsController : Controller
             url = Url.Action("Details", new { id = t.Id }),
         }));
 
-        // paginate (page size 9), counts from filtered/pre-paged list
         var totalCount = trails.Count;
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
         if (page < 1) page = 1;
@@ -116,16 +123,19 @@ public class TrailsController : Controller
         ViewBag.Page = page;
         ViewBag.TotalPages = totalPages;
         ViewBag.TotalCount = totalCount;
-        ViewBag.UserLat = lat;
-        ViewBag.UserLng = lng;
-        // distances shown on cards, rounded to 0.1 km (keyed by trail id)
+        ViewBag.UserLat = effLat;
+        ViewBag.UserLng = effLng;
+        ViewBag.IsLiveLocation = liveLocation;
+        ViewBag.HomeName = homeName;
+        ViewBag.FocusLat = effLat ?? 41.6;
+        ViewBag.FocusLng = effLng ?? 21.7;
+        ViewBag.FocusZoom = effLat.HasValue ? 8.5 : 6.5;
         ViewBag.Distances = distances?.ToDictionary(kv => kv.Key, kv => Math.Round(kv.Value, 1));
 
         ViewBag.FavoriteTrailIds = await GetFavoriteTrailIdsAsync();
         return View(trails);
     }
 
-    // GET: Trails/Details/5
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null) return NotFound();
@@ -146,7 +156,6 @@ public class TrailsController : Controller
         return View(trail);
     }
 
-    // GET: Trails/Nearby?lat=  — coords come from browser geolocation
     public async Task<IActionResult> Nearby(double? lat, double? lng)
     {
         var trails = await _context.Trails
@@ -174,7 +183,6 @@ public class TrailsController : Controller
         return View(vm);
     }
 
-    // GET: Trails/Create
     [Authorize(Roles = "Guide,Admin")]
     public async Task<IActionResult> Create()
     {
@@ -183,7 +191,6 @@ public class TrailsController : Controller
         return View(new TrailFormViewModel());
     }
 
-    // POST: Trails/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Guide,Admin")]
@@ -221,7 +228,6 @@ public class TrailsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // GET: Trails/Edit/5
     [Authorize(Roles = "Guide,Admin")]
     public async Task<IActionResult> Edit(int? id)
     {
@@ -240,7 +246,6 @@ public class TrailsController : Controller
         return View(form);
     }
 
-    // POST: Trails/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Guide,Admin")]
@@ -272,10 +277,8 @@ public class TrailsController : Controller
         trail.PhotoUrl = form.PhotoUrl;
         trail.RouteGeoJson = form.RouteGeoJson;
         trail.RegionId = form.RegionId;
-        // recompute - distance/gain may have changed
         trail.DifficultyId = await _difficulty.ResolveDifficultyIdAsync(form.DistanceKm, form.ElevationGainM);
 
-        // replace tag links with the new selection
         trail.TrailTags.Clear();
         foreach (var tid in form.SelectedTagIds)
             trail.TrailTags.Add(new TrailTag { TagId = tid });
@@ -293,7 +296,6 @@ public class TrailsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // GET: Trails/Delete/5
     [Authorize(Roles = "Guide,Admin")]
     public async Task<IActionResult> Delete(int? id)
     {
@@ -311,7 +313,6 @@ public class TrailsController : Controller
         return View(trail);
     }
 
-    // POST: Trails/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Guide,Admin")]
@@ -329,8 +330,6 @@ public class TrailsController : Controller
 
     private bool TrailExists(int id) => _context.Trails.Any(e => e.Id == id);
 
-    // The route comes from the click-to-draw map editor as a GeoJSON LineString.
-    // Blank it if empty; reject anything that isn't a valid LineString with 2+ points.
     private void NormalizeRoute(TrailFormViewModel form)
     {
         if (string.IsNullOrWhiteSpace(form.RouteGeoJson))
@@ -357,7 +356,6 @@ public class TrailsController : Controller
         }
     }
 
-    // trail ids the current user has favorited (empty set when signed out) — drives the heart state
     private async Task<HashSet<int>> GetFavoriteTrailIdsAsync()
     {
         var userId = _userManager.GetUserId(User);
