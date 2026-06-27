@@ -1,5 +1,6 @@
 [
   {
+    "seedKey": "vodno-millennium-cross",
     "name": "Vodno - Millennium Cross",
     "region": "Skopje",
     "country": "North Macedonia",
@@ -21,6 +22,7 @@
     ]
   },
   {
+    "seedKey": "matka-canyon",
     "name": "Matka Canyon Trail",
     "region": "Skopje",
     "country": "North Macedonia",
@@ -42,6 +44,7 @@
     ]
   },
   {
+    "seedKey": "ljuboten-peak",
     "name": "Ljuboten Peak",
     "region": "Shar Mountain",
     "country": "North Macedonia",
@@ -63,6 +66,7 @@
     ]
   },
   {
+    "seedKey": "titov-vrv",
     "name": "Titov Vrv from Popova Shapka",
     "region": "Shar Mountain",
     "country": "North Macedonia",
@@ -84,6 +88,7 @@
     ]
   },
   {
+    "seedKey": "golem-korab",
     "name": "Mount Korab - Golem Korab",
     "region": "Mavrovo",
     "country": "North Macedonia",
@@ -106,6 +111,7 @@
     ]
   },
   {
+    "seedKey": "magaro-peak",
     "name": "Galichica - Magaro Peak",
     "region": "Galichica",
     "country": "North Macedonia",
@@ -127,6 +133,7 @@
     ]
   },
   {
+    "seedKey": "pelister-peak",
     "name": "Pelister - Antenna and Peak",
     "region": "Pelister",
     "country": "North Macedonia",
@@ -148,6 +155,7 @@
     ]
   },
   {
+    "seedKey": "kozhuf-zelen-breg",
     "name": "Kozhuf - Zelen Breg",
     "region": "Kozhuf",
     "country": "North Macedonia",
@@ -169,6 +177,7 @@
     ]
   },
   {
+    "seedKey": "solunska-glava",
     "name": "Jakupica - Solunska Glava",
     "region": "Jakupica",
     "country": "North Macedonia",
@@ -191,6 +200,7 @@
     ]
   },
   {
+    "seedKey": "leshnica",
     "name": "Leshnica Valley Trail",
     "region": "Shar Mountain",
     "country": "North Macedonia",
@@ -212,6 +222,7 @@
     ]
   },
   {
+    "seedKey": "mavrovo-lake",
     "name": "Mavrovo Lake and Forest Trail",
     "region": "Mavrovo",
     "country": "North Macedonia",
@@ -233,6 +244,7 @@
     ]
   },
   {
+    "seedKey": "treskavec",
     "name": "Treskavec Monastery Trail",
     "region": "Prilep",
     "country": "North Macedonia",
@@ -254,6 +266,7 @@
     ]
   },
   {
+    "seedKey": "mechkin-kamen",
     "name": "Krushevo - Mechkin Kamen",
     "region": "Krushevo",
     "country": "North Macedonia",
@@ -275,6 +288,7 @@
     ]
   },
   {
+    "seedKey": "kokino",
     "name": "Kokino Observatory Trail",
     "region": "Kumanovo",
     "country": "North Macedonia",
@@ -296,6 +310,7 @@
     ]
   },
   {
+    "seedKey": "ohrid-viewpoint",
     "name": "Ohrid Viewpoint Trail",
     "region": "Ohrid",
     "country": "North Macedonia",
@@ -317,6 +332,7 @@
     ]
   },
   {
+    "seedKey": "smolare-waterfall",
     "name": "Smolare Waterfall Trail",
     "region": "Belasica",
     "country": "North Macedonia",
@@ -338,6 +354,7 @@
     ]
   },
   {
+    "seedKey": "berovo-lake",
     "name": "Berovo Lake Loop",
     "region": "Maleshevo",
     "country": "North Macedonia",
@@ -359,6 +376,7 @@
     ]
   },
   {
+    "seedKey": "cheples",
     "name": "Babuna - Nezhilovo to Cheples",
     "region": "Babuna",
     "country": "North Macedonia",
@@ -380,6 +398,7 @@
     ]
   },
   {
+    "seedKey": "demir-kapija",
     "name": "Demir Kapija Canyon Trail",
     "region": "Demir Kapija",
     "country": "North Macedonia",
@@ -401,6 +420,7 @@
     ]
   },
   {
+    "seedKey": "lisec-peak",
     "name": "Plachkovica - Lisec Peak",
     "region": "Plachkovica",
     "country": "North Macedonia",

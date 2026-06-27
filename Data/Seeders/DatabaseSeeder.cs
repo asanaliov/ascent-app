@@ -164,8 +164,18 @@ public static class DatabaseSeeder
             if (!difficulties.TryGetValue(seed.Difficulty, out var difficulty))
                 throw new InvalidOperationException($"Unknown difficulty '{seed.Difficulty}' for '{seed.Name}'.");
 
+            if (string.IsNullOrWhiteSpace(seed.SeedKey))
+                throw new InvalidDataException($"Trail '{seed.Name}' has no seedKey.");
+
             var trail = trails.FirstOrDefault(t =>
-                t.Name.Equals(seed.Name, StringComparison.OrdinalIgnoreCase));
+                            seed.SeedKey.Equals(t.SeedKey, StringComparison.OrdinalIgnoreCase))
+                        ?? trails.FirstOrDefault(t =>
+                            t.IsSeedData
+                            && (t.Name.Equals(seed.Name, StringComparison.OrdinalIgnoreCase)
+                                || seed.LegacyNames.Contains(
+                                    t.Name, StringComparer.OrdinalIgnoreCase)))
+                        ?? trails.FirstOrDefault(t =>
+                            t.Name.Equals(seed.Name, StringComparison.OrdinalIgnoreCase));
             if (trail is null)
             {
                 trail = new Trail
@@ -177,6 +187,7 @@ public static class DatabaseSeeder
             }
 
             trail.Name = seed.Name;
+            trail.SeedKey = seed.SeedKey;
             trail.ShortDescription = seed.ShortDescription;
             trail.Description = seed.Description;
             trail.DistanceKm = seed.DistanceKm;

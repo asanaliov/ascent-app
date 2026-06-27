@@ -11,6 +11,9 @@ public class Trail
     [MaxLength(120)]
     public string Name { get; set; } = string.Empty;
 
+    [MaxLength(80)]
+    public string? SeedKey { get; set; }
+
     [Required]
     [MaxLength(200)]
     public string ShortDescription { get; set; } = string.Empty;

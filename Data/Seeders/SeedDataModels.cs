@@ -4,7 +4,9 @@ namespace ascent_app.Data.Seeders;
 
 internal sealed class TrailSeed
 {
+    public string SeedKey { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
+    public List<string> LegacyNames { get; set; } = new();
     public string Region { get; set; } = string.Empty;
     public string Country { get; set; } = "North Macedonia";
     public string Difficulty { get; set; } = string.Empty;

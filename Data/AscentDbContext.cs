@@ -48,6 +48,10 @@ public class AscentDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(t => t.AuthorId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        builder.Entity<Trail>()
+            .HasIndex(t => t.SeedKey)
+            .IsUnique();
+
         builder.Entity<HikeLog>()
             .HasOne(h => h.Trail)
             .WithMany(t => t.HikeLogs)

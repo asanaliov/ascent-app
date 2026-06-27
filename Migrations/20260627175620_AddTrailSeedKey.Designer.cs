@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ascent_app.Data;
 
@@ -10,9 +11,11 @@ using ascent_app.Data;
 namespace ascent_app.Migrations
 {
     [DbContext(typeof(AscentDbContext))]
-    partial class AscentDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260627175620_AddTrailSeedKey")]
+    partial class AddTrailSeedKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
