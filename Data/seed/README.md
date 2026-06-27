@@ -27,3 +27,8 @@ Route geometry in this demo catalog is illustrative, not a navigation-grade
 GPX track. Geometry is `null` where the previous line did not match the
 reviewed route. Users should obtain current official maps, check park and
 border rules, and verify trail conditions before hiking.
+
+`legacy-imported-trails.json` is an exact allowlist of obsolete trails produced
+by the former development-time external importer. In Development, the seeder
+removes only non-seed rows whose names appear in that file, together with their
+dependent demo activity. It does not broadly delete user-created trails.

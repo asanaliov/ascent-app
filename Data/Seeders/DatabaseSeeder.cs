@@ -49,6 +49,14 @@ public static class DatabaseSeeder
         if (!seedDemoData)
             return;
 
+        if (configuration.GetValue("DatabaseSeeding:RemoveLegacyImportedTrails", true))
+        {
+            var legacyTrailNames = await ReadSeedFileAsync<string>(
+                environment, "legacy-imported-trails.json", cancellationToken);
+            await RemoveLegacyImportedTrailsAsync(
+                context, legacyTrailNames, logger, cancellationToken);
+        }
+
         var users = await ReadSeedFileAsync<DemoUserSeed>(
             environment, "demo-users.json", cancellationToken);
         await SeedDemoUsersAsync(userManager, users);
@@ -288,6 +296,43 @@ public static class DatabaseSeeder
                 EnsureIdentitySucceeded(roleResult, $"assign role '{seed.Role}' to '{seed.Email}'");
             }
         }
+    }
+
+    private static async Task RemoveLegacyImportedTrailsAsync(
+        AscentDbContext context,
+        IReadOnlyCollection<string> legacyTrailNames,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        var names = legacyTrailNames.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var legacyTrails = await context.Trails
+            .Where(t => !t.IsSeedData && t.SeedKey == null)
+            .ToListAsync(cancellationToken);
+        legacyTrails = legacyTrails
+            .Where(t => names.Contains(t.Name))
+            .ToList();
+        if (legacyTrails.Count == 0)
+            return;
+
+        var trailIds = legacyTrails.Select(t => t.Id).ToList();
+        context.Reviews.RemoveRange(
+            await context.Reviews.Where(r => trailIds.Contains(r.TrailId))
+                .ToListAsync(cancellationToken));
+        context.Favorites.RemoveRange(
+            await context.Favorites.Where(f => trailIds.Contains(f.TrailId))
+                .ToListAsync(cancellationToken));
+        context.HikeEvents.RemoveRange(
+            await context.HikeEvents.Where(e => trailIds.Contains(e.TrailId))
+                .ToListAsync(cancellationToken));
+        context.HikeLogs.RemoveRange(
+            await context.HikeLogs.Where(h => trailIds.Contains(h.TrailId))
+                .ToListAsync(cancellationToken));
+        context.Trails.RemoveRange(legacyTrails);
+
+        await context.SaveChangesAsync(cancellationToken);
+        logger.LogInformation(
+            "Removed {Count} legacy externally imported development trails.",
+            legacyTrails.Count);
     }
 
     private static async Task SeedReviewsAsync(
