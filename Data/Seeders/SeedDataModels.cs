@@ -47,7 +47,7 @@ internal sealed class DemoUserSeed
 internal sealed class DemoReviewSeed
 {
     public string UserEmail { get; set; } = string.Empty;
-    public string TrailName { get; set; } = string.Empty;
+    public string TrailKey { get; set; } = string.Empty;
     public int Rating { get; set; }
     public string? Comment { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -56,14 +56,14 @@ internal sealed class DemoReviewSeed
 internal sealed class DemoFavoriteSeed
 {
     public string UserEmail { get; set; } = string.Empty;
-    public string TrailName { get; set; } = string.Empty;
+    public string TrailKey { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 }
 
 internal sealed class DemoHikeLogSeed
 {
     public string UserEmail { get; set; } = string.Empty;
-    public string TrailName { get; set; } = string.Empty;
+    public string TrailKey { get; set; } = string.Empty;
     public DateTime HikedOn { get; set; }
     public int? DurationMinutes { get; set; }
     public string? Notes { get; set; }
@@ -73,7 +73,7 @@ internal sealed class DemoHikeEventSeed
 {
     public string Title { get; set; } = string.Empty;
     public string GuideEmail { get; set; } = string.Empty;
-    public string TrailName { get; set; } = string.Empty;
+    public string TrailKey { get; set; } = string.Empty;
     public string? Description { get; set; }
     public DateTime StartsAt { get; set; }
     public int MaxParticipants { get; set; }

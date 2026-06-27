@@ -2,7 +2,7 @@
   {
     "title": "Sunrise on Vodno",
     "guideEmail": "guide@ascent.demo",
-    "trailName": "Vodno - Millennium Cross",
+    "trailKey": "vodno-millennium-cross",
     "description": "A steady early climb to watch the morning light over Skopje.",
     "startsAt": "2026-07-04T03:30:00Z",
     "maxParticipants": 12,
@@ -11,7 +11,7 @@
   {
     "title": "Leshnica Summer Valley Hike",
     "guideEmail": "guide@ascent.demo",
-    "trailName": "Leshnica Valley Trail",
+    "trailKey": "leshnica",
     "description": "A full-day guided hike into Leshnica with stream and waterfall stops.",
     "startsAt": "2026-07-18T05:00:00Z",
     "maxParticipants": 10,
@@ -20,7 +20,7 @@
   {
     "title": "Pelister Molika and Summit Day",
     "guideEmail": "elena.guide@ascent.demo",
-    "trailName": "Pelister - Antenna and Peak",
+    "trailKey": "pelister-peak",
     "description": "A guided ascent through molika pine forest to Pelister's upper slopes.",
     "startsAt": "2026-08-01T04:30:00Z",
     "maxParticipants": 8,
@@ -29,7 +29,7 @@
   {
     "title": "Magaro Two Lakes Panorama",
     "guideEmail": "elena.guide@ascent.demo",
-    "trailName": "Galichica - Magaro Peak",
+    "trailKey": "magaro-peak",
     "description": "A compact high-mountain day focused on the Ohrid and Prespa panorama.",
     "startsAt": "2026-08-15T05:00:00Z",
     "maxParticipants": 10,
@@ -38,7 +38,7 @@
   {
     "title": "Golem Korab Summit Weekend",
     "guideEmail": "filip.guide@ascent.demo",
-    "trailName": "Mount Korab - Golem Korab",
+    "trailKey": "golem-korab",
     "description": "A demanding guided ascent of North Macedonia's highest summit.",
     "startsAt": "2026-09-05T03:30:00Z",
     "maxParticipants": 8,
@@ -47,7 +47,7 @@
   {
     "title": "Solunska Glava Endurance Hike",
     "guideEmail": "filip.guide@ascent.demo",
-    "trailName": "Jakupica - Solunska Glava",
+    "trailKey": "solunska-glava",
     "description": "A long guided day for experienced hikers across the Jakupica massif.",
     "startsAt": "2026-09-19T03:00:00Z",
     "maxParticipants": 6,
@@ -56,7 +56,7 @@
   {
     "title": "Matka Canyon Beginner Walk",
     "guideEmail": "guide@ascent.demo",
-    "trailName": "Matka Canyon Trail",
+    "trailKey": "matka-canyon",
     "description": "A relaxed introductory group walk with canyon and monastery history.",
     "startsAt": "2026-10-03T07:00:00Z",
     "maxParticipants": 15,

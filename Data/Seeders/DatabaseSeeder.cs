@@ -291,7 +291,7 @@ public static class DatabaseSeeder
 
         foreach (var seed in seeds)
         {
-            var (user, trail) = ResolveActivityReferences(seed.UserEmail, seed.TrailName, references);
+            var (user, trail) = ResolveActivityReferences(seed.UserEmail, seed.TrailKey, references);
             if (!keys.Add($"{user.Id}|{trail.Id}"))
                 continue;
 
@@ -323,7 +323,7 @@ public static class DatabaseSeeder
 
         foreach (var seed in seeds)
         {
-            var (user, trail) = ResolveActivityReferences(seed.UserEmail, seed.TrailName, references);
+            var (user, trail) = ResolveActivityReferences(seed.UserEmail, seed.TrailKey, references);
             if (!keys.Add($"{user.Id}|{trail.Id}"))
                 continue;
 
@@ -353,7 +353,7 @@ public static class DatabaseSeeder
 
         foreach (var seed in seeds)
         {
-            var (user, trail) = ResolveActivityReferences(seed.UserEmail, seed.TrailName, references);
+            var (user, trail) = ResolveActivityReferences(seed.UserEmail, seed.TrailKey, references);
             if (!keys.Add($"{user.Id}|{trail.Id}|{seed.HikedOn.Ticks}"))
                 continue;
 
@@ -387,7 +387,7 @@ public static class DatabaseSeeder
         foreach (var seed in seeds)
         {
             var (guide, trail) = ResolveActivityReferences(
-                seed.GuideEmail, seed.TrailName, references);
+                seed.GuideEmail, seed.TrailKey, references);
             if (!keys.Add($"{seed.Title}|{seed.StartsAt.Ticks}"))
                 continue;
 
@@ -415,20 +415,20 @@ public static class DatabaseSeeder
             .Where(u => u.IsDemoUser)
             .ToDictionaryAsync(u => u.Email!, StringComparer.OrdinalIgnoreCase, cancellationToken);
         var trails = await context.Trails
-            .Where(t => t.IsSeedData)
-            .ToDictionaryAsync(t => t.Name, StringComparer.OrdinalIgnoreCase, cancellationToken);
+            .Where(t => t.IsSeedData && t.SeedKey != null)
+            .ToDictionaryAsync(t => t.SeedKey!, StringComparer.OrdinalIgnoreCase, cancellationToken);
         return new ActivityReferences(users, trails);
     }
 
     private static (ApplicationUser User, Trail Trail) ResolveActivityReferences(
         string email,
-        string trailName,
+        string trailKey,
         ActivityReferences references)
     {
         if (!references.Users.TryGetValue(email, out var user))
             throw new InvalidOperationException($"Demo user '{email}' was not found.");
-        if (!references.Trails.TryGetValue(trailName, out var trail))
-            throw new InvalidOperationException($"Seed trail '{trailName}' was not found.");
+        if (!references.Trails.TryGetValue(trailKey, out var trail))
+            throw new InvalidOperationException($"Seed trail key '{trailKey}' was not found.");
         return (user, trail);
     }
 
