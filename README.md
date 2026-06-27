@@ -30,6 +30,9 @@ demo-hike-logs.json     24 hike logs
 demo-hike-events.json   7 guided events
 ```
 
+Trail naming conventions, review sources, and geometry limitations are
+documented in [`Data/seed/README.md`](Data/seed/README.md).
+
 `Data/Seeders/DatabaseSeeder.cs` applies migrations and imports these files
 idempotently. Trails are matched by name, users by email, reviews/favorites by
 user and trail, and logs/events by stable composite values. Restarting the app
