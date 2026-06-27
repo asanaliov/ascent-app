@@ -51,7 +51,10 @@ public static class DbInitializer
         var guide = await userManager.FindByEmailAsync("guide@ascent.local");
         await SeedTrailsAsync(context, guide?.Id, externalTrails);
         await SeedTagsAsync(context, externalTrails);
-        await EnrichTrailPhotosAsync(context, sp.GetRequiredService<ITrailPhotoSource>());
+        await EnrichTrailPhotosAsync(
+            context,
+            sp.GetRequiredService<ITrailPhotoSource>(),
+            sp.GetRequiredService<ITrailPhotoCache>());
         await SeedActivityAsync(context, userManager);
     }
 
@@ -245,20 +248,25 @@ public static class DbInitializer
         await context.SaveChangesAsync();
     }
 
-    private static async Task EnrichTrailPhotosAsync(AscentDbContext context, ITrailPhotoSource photoSource)
+    private static async Task EnrichTrailPhotosAsync(
+        AscentDbContext context,
+        ITrailPhotoSource photoSource,
+        ITrailPhotoCache photoCache)
     {
         var trails = await context.Trails
             .Include(t => t.Region)
-            .Where(t => string.IsNullOrWhiteSpace(t.PhotoUrl))
             .OrderBy(t => t.Name)
-            .Take(16)
             .ToListAsync();
 
         foreach (var trail in trails)
         {
-            var photoUrl = await photoSource.FindPhotoAsync(trail);
-            if (!string.IsNullOrWhiteSpace(photoUrl))
-                trail.PhotoUrl = photoUrl;
+            var sourceUrl = trail.PhotoUrl;
+            if (string.IsNullOrWhiteSpace(sourceUrl))
+                sourceUrl = await photoSource.FindPhotoAsync(trail);
+
+            var localUrl = await photoCache.CacheAsync(trail, sourceUrl);
+            if (!string.IsNullOrWhiteSpace(localUrl))
+                trail.PhotoUrl = localUrl;
         }
 
         await context.SaveChangesAsync();

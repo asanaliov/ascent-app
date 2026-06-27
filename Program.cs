@@ -21,6 +21,7 @@ builder.Services.AddScoped<IGeoService, GeoService>();
 builder.Services.AddScoped<IImageStorage, ImageStorage>();
 builder.Services.AddHttpClient<IExternalTrailSource, OverpassTrailSource>();
 builder.Services.AddHttpClient<ITrailPhotoSource, OpenverseTrailPhotoSource>();
+builder.Services.AddHttpClient<ITrailPhotoCache, LocalTrailPhotoCache>();
 
 builder.Services.AddControllersWithViews();
 
