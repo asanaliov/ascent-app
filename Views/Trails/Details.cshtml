@@ -61,22 +61,24 @@
 </div>
 
 @{
-    var images = new List<string>();
-    if (!string.IsNullOrEmpty(Model.PhotoUrl)) images.Add(Model.PhotoUrl);
-    images.AddRange(Model.Photos.Select(p => p.Url));
+    var images = Model.Photos
+        .OrderByDescending(p => p.IsCoverImage)
+        .ThenBy(p => p.Id)
+        .Select(p => p.Url)
+        .ToList();
+    if (!string.IsNullOrEmpty(Model.PhotoUrl) && !images.Contains(Model.PhotoUrl))
+        images.Add(Model.PhotoUrl);
+    if (images.Count == 0)
+        images.Add("/images/trails/default-trail.svg");
 }
 
 <div class="trail-hero">
     <div>
         <div class="gallery-main">
-            @if (images.Count > 0)
-            {
-                <img id="galleryMain" src="@images[0]" alt="@Model.Name">
-            }
-            else
-            {
-                <i class="ti ti-mountain placeholder"></i>
-            }
+            <img id="galleryMain"
+                 src="@images[0]"
+                 alt="@Model.Name"
+                 onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';">
             @if (Model.Difficulty is not null)
             {
                 <span class="diff-badge diff-@diffClass">@Model.Difficulty.Label</span>
@@ -88,7 +90,9 @@
                 @for (var i = 0; i < images.Count; i++)
                 {
                     <button type="button" class="gallery-thumb @(i == 0 ? "active" : "")" data-src="@images[i]" aria-label="Show photo @(i + 1)">
-                        <img src="@images[i]" alt="">
+                        <img src="@images[i]"
+                             alt=""
+                             onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';">
                     </button>
                 }
             </div>
@@ -104,6 +108,10 @@
             <div class="row-item">
                 <span class="k"><i class="ti ti-mountain"></i> Elevation gain</span>
                 <span class="v">@Model.ElevationGainM m</span>
+            </div>
+            <div class="row-item">
+                <span class="k"><i class="ti ti-clock"></i> Estimated time</span>
+                <span class="v">@Model.EstimatedTimeHours.ToString("0.#") hours</span>
             </div>
             <div class="row-item">
                 <span class="k"><i class="ti ti-chart-line"></i> Difficulty</span>
@@ -167,6 +175,9 @@
         {
             <p class="text-secondary">@Model.Description</p>
         }
+        <p class="text-muted" style="font-size:12px">
+            <i class="ti ti-database"></i> Source: @Model.Source
+        </p>
         @if (Model.TrailTags.Any())
         {
             <div class="d-flex gap-2 flex-wrap mt-2">
@@ -198,7 +209,9 @@
                 @foreach (var p in Model.Photos)
                 {
                     <figure class="photo-thumb">
-                        <img src="@p.Url" alt="@(p.Caption ?? Model.Name)" />
+                        <img src="@p.Url"
+                             alt="@(p.Caption ?? Model.Name)"
+                             onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';" />
                         @if (canManage)
                         {
                             <form asp-controller="TrailPhotos" asp-action="Delete" asp-route-id="@p.Id" method="post"

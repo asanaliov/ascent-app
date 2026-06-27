@@ -1,4 +1,5 @@
 using ascent_app.Data;
+using ascent_app.Data.Seeders;
 using ascent_app.Models;
 using ascent_app.Services;
 using Microsoft.AspNetCore.Identity;
@@ -27,7 +28,7 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-await DbInitializer.SeedAsync(app.Services);
+await DatabaseSeeder.SeedAsync(app.Services);
 
 if (!app.Environment.IsDevelopment()) {
     app.UseExceptionHandler("/Home/Error");

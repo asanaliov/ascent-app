@@ -34,6 +34,7 @@ public class FavoritesController : Controller
             .Include(t => t.Region)
             .Include(t => t.Difficulty)
             .Include(t => t.Reviews)
+            .Include(t => t.Photos)
             .AsNoTracking()
             .ToListAsync();
 

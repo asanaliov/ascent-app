@@ -23,6 +23,7 @@ public class AscentDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Badge> Badges => Set<Badge>();
     public DbSet<UserBadge> UserBadges => Set<UserBadge>();
     public DbSet<Favorite> Favorites => Set<Favorite>();
+    public DbSet<HikeEvent> HikeEvents => Set<HikeEvent>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -64,6 +65,22 @@ public class AscentDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(t => t.Favorites)
             .HasForeignKey(f => f.TrailId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<HikeEvent>()
+            .HasOne(e => e.Trail)
+            .WithMany(t => t.HikeEvents)
+            .HasForeignKey(e => e.TrailId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<HikeEvent>()
+            .HasOne(e => e.Guide)
+            .WithMany(u => u.GuidedHikeEvents)
+            .HasForeignKey(e => e.GuideId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<HikeEvent>()
+            .HasIndex(e => new { e.Title, e.StartsAt })
+            .IsUnique();
 
         builder.Entity<Trail>()
             .HasOne(t => t.Region)

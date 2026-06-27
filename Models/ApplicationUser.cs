@@ -12,6 +12,14 @@ public class ApplicationUser : IdentityUser
     [MaxLength(500)]
     public string? Bio { get; set; }
 
+    [MaxLength(400)]
+    public string? ProfileImageUrl { get; set; }
+
+    [MaxLength(30)]
+    public string? ExperienceLevel { get; set; }
+
+    public bool IsDemoUser { get; set; }
+
     public double? HomeLat { get; set; }
     public double? HomeLng { get; set; }
 
@@ -25,4 +33,5 @@ public class ApplicationUser : IdentityUser
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
     public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
     public ICollection<UserBadge> UserBadges { get; set; } = new List<UserBadge>();
+    public ICollection<HikeEvent> GuidedHikeEvents { get; set; } = new List<HikeEvent>();
 }

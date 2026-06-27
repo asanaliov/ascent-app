@@ -3,16 +3,28 @@
     ViewData["Title"] = Model.DisplayName;
 }
 
-<div class="mt-4 mb-3">
-    <p class="eyebrow mb-1">HIKER PROFILE</p>
-    <h1 class="mb-1">@Model.DisplayName</h1>
-    <div class="meta-row">
-        <span><i class="ti ti-calendar"></i> Member since @Model.MemberSince.ToString("MMM yyyy")</span>
+<div class="mt-4 mb-3 d-flex align-items-center gap-3">
+    <img src="@(Model.ProfileImageUrl ?? "/images/users/default-user.svg")"
+         alt="@Model.DisplayName"
+         width="88"
+         height="88"
+         style="border-radius:50%;object-fit:cover;border:1px solid var(--border)"
+         onerror="this.onerror=null;this.src='/images/users/default-user.svg';" />
+    <div>
+        <p class="eyebrow mb-1">HIKER PROFILE</p>
+        <h1 class="mb-1">@Model.DisplayName</h1>
+        <div class="meta-row">
+            <span><i class="ti ti-calendar"></i> Member since @Model.MemberSince.ToString("MMM yyyy")</span>
+            @if (!string.IsNullOrWhiteSpace(Model.ExperienceLevel))
+            {
+                <span><i class="ti ti-mountain"></i> @Model.ExperienceLevel</span>
+            }
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.Bio))
+        {
+            <p class="text-secondary mb-0 mt-2" style="max-width:640px">@Model.Bio</p>
+        }
     </div>
-    @if (!string.IsNullOrWhiteSpace(Model.Bio))
-    {
-        <p class="text-secondary mb-0 mt-2" style="max-width:640px">@Model.Bio</p>
-    }
 </div>
 
 <div class="stat-row mb-4">

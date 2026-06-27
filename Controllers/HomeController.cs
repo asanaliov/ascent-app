@@ -18,6 +18,7 @@ public class HomeController : Controller {
             .Include(t => t.Difficulty)
             .Include(t => t.Region)
             .Include(t => t.Reviews)
+            .Include(t => t.Photos)
             .AsNoTracking()
             .ToListAsync();
 

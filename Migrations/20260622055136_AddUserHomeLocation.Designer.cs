@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ascent_app.Data;
 
@@ -10,9 +11,11 @@ using ascent_app.Data;
 namespace ascent_app.Migrations
 {
     [DbContext(typeof(AscentDbContext))]
-    partial class AscentDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260622055136_AddUserHomeLocation")]
+    partial class AddUserHomeLocation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
@@ -176,10 +179,6 @@ namespace ascent_app.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ExperienceLevel")
-                        .HasMaxLength(30)
-                        .HasColumnType("TEXT");
-
                     b.Property<double?>("HomeLat")
                         .HasColumnType("REAL");
 
@@ -189,9 +188,6 @@ namespace ascent_app.Migrations
                     b.Property<string>("HomeLocationName")
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDemoUser")
-                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
@@ -215,10 +211,6 @@ namespace ascent_app.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ProfileImageUrl")
-                        .HasMaxLength(400)
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");
@@ -312,61 +304,11 @@ namespace ascent_app.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsDemoData")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("UserId", "TrailId");
 
                     b.HasIndex("TrailId");
 
                     b.ToTable("Favorites");
-                });
-
-            modelBuilder.Entity("ascent_app.Models.HikeEvent", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("GuideId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDemoData")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MaxParticipants")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("MeetingPoint")
-                        .HasMaxLength(200)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("StartsAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("TrailId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuideId");
-
-                    b.HasIndex("TrailId");
-
-                    b.HasIndex("Title", "StartsAt")
-                        .IsUnique();
-
-                    b.ToTable("HikeEvents");
                 });
 
             modelBuilder.Entity("ascent_app.Models.HikeLog", b =>
@@ -383,9 +325,6 @@ namespace ascent_app.Migrations
 
                     b.Property<DateTime>("HikedOn")
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDemoData")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
@@ -473,9 +412,6 @@ namespace ascent_app.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsDemoData")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Rating")
                         .HasColumnType("INTEGER");
 
@@ -537,12 +473,6 @@ namespace ascent_app.Migrations
                     b.Property<int>("ElevationGainM")
                         .HasColumnType("INTEGER");
 
-                    b.Property<double>("EstimatedTimeHours")
-                        .HasColumnType("REAL");
-
-                    b.Property<bool>("IsSeedData")
-                        .HasColumnType("INTEGER");
-
                     b.Property<double>("Latitude")
                         .HasColumnType("REAL");
 
@@ -569,11 +499,6 @@ namespace ascent_app.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
@@ -594,9 +519,6 @@ namespace ascent_app.Migrations
                     b.Property<string>("Caption")
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsCoverImage")
-                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TrailId")
                         .HasColumnType("INTEGER");
@@ -717,25 +639,6 @@ namespace ascent_app.Migrations
                     b.Navigation("Trail");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ascent_app.Models.HikeEvent", b =>
-                {
-                    b.HasOne("ascent_app.Models.ApplicationUser", "Guide")
-                        .WithMany("GuidedHikeEvents")
-                        .HasForeignKey("GuideId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ascent_app.Models.Trail", "Trail")
-                        .WithMany("HikeEvents")
-                        .HasForeignKey("TrailId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Guide");
-
-                    b.Navigation("Trail");
                 });
 
             modelBuilder.Entity("ascent_app.Models.HikeLog", b =>
@@ -868,8 +771,6 @@ namespace ascent_app.Migrations
 
                     b.Navigation("Favorites");
 
-                    b.Navigation("GuidedHikeEvents");
-
                     b.Navigation("HikeLogs");
 
                     b.Navigation("Reviews");
@@ -905,8 +806,6 @@ namespace ascent_app.Migrations
             modelBuilder.Entity("ascent_app.Models.Trail", b =>
                 {
                     b.Navigation("Favorites");
-
-                    b.Navigation("HikeEvents");
 
                     b.Navigation("HikeLogs");
 

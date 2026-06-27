@@ -13,6 +13,8 @@ public class TrailPhoto
     [MaxLength(200)]
     public string? Caption { get; set; }
 
+    public bool IsCoverImage { get; set; }
+
     public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
 
     public int TrailId { get; set; }

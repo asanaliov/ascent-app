@@ -31,16 +31,10 @@
                     
                     <a class="stacked-card card-index-@i" draggable="false" ondragstart="return false;" asp-controller="Trails" asp-action="Details" asp-route-id="@trail.Id">
                         <div class="sc-img-wrapper">
-                            @if (!string.IsNullOrEmpty(trail.PhotoUrl))
-                            {
-                                <img src="@trail.PhotoUrl" alt="@trail.Name" draggable="false" />
-                            }
-                            else
-                            {
-                                <div class="sc-placeholder">
-                                    <i class="ti ti-mountain"></i>
-                                </div>
-                            }
+                            <img src="@trail.CoverImageUrl"
+                                 alt="@trail.Name"
+                                 draggable="false"
+                                 onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';" />
                             <span class="diff-badge diff-@diffClass">@trail.Difficulty?.Label</span>
                         </div>
                         <div class="sc-content">

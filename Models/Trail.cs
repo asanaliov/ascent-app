@@ -24,6 +24,9 @@ public class Trail
     [Range(0, 10000)]
     public int ElevationGainM { get; set; }
 
+    [Range(0, 168)]
+    public double EstimatedTimeHours { get; set; }
+
     [Range(-90, 90)]
     public double Latitude { get; set; }
 
@@ -32,6 +35,11 @@ public class Trail
 
     [MaxLength(400)]
     public string? PhotoUrl { get; set; }
+
+    [MaxLength(100)]
+    public string Source { get; set; } = "Local";
+
+    public bool IsSeedData { get; set; }
 
     public string? RouteGeoJson { get; set; }
 
@@ -51,8 +59,16 @@ public class Trail
     public ICollection<HikeLog> HikeLogs { get; set; } = new List<HikeLog>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
     public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+    public ICollection<HikeEvent> HikeEvents { get; set; } = new List<HikeEvent>();
 
     [NotMapped]
     public double AverageRating =>
         Reviews.Count == 0 ? 0 : Math.Round(Reviews.Average(r => r.Rating), 1);
+
+    [NotMapped]
+    public string CoverImageUrl =>
+        Photos.FirstOrDefault(p => p.IsCoverImage)?.Url
+        ?? Photos.FirstOrDefault()?.Url
+        ?? PhotoUrl
+        ?? "/images/trails/default-trail.svg";
 }

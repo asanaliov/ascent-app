@@ -39,7 +39,14 @@ public class TrailPhotosController : Controller
             return RedirectToAction("Details", "Trails", new { id = trailId });
         }
 
-        _context.TrailPhotos.Add(new TrailPhoto { TrailId = trailId, Url = url!, Caption = caption });
+        var hasPhotos = await _context.TrailPhotos.AnyAsync(p => p.TrailId == trailId);
+        _context.TrailPhotos.Add(new TrailPhoto
+        {
+            TrailId = trailId,
+            Url = url!,
+            Caption = caption,
+            IsCoverImage = !hasPhotos,
+        });
         await _context.SaveChangesAsync();
         return RedirectToAction("Details", "Trails", new { id = trailId });
     }
@@ -52,8 +59,23 @@ public class TrailPhotosController : Controller
         if (photo == null) return NotFound();
 
         var trailId = photo.TrailId;
+        var wasCover = photo.IsCoverImage;
         _context.TrailPhotos.Remove(photo);
         await _context.SaveChangesAsync();
+
+        if (wasCover)
+        {
+            var replacement = await _context.TrailPhotos
+                .Where(p => p.TrailId == trailId)
+                .OrderBy(p => p.Id)
+                .FirstOrDefaultAsync();
+            if (replacement is not null)
+            {
+                replacement.IsCoverImage = true;
+                await _context.SaveChangesAsync();
+            }
+        }
+
         return RedirectToAction("Details", "Trails", new { id = trailId });
     }
 }

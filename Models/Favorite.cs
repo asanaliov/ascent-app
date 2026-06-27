@@ -9,4 +9,6 @@ public class Favorite
     public Trail Trail { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public bool IsDemoData { get; set; }
 }

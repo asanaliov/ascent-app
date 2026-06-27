@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title description">
+  <title id="title">Default trail image</title>
+  <desc id="description">A stylized mountain landscape used when a trail photo is unavailable.</desc>
+  <rect width="1200" height="800" fill="#e8ede5"/>
+  <circle cx="930" cy="180" r="72" fill="#d69b68" opacity=".8"/>
+  <path d="M0 640 270 330l155 178 190-265 222 290 117-130 246 270v127H0Z" fill="#7d9877"/>
+  <path d="m270 330 80 92 75 86 190-265 87 114-86-47-51 82-62-26-78 142Z" fill="#f4f1e9" opacity=".9"/>
+  <path d="M0 670c190-72 325-63 448 8 142 82 279 68 416-6 110-60 222-65 336-16v144H0Z" fill="#314b38"/>
+  <path d="M456 800c8-102 52-178 131-228 55-35 113-51 174-49-97 49-155 142-171 277Z" fill="#d8b382"/>
+</svg>

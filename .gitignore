@@ -43,8 +43,15 @@ Thumbs.db
 
 # SQLite
 *.db
+*.sqlite
+*.sqlite3
 *.db-shm
 *.db-wal
+*.mdf
+*.bak
+
+# Environment-specific production settings and secrets
+appsettings.Production.json
 
 
 # uploaded user content

@@ -8,6 +8,8 @@ public class ProfileViewModel
 
     public string DisplayName { get; set; } = string.Empty;
     public string? Bio { get; set; }
+    public string? ProfileImageUrl { get; set; }
+    public string? ExperienceLevel { get; set; }
     public DateTime MemberSince { get; set; }
 
     public int TotalHikes { get; set; }

@@ -10,14 +10,10 @@
     <partial name="_FavoriteButton" model="Model" />
     <a class="trail-card" asp-controller="Trails" asp-action="Details" asp-route-id="@Model.Id">
         <div class="tc-media">
-            @if (!string.IsNullOrEmpty(Model.PhotoUrl))
-            {
-                <img src="@Model.PhotoUrl" alt="@Model.Name">
-            }
-            else
-            {
-                <i class="ti ti-mountain placeholder"></i>
-            }
+            <img src="@Model.CoverImageUrl"
+                 alt="@Model.Name"
+                 loading="lazy"
+                 onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';">
             @if (Model.Difficulty is not null)
             {
                 <span class="diff-badge diff-@diffClass">@Model.Difficulty.Label</span>

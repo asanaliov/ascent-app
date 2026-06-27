@@ -1,54 +1,146 @@
 # Ascent
 
-Ascent is a polished hiking trail app for discovering, saving, reviewing, and
-logging mountain routes. Trail data comes from OpenStreetMap through the
-Overpass API instead of a hardcoded seed file.
+Ascent is an ASP.NET Core MVC hiking app for discovering, saving, reviewing,
+and logging trails. Its built-in catalog focuses on North Macedonia and is
+loaded from version-controlled JSON into the local EF Core database.
 
-ASP.NET Core MVC (.NET 10) · EF Core 10 · SQLite · Identity · MapLibre GL ·
-Bootstrap 5
+ASP.NET Core MVC (.NET 10) · EF Core 10 · SQLite · ASP.NET Core Identity ·
+MapLibre GL · Bootstrap 5
 
-The app is built around clear trail confidence signals: difficulty, distance,
-elevation, region, photos, reviews, favorites, route geometry, and 3D terrain
-maps.
+## Features
 
-## Highlights
+- Browse, search, filter, sort, map, and favorite local trails.
+- View route geometry, trail facts, reviews, and multi-image galleries.
+- Log hikes, upload photos, earn badges, and view hiker profiles.
+- Discover nearby trails using a saved home location or browser geolocation.
+- Use Guide tools for trail management and Admin tools for site management.
+- Optionally retain the Overpass/OpenStreetMap service for explicit future
+  imports; normal trail browsing and startup do not call it.
 
-- Browse, search, filter, sort, and save trails.
-- View photo galleries, reviews, facts, tags, and route maps.
-- Log hikes, upload photos, earn badges, and track progress.
-- Explore nearby trails using home location or browser geolocation.
-- View public hiker profiles and a community leaderboard.
-- Manage guide trails and admin content.
+## Local seed data
 
-## Roles
-
-| Role  | Can do                                                        |
-|-------|---------------------------------------------------------------|
-| Hiker | Browse, log hikes, review, favorite (default for new sign-ups)|
-| Guide | Everything a Hiker can, plus create/edit/delete trails        |
-| Admin | Everything, plus the `/Admin` area and role management        |
-
-## Demo
-
-| Role  | Email                | Password |
-|-------|----------------------|----------|
-| Admin | admin@ascent.local   | Admin1!  |
-| Guide | guide@ascent.local   | Guide1!  |
-| Hiker | demo@ascent.local    | Hiker1!  |
-
-The demo hiker starts from Skopje, so nearby trail discovery works immediately.
-Extra seeded hikers populate reviews, profiles, and the leaderboard.
-
-## Project Layout
+Seed files live in `Data/seed/`:
 
 ```text
-Controllers/            Public app controllers
-Areas/Admin/            Admin area
-Models/                 EF Core entities
-ViewModels/             Page and form models
-Services/               Difficulty, badges, geo, image storage
-Data/                   DbContext and external trail models
-Views/                  Razor views
-wwwroot/css/ascent.css  Main visual system
-wwwroot/js/             Map and route editor scripts
+macedonia-trails.json   20 curated North Macedonia trails and 62 image paths
+demo-users.json         12 development-only Identity users
+demo-reviews.json       48 reviews
+demo-favorites.json     40 favorites
+demo-hike-logs.json     24 hike logs
+demo-hike-events.json   7 guided events
+```
+
+`Data/Seeders/DatabaseSeeder.cs` applies migrations and imports these files
+idempotently. Trails are matched by name, users by email, reviews/favorites by
+user and trail, and logs/events by stable composite values. Restarting the app
+does not duplicate seeded records.
+
+Development settings enable both the trail catalog and demo activity:
+
+```json
+"DatabaseSeeding": {
+  "SeedTrails": true,
+  "SeedDemoData": true
+}
+```
+
+Production defaults both options to `false`. Demo identities and activity are
+also guarded by `IWebHostEnvironment.IsDevelopment()`, even if configuration
+is accidentally enabled outside Development.
+
+## Prerequisites
+
+- .NET 10 SDK
+- EF Core CLI tools (`dotnet tool restore` or `dotnet tool install --global dotnet-ef`)
+
+## Run locally
+
+```bash
+dotnet restore
+dotnet ef database update
+dotnet run
+```
+
+The app also applies pending migrations and runs the configured idempotent
+seeder at startup. The explicit `database update` command is useful for seeing
+migration failures before launching the web app.
+
+## Development demo accounts
+
+All seeded demo users use the password `Demo123!`.
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@ascent.demo` | `Demo123!` |
+| Guide | `guide@ascent.demo` | `Demo123!` |
+| Hiker | `hiker@ascent.demo` | `Demo123!` |
+
+These accounts are fake, development-only identities. The other users in
+`demo-users.json` use the same password and exist only to populate the demo.
+
+## Reset and reseed
+
+Stop the running app, delete the local SQLite files, and start again:
+
+```bash
+rm -f ascent.db ascent.db-shm ascent.db-wal
+dotnet run
+```
+
+PowerShell:
+
+```powershell
+Remove-Item ascent.db, ascent.db-shm, ascent.db-wal -ErrorAction SilentlyContinue
+dotnet run
+```
+
+Startup recreates the database from committed EF Core migrations and seed JSON.
+The generated database is local runtime state and must not be committed.
+
+## Images
+
+The database stores image paths only; it never stores image binary data.
+
+- Trail assets: `wwwroot/images/trails/`
+- User assets: `wwwroot/images/users/`
+- Uploaded runtime assets: `wwwroot/uploads/` (gitignored)
+
+The repository includes safe SVG fallback images. Seed records intentionally
+reference descriptive `.webp` paths such as
+`/images/trails/vodno-1.webp` and `/images/users/marko-hiker.webp`. Add the
+corresponding licensed image files at those paths when final photography is
+available. Missing files fall back in the UI without breaking cards, galleries,
+or profiles.
+
+## Database and repository safety
+
+The `.gitignore` excludes SQLite/SQL Server database files, backups,
+production settings, and runtime uploads:
+
+```text
+*.db
+*.sqlite
+*.sqlite3
+*.mdf
+*.bak
+appsettings.Production.json
+wwwroot/uploads/
+```
+
+Commit the seed JSON files and EF Core migrations. Do not commit databases,
+production connection strings, real credentials, API keys, or user uploads.
+
+## Project layout
+
+```text
+Areas/Admin/          Admin controllers and views
+Controllers/          Public MVC controllers
+Data/                 DbContext, migrations entry point, and seed pipeline
+Data/seed/            Version-controlled JSON source data
+Data/Seeders/         Idempotent EF Core and Identity seeding
+Models/               EF Core entities
+Services/             Trail, difficulty, geo, badge, and image services
+ViewModels/            MVC page and form models
+Views/                Razor views and shared trail cards
+wwwroot/images/       Version-controlled image assets and fallbacks
 ```

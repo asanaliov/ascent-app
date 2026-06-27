@@ -36,6 +36,7 @@ public class TrailsController : Controller
             .Include(t => t.Difficulty)
             .Include(t => t.Region)
             .Include(t => t.Reviews)
+            .Include(t => t.Photos)
             .Include(t => t.TrailTags)
             .AsNoTracking()
             .AsQueryable();
@@ -161,6 +162,7 @@ public class TrailsController : Controller
         var trails = await _context.Trails
             .Include(t => t.Difficulty)
             .Include(t => t.Region)
+            .Include(t => t.Photos)
             .AsNoTracking()
             .ToListAsync();
 

@@ -49,6 +49,8 @@ public class ProfileController : Controller
             UserId = user.Id,
             DisplayName = user.DisplayName,
             Bio = user.Bio,
+            ProfileImageUrl = user.ProfileImageUrl,
+            ExperienceLevel = user.ExperienceLevel,
             MemberSince = user.CreatedAt,
             TotalHikes = hikes.Count,
             TotalDistanceKm = hikes.Sum(h => h.Trail.DistanceKm),

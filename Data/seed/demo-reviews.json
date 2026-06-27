@@ -1,0 +1,61 @@
+[
+  { "userEmail": "admin@ascent.demo", "trailName": "Vodno - Millennium Cross", "rating": 5, "comment": "A reliable local climb with excellent city views.", "createdAt": "2025-03-02T18:00:00Z" },
+  { "userEmail": "admin@ascent.demo", "trailName": "Matka Canyon Trail", "rating": 4, "comment": "Beautiful canyon scenery; start early on weekends.", "createdAt": "2025-04-14T18:00:00Z" },
+  { "userEmail": "admin@ascent.demo", "trailName": "Kokino Observatory Trail", "rating": 4, "comment": "Short route with a fascinating archaeological finish.", "createdAt": "2025-05-09T18:00:00Z" },
+  { "userEmail": "admin@ascent.demo", "trailName": "Berovo Lake Loop", "rating": 4, "comment": "Calm forest walking and a good family option.", "createdAt": "2025-06-21T18:00:00Z" },
+
+  { "userEmail": "guide@ascent.demo", "trailName": "Titov Vrv from Popova Shapka", "rating": 5, "comment": "A substantial ridge day; carry water and watch the weather.", "createdAt": "2025-02-18T18:00:00Z" },
+  { "userEmail": "guide@ascent.demo", "trailName": "Ljuboten Peak", "rating": 5, "comment": "One of Shar Mountain's finest profiles and summit views.", "createdAt": "2025-04-05T18:00:00Z" },
+  { "userEmail": "guide@ascent.demo", "trailName": "Leshnica Valley Trail", "rating": 5, "comment": "The valley is especially impressive after the spring melt.", "createdAt": "2025-05-28T18:00:00Z" },
+  { "userEmail": "guide@ascent.demo", "trailName": "Mount Korab - Golem Korab", "rating": 5, "comment": "Remote and rewarding. Navigation matters in cloud.", "createdAt": "2025-07-13T18:00:00Z" },
+
+  { "userEmail": "hiker@ascent.demo", "trailName": "Vodno - Millennium Cross", "rating": 4, "comment": "Good training hike close to town.", "createdAt": "2025-03-16T18:00:00Z" },
+  { "userEmail": "hiker@ascent.demo", "trailName": "Treskavec Monastery Trail", "rating": 5, "comment": "The granite formations make every section interesting.", "createdAt": "2025-04-27T18:00:00Z" },
+  { "userEmail": "hiker@ascent.demo", "trailName": "Krushevo - Mechkin Kamen", "rating": 4, "comment": "Shaded, historical and easy to follow.", "createdAt": "2025-06-08T18:00:00Z" },
+  { "userEmail": "hiker@ascent.demo", "trailName": "Demir Kapija Canyon Trail", "rating": 4, "comment": "Great gorge views, but very hot in the afternoon.", "createdAt": "2025-09-20T18:00:00Z" },
+
+  { "userEmail": "marko.hiker@ascent.demo", "trailName": "Galichica - Magaro Peak", "rating": 5, "comment": "Seeing both lakes from the ridge is unforgettable.", "createdAt": "2025-05-18T18:00:00Z" },
+  { "userEmail": "marko.hiker@ascent.demo", "trailName": "Ohrid Viewpoint Trail", "rating": 5, "comment": "An ideal sunset walk above Ohrid.", "createdAt": "2025-06-02T18:00:00Z" },
+  { "userEmail": "marko.hiker@ascent.demo", "trailName": "Mavrovo Lake and Forest Trail", "rating": 4, "comment": "Relaxed terrain with plenty of quiet places by the lake.", "createdAt": "2025-07-22T18:00:00Z" },
+  { "userEmail": "marko.hiker@ascent.demo", "trailName": "Pelister - Antenna and Peak", "rating": 5, "comment": "Long climb, excellent forest and a rugged final section.", "createdAt": "2025-08-17T18:00:00Z" },
+
+  { "userEmail": "elena.guide@ascent.demo", "trailName": "Pelister - Antenna and Peak", "rating": 5, "comment": "A complete Pelister day from molika forest to open rock.", "createdAt": "2025-03-30T18:00:00Z" },
+  { "userEmail": "elena.guide@ascent.demo", "trailName": "Galichica - Magaro Peak", "rating": 5, "comment": "Exposed in places, but the lake panorama is exceptional.", "createdAt": "2025-05-24T18:00:00Z" },
+  { "userEmail": "elena.guide@ascent.demo", "trailName": "Smolare Waterfall Trail", "rating": 4, "comment": "A well-shaded short hike with a strong finish.", "createdAt": "2025-06-29T18:00:00Z" },
+  { "userEmail": "elena.guide@ascent.demo", "trailName": "Plachkovica - Lisec Peak", "rating": 4, "comment": "Quiet forest and surprisingly broad summit views.", "createdAt": "2025-10-11T18:00:00Z" },
+
+  { "userEmail": "ana.explorer@ascent.demo", "trailName": "Smolare Waterfall Trail", "rating": 5, "comment": "Lush, cool and perfect after recent rain.", "createdAt": "2025-04-19T18:00:00Z" },
+  { "userEmail": "ana.explorer@ascent.demo", "trailName": "Leshnica Valley Trail", "rating": 5, "comment": "Streams, cliffs and a brilliant wild valley atmosphere.", "createdAt": "2025-06-15T18:00:00Z" },
+  { "userEmail": "ana.explorer@ascent.demo", "trailName": "Babuna - Nezhilovo to Cheples", "rating": 4, "comment": "Steady forest climbing with a welcoming hut at the end.", "createdAt": "2025-08-03T18:00:00Z" },
+  { "userEmail": "ana.explorer@ascent.demo", "trailName": "Kozhuf - Zelen Breg", "rating": 4, "comment": "Peaceful route with excellent wildflowers in early summer.", "createdAt": "2025-09-07T18:00:00Z" },
+
+  { "userEmail": "filip.guide@ascent.demo", "trailName": "Mount Korab - Golem Korab", "rating": 5, "comment": "A flagship summit that deserves conservative weather planning.", "createdAt": "2025-04-12T18:00:00Z" },
+  { "userEmail": "filip.guide@ascent.demo", "trailName": "Jakupica - Solunska Glava", "rating": 5, "comment": "Long, remote and immensely satisfying in stable conditions.", "createdAt": "2025-05-31T18:00:00Z" },
+  { "userEmail": "filip.guide@ascent.demo", "trailName": "Titov Vrv from Popova Shapka", "rating": 5, "comment": "Sustained rolling terrain before the final summit climb.", "createdAt": "2025-07-05T18:00:00Z" },
+  { "userEmail": "filip.guide@ascent.demo", "trailName": "Demir Kapija Canyon Trail", "rating": 4, "comment": "Excellent shoulder-season walking and interesting limestone.", "createdAt": "2025-11-02T18:00:00Z" },
+
+  { "userEmail": "sara.mountain@ascent.demo", "trailName": "Ljuboten Peak", "rating": 5, "comment": "A beautiful, direct ascent with an airy summit feel.", "createdAt": "2025-05-11T18:00:00Z" },
+  { "userEmail": "sara.mountain@ascent.demo", "trailName": "Mount Korab - Golem Korab", "rating": 5, "comment": "Big landscapes and a memorable border summit.", "createdAt": "2025-06-26T18:00:00Z" },
+  { "userEmail": "sara.mountain@ascent.demo", "trailName": "Galichica - Magaro Peak", "rating": 4, "comment": "Dry and exposed, with world-class lake views.", "createdAt": "2025-08-09T18:00:00Z" },
+  { "userEmail": "sara.mountain@ascent.demo", "trailName": "Jakupica - Solunska Glava", "rating": 5, "comment": "A serious outing across striking karst terrain.", "createdAt": "2025-09-14T18:00:00Z" },
+
+  { "userEmail": "darko.trekker@ascent.demo", "trailName": "Kokino Observatory Trail", "rating": 4, "comment": "Easy walking with a unique historical destination.", "createdAt": "2025-02-23T18:00:00Z" },
+  { "userEmail": "darko.trekker@ascent.demo", "trailName": "Treskavec Monastery Trail", "rating": 5, "comment": "A superb blend of landscape and cultural history.", "createdAt": "2025-04-06T18:00:00Z" },
+  { "userEmail": "darko.trekker@ascent.demo", "trailName": "Krushevo - Mechkin Kamen", "rating": 4, "comment": "A comfortable walk with several worthwhile stops.", "createdAt": "2025-07-19T18:00:00Z" },
+  { "userEmail": "darko.trekker@ascent.demo", "trailName": "Berovo Lake Loop", "rating": 4, "comment": "Quiet and well suited to an unhurried day.", "createdAt": "2025-10-04T18:00:00Z" },
+
+  { "userEmail": "viktor.climber@ascent.demo", "trailName": "Treskavec Monastery Trail", "rating": 5, "comment": "Fantastic granite scenery above Prilep.", "createdAt": "2025-03-22T18:00:00Z" },
+  { "userEmail": "viktor.climber@ascent.demo", "trailName": "Demir Kapija Canyon Trail", "rating": 5, "comment": "Dramatic limestone walls and excellent birdlife.", "createdAt": "2025-05-03T18:00:00Z" },
+  { "userEmail": "viktor.climber@ascent.demo", "trailName": "Pelister - Antenna and Peak", "rating": 4, "comment": "The boulder terrain near the top keeps it interesting.", "createdAt": "2025-07-27T18:00:00Z" },
+  { "userEmail": "viktor.climber@ascent.demo", "trailName": "Plachkovica - Lisec Peak", "rating": 4, "comment": "Good ascent with little traffic and a broad ridge.", "createdAt": "2025-09-28T18:00:00Z" },
+
+  { "userEmail": "maya.walker@ascent.demo", "trailName": "Berovo Lake Loop", "rating": 5, "comment": "Gentle, shaded and easy to enjoy at any pace.", "createdAt": "2025-04-26T18:00:00Z" },
+  { "userEmail": "maya.walker@ascent.demo", "trailName": "Mavrovo Lake and Forest Trail", "rating": 5, "comment": "A lovely first national-park hike.", "createdAt": "2025-06-07T18:00:00Z" },
+  { "userEmail": "maya.walker@ascent.demo", "trailName": "Matka Canyon Trail", "rating": 4, "comment": "Scenic throughout, with a few rocky sections.", "createdAt": "2025-08-23T18:00:00Z" },
+  { "userEmail": "maya.walker@ascent.demo", "trailName": "Ohrid Viewpoint Trail", "rating": 5, "comment": "Manageable climb and a wonderful reward above the lake.", "createdAt": "2025-09-21T18:00:00Z" },
+
+  { "userEmail": "leon.adventure@ascent.demo", "trailName": "Ohrid Viewpoint Trail", "rating": 5, "comment": "Excellent light and viewpoints for photography.", "createdAt": "2025-04-17T18:00:00Z" },
+  { "userEmail": "leon.adventure@ascent.demo", "trailName": "Kozhuf - Zelen Breg", "rating": 4, "comment": "Open, quiet and full of subtle mountain landscapes.", "createdAt": "2025-06-19T18:00:00Z" },
+  { "userEmail": "leon.adventure@ascent.demo", "trailName": "Vodno - Millennium Cross", "rating": 4, "comment": "An accessible introduction to hiking around Skopje.", "createdAt": "2025-08-31T18:00:00Z" },
+  { "userEmail": "leon.adventure@ascent.demo", "trailName": "Smolare Waterfall Trail", "rating": 5, "comment": "The waterfall and forest are highly photogenic.", "createdAt": "2025-10-18T18:00:00Z" }
+]
