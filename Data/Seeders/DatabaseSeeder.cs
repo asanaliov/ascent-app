@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using System.Text.Json;
 using ascent_app.Models;
 using Microsoft.AspNetCore.Identity;
@@ -152,13 +154,18 @@ public static class DatabaseSeeder
         foreach (var seed in seeds)
         {
             var region = regions.FirstOrDefault(r =>
-                r.Name.Equals(seed.Region, StringComparison.OrdinalIgnoreCase)
+                FoldName(r.Name).Equals(
+                    FoldName(seed.Region), StringComparison.OrdinalIgnoreCase)
                 && r.Country.Equals(seed.Country, StringComparison.OrdinalIgnoreCase));
             if (region is null)
             {
                 region = new Region { Name = seed.Region, Country = seed.Country };
                 regions.Add(region);
                 context.Regions.Add(region);
+            }
+            else
+            {
+                region.Name = seed.Region;
             }
 
             if (!difficulties.TryGetValue(seed.Difficulty, out var difficulty))
@@ -219,12 +226,17 @@ public static class DatabaseSeeder
             foreach (var tagName in seed.Tags.Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 var tag = tags.FirstOrDefault(t =>
-                    t.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
+                    FoldName(t.Name).Equals(
+                        FoldName(tagName), StringComparison.OrdinalIgnoreCase));
                 if (tag is null)
                 {
                     tag = new Tag { Name = tagName };
                     tags.Add(tag);
                     context.Tags.Add(tag);
+                }
+                else
+                {
+                    tag.Name = tagName;
                 }
 
                 if (trail.TrailTags.All(tt => tt.Tag != tag && tt.TagId != tag.Id))
@@ -454,6 +466,14 @@ public static class DatabaseSeeder
 
         var details = string.Join("; ", result.Errors.Select(e => e.Description));
         throw new InvalidOperationException($"Could not {operation}: {details}");
+    }
+
+    private static string FoldName(string value)
+    {
+        var decomposed = value.Normalize(NormalizationForm.FormD);
+        var characters = decomposed.Where(c =>
+            CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark);
+        return new string(characters.ToArray()).Normalize(NormalizationForm.FormC);
     }
 
     private sealed record ActivityReferences(

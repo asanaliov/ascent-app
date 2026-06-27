@@ -49,7 +49,7 @@
     "seedKey": "ljuboten-peak",
     "legacyNames": ["Ljuboten Peak"],
     "name": "Ljuboten Mountain Hut – Ljuboten Peak",
-    "region": "Shar Mountain",
+    "region": "Šar Mountain",
     "country": "North Macedonia",
     "difficulty": "Hard",
     "distanceKm": 11.0,
@@ -61,7 +61,7 @@
     "startLongitude": 21.1242,
     "routeGeometry": { "type": "LineString", "coordinates": [[21.1242, 42.1708], [21.1124, 42.1858], [21.1199, 42.2067]] },
     "source": "High Scardus Trail",
-    "tags": ["Peak", "Alpine", "Panorama", "Shar Mountain"],
+    "tags": ["Peak", "Alpine", "Panorama", "Šar Mountain"],
     "images": [
       { "imageUrl": "/images/trails/ljuboten-1.webp", "caption": "Ljuboten summit", "isCoverImage": true },
       { "imageUrl": "/images/trails/ljuboten-2.webp", "caption": "High pasture", "isCoverImage": false },
@@ -72,7 +72,7 @@
     "seedKey": "titov-vrv",
     "legacyNames": ["Titov Vrv from Popova Shapka"],
     "name": "Popova Šapka – Titov Vrv",
-    "region": "Shar Mountain",
+    "region": "Šar Mountain",
     "country": "North Macedonia",
     "difficulty": "Strenuous",
     "distanceKm": 20.9,
@@ -87,7 +87,7 @@
     "tags": ["Peak", "Alpine", "Long Distance", "Šar Mountain"],
     "images": [
       { "imageUrl": "/images/trails/titov-vrv-1.webp", "caption": "Titov Vrv", "isCoverImage": true },
-      { "imageUrl": "/images/trails/titov-vrv-2.webp", "caption": "Shar Mountain ridge", "isCoverImage": false },
+      { "imageUrl": "/images/trails/titov-vrv-2.webp", "caption": "Šar Mountain ridge", "isCoverImage": false },
       { "imageUrl": "/images/trails/titov-vrv-3.webp", "caption": "Summit tower", "isCoverImage": false }
     ]
   },
@@ -119,7 +119,7 @@
     "seedKey": "magaro-peak",
     "legacyNames": ["Galichica - Magaro Peak"],
     "name": "Galičica Pass – Magaro Peak",
-    "region": "Galichica",
+    "region": "Galičica",
     "country": "North Macedonia",
     "difficulty": "Hard",
     "distanceKm": 9.0,
@@ -133,7 +133,7 @@
     "source": "National Park Galičica",
     "tags": ["Peak", "National Park", "Lake View", "Limestone"],
     "images": [
-      { "imageUrl": "/images/trails/galichica-1.webp", "caption": "Galichica ridge", "isCoverImage": true },
+      { "imageUrl": "/images/trails/galichica-1.webp", "caption": "Galičica ridge", "isCoverImage": true },
       { "imageUrl": "/images/trails/galichica-2.webp", "caption": "Ohrid lake view", "isCoverImage": false },
       { "imageUrl": "/images/trails/galichica-3.webp", "caption": "Magaro trail", "isCoverImage": false }
     ]
@@ -165,7 +165,7 @@
     "seedKey": "kozhuf-zelen-breg",
     "legacyNames": ["Kozhuf - Zelen Breg"],
     "name": "Adžibarica – Zelen Breg",
-    "region": "Kozhuf",
+    "region": "Kožuf",
     "country": "North Macedonia",
     "difficulty": "Moderate",
     "distanceKm": 14.0,
@@ -179,7 +179,7 @@
     "source": "North Macedonia Timeless",
     "tags": ["Ridge", "Forest", "Wildflowers", "Quiet"],
     "images": [
-      { "imageUrl": "/images/trails/kozhuf-1.webp", "caption": "Kozhuf ridge", "isCoverImage": true },
+      { "imageUrl": "/images/trails/kozhuf-1.webp", "caption": "Kožuf ridge", "isCoverImage": true },
       { "imageUrl": "/images/trails/kozhuf-2.webp", "caption": "Zelen Breg", "isCoverImage": false },
       { "imageUrl": "/images/trails/kozhuf-3.webp", "caption": "Southern mountain view", "isCoverImage": false }
     ]
@@ -212,7 +212,7 @@
     "seedKey": "leshnica",
     "legacyNames": ["Leshnica Valley Trail"],
     "name": "Popova Šapka – Gorna Lešnica – Lešnica",
-    "region": "Shar Mountain",
+    "region": "Šar Mountain",
     "country": "North Macedonia",
     "difficulty": "Hard",
     "distanceKm": 14.0,
@@ -226,9 +226,9 @@
     "source": "Explore Šar Mountain trail guide",
     "tags": ["Valley", "Waterfall", "Forest", "Šar Mountain"],
     "images": [
-      { "imageUrl": "/images/trails/leshnica-1.webp", "caption": "Leshnica valley", "isCoverImage": true },
+      { "imageUrl": "/images/trails/leshnica-1.webp", "caption": "Lešnica valley", "isCoverImage": true },
       { "imageUrl": "/images/trails/leshnica-2.webp", "caption": "Mountain stream", "isCoverImage": false },
-      { "imageUrl": "/images/trails/leshnica-3.webp", "caption": "Leshnica cliffs", "isCoverImage": false }
+      { "imageUrl": "/images/trails/leshnica-3.webp", "caption": "Lešnica cliffs", "isCoverImage": false }
     ]
   },
   {
@@ -281,7 +281,7 @@
     "seedKey": "mechkin-kamen",
     "legacyNames": ["Krushevo - Mechkin Kamen"],
     "name": "Kruševo – Mečkin Kamen",
-    "region": "Krushevo",
+    "region": "Kruševo",
     "country": "North Macedonia",
     "difficulty": "Easy",
     "distanceKm": 8.9,
@@ -295,9 +295,9 @@
     "source": "Kruševo tourism sources",
     "tags": ["Forest", "History", "Family", "Viewpoint"],
     "images": [
-      { "imageUrl": "/images/trails/krushevo-1.webp", "caption": "Krushevo highlands", "isCoverImage": true },
+      { "imageUrl": "/images/trails/krushevo-1.webp", "caption": "Kruševo highlands", "isCoverImage": true },
       { "imageUrl": "/images/trails/krushevo-2.webp", "caption": "Forest path", "isCoverImage": false },
-      { "imageUrl": "/images/trails/krushevo-3.webp", "caption": "Mechkin Kamen", "isCoverImage": false }
+      { "imageUrl": "/images/trails/krushevo-3.webp", "caption": "Mečkin Kamen", "isCoverImage": false }
     ]
   },
   {
@@ -320,7 +320,7 @@
     "images": [
       { "imageUrl": "/images/trails/kokino-1.webp", "caption": "Kokino rocks", "isCoverImage": true },
       { "imageUrl": "/images/trails/kokino-2.webp", "caption": "Observatory site", "isCoverImage": false },
-      { "imageUrl": "/images/trails/kokino-3.webp", "caption": "Tatikjev Kamen", "isCoverImage": false }
+      { "imageUrl": "/images/trails/kokino-3.webp", "caption": "Tatićev Kamen", "isCoverImage": false }
     ]
   },
   {
@@ -373,14 +373,14 @@
     "seedKey": "berovo-lake",
     "legacyNames": ["Berovo Lake Loop"],
     "name": "Berovo Lake – Dvorište – Bela Voda",
-    "region": "Maleshevo",
+    "region": "Maleševo",
     "country": "North Macedonia",
     "difficulty": "Hard",
     "distanceKm": 20.0,
     "elevationGainM": 453,
     "estimatedTimeHours": 5.0,
     "shortDescription": "A point-to-point route from Berovo Lake through Dvorište to Bela Voda.",
-    "description": "This substantial Maleshevo route begins where the Klepalo River enters Berovo Lake, climbs through pine and beech forest past Bačilo Kalamadevski, and reaches Babin Čukar (1,403 m). It continues by the Turtela archaeological site and St. Ilija church, through Dvorište, and finishes at Bela Voda on Ogražden. The 20 km route is point-to-point, so return transport should be arranged in advance.",
+    "description": "This substantial Maleševo route begins where the Klepalo River enters Berovo Lake, climbs through pine and beech forest past Bačilo Kalamadevski, and reaches Babin Čukar (1,403 m). It continues by the Turtela archaeological site and St. Ilija church, through Dvorište, and finishes at Bela Voda on Ogražden. The 20 km route is point-to-point, so return transport should be arranged in advance.",
     "startLatitude": 41.6742,
     "startLongitude": 22.9308,
     "routeGeometry": null,
@@ -410,9 +410,9 @@
     "source": "Čeples route guides",
     "tags": ["Forest", "Mountain Hut", "Jakupica", "Point to Point"],
     "images": [
-      { "imageUrl": "/images/trails/cheples-1.webp", "caption": "Cheples trail", "isCoverImage": true },
+      { "imageUrl": "/images/trails/cheples-1.webp", "caption": "Čeples trail", "isCoverImage": true },
       { "imageUrl": "/images/trails/cheples-2.webp", "caption": "Babuna forest", "isCoverImage": false },
-      { "imageUrl": "/images/trails/cheples-3.webp", "caption": "Cheples hut", "isCoverImage": false }
+      { "imageUrl": "/images/trails/cheples-3.webp", "caption": "Čeples hut", "isCoverImage": false }
     ]
   },
   {
@@ -442,7 +442,7 @@
     "seedKey": "lisec-peak",
     "legacyNames": ["Plachkovica - Lisec Peak"],
     "name": "Gradec – Lisec Peak",
-    "region": "Plachkovica",
+    "region": "Plačkovica",
     "country": "North Macedonia",
     "difficulty": "Hard",
     "distanceKm": 10.0,
@@ -457,7 +457,7 @@
     "tags": ["Peak", "Forest", "Ridge", "Eastern Mountains"],
     "images": [
       { "imageUrl": "/images/trails/lisec-1.webp", "caption": "Lisec Peak", "isCoverImage": true },
-      { "imageUrl": "/images/trails/lisec-2.webp", "caption": "Plachkovica forest", "isCoverImage": false },
+      { "imageUrl": "/images/trails/lisec-2.webp", "caption": "Plačkovica forest", "isCoverImage": false },
       { "imageUrl": "/images/trails/lisec-3.webp", "caption": "Eastern mountain ridge", "isCoverImage": false }
     ]
   }

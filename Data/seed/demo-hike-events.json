@@ -9,10 +9,10 @@
     "meetingPoint": "Sredno Vodno lower car park"
   },
   {
-    "title": "Leshnica Summer Valley Hike",
+    "title": "Lešnica Summer Valley Hike",
     "guideEmail": "guide@ascent.demo",
     "trailKey": "leshnica",
-    "description": "A full-day guided hike into Leshnica with stream and waterfall stops.",
+    "description": "A full-day guided hike into Lešnica with stream and waterfall stops.",
     "startsAt": "2026-07-18T05:00:00Z",
     "maxParticipants": 10,
     "meetingPoint": "Popova Shapka main square"
@@ -51,7 +51,7 @@
     "description": "A long guided day for experienced hikers across the Jakupica massif.",
     "startsAt": "2026-09-19T03:00:00Z",
     "maxParticipants": 6,
-    "meetingPoint": "Nezhilovo village"
+    "meetingPoint": "Nežilovo village"
   },
   {
     "title": "Matka Canyon Beginner Walk",

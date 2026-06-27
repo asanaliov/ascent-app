@@ -5,7 +5,7 @@
   { "userEmail": "admin@ascent.demo", "trailKey": "berovo-lake", "rating": 4, "comment": "Calm forest walking and a good family option.", "createdAt": "2025-06-21T18:00:00Z" },
 
   { "userEmail": "guide@ascent.demo", "trailKey": "titov-vrv", "rating": 5, "comment": "A substantial ridge day; carry water and watch the weather.", "createdAt": "2025-02-18T18:00:00Z" },
-  { "userEmail": "guide@ascent.demo", "trailKey": "ljuboten-peak", "rating": 5, "comment": "One of Shar Mountain's finest profiles and summit views.", "createdAt": "2025-04-05T18:00:00Z" },
+  { "userEmail": "guide@ascent.demo", "trailKey": "ljuboten-peak", "rating": 5, "comment": "One of Šar Mountain's finest profiles and summit views.", "createdAt": "2025-04-05T18:00:00Z" },
   { "userEmail": "guide@ascent.demo", "trailKey": "leshnica", "rating": 5, "comment": "The valley is especially impressive after the spring melt.", "createdAt": "2025-05-28T18:00:00Z" },
   { "userEmail": "guide@ascent.demo", "trailKey": "golem-korab", "rating": 5, "comment": "Remote and rewarding. Navigation matters in cloud.", "createdAt": "2025-07-13T18:00:00Z" },
 
