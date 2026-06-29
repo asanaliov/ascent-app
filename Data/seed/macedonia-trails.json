@@ -17,7 +17,7 @@
     "source": "North Macedonia tourism sources",
     "tags": ["Mountain", "Viewpoint", "Forest", "Popular"],
     "images": [
-      { "imageUrl": "/images/trails/vodno-1.webp", "caption": "Vodno ridge", "isCoverImage": true },
+      { "imageUrl": "/img/trails/vodno-millennium-cross.jpg", "caption": "Millennium Cross on Vodno", "isCoverImage": true },
       { "imageUrl": "/images/trails/vodno-2.webp", "caption": "Woodland approach", "isCoverImage": false },
       { "imageUrl": "/images/trails/vodno-3.webp", "caption": "Millennium Cross", "isCoverImage": false }
     ]
@@ -63,7 +63,7 @@
     "source": "High Scardus Trail",
     "tags": ["Peak", "Alpine", "Panorama", "Šar Mountain"],
     "images": [
-      { "imageUrl": "/images/trails/ljuboten-1.webp", "caption": "Ljuboten summit", "isCoverImage": true },
+      { "imageUrl": "/img/trails/ljuboten-peak.jpg", "caption": "Ljuboten seen from Piribeg", "isCoverImage": true },
       { "imageUrl": "/images/trails/ljuboten-2.webp", "caption": "High pasture", "isCoverImage": false },
       { "imageUrl": "/images/trails/ljuboten-3.webp", "caption": "Summit ridge", "isCoverImage": false }
     ]
@@ -179,7 +179,7 @@
     "source": "North Macedonia Timeless",
     "tags": ["Ridge", "Forest", "Wildflowers", "Quiet"],
     "images": [
-      { "imageUrl": "/images/trails/kozhuf-1.webp", "caption": "Kožuf ridge", "isCoverImage": true },
+      { "imageUrl": "/img/trails/kozhuf.jpg", "caption": "High ridges of Kožuf", "isCoverImage": true },
       { "imageUrl": "/images/trails/kozhuf-2.webp", "caption": "Zelen Breg", "isCoverImage": false },
       { "imageUrl": "/images/trails/kozhuf-3.webp", "caption": "Southern mountain view", "isCoverImage": false }
     ]
@@ -202,7 +202,7 @@
     "source": "Čeples route guides",
     "tags": ["Peak", "Karst", "Long Distance", "Remote"],
     "images": [
-      { "imageUrl": "/images/trails/solunska-glava-1.webp", "caption": "Solunska Glava", "isCoverImage": true },
+      { "imageUrl": "/img/trails/solunska-glava.jpg", "caption": "Solunska Glava on Jakupica", "isCoverImage": true },
       { "imageUrl": "/images/trails/solunska-glava-2.webp", "caption": "Jakupica plateau", "isCoverImage": false },
       { "imageUrl": "/images/trails/solunska-glava-3.webp", "caption": "High mountain route", "isCoverImage": false },
       { "imageUrl": "/images/trails/solunska-glava-4.webp", "caption": "Summit panorama", "isCoverImage": false }
