@@ -341,7 +341,7 @@
     "source": "National Park Galičica",
     "tags": ["Lake View", "Viewpoint", "Forest", "Point to Point"],
     "images": [
-      { "imageUrl": "/images/trails/ohrid-viewpoint-1.webp", "caption": "Lake Ohrid viewpoint", "isCoverImage": true },
+      { "imageUrl": "/img/trails/velestovo.jpg", "caption": "Velestovo on Galičica", "isCoverImage": true },
       { "imageUrl": "/images/trails/ohrid-viewpoint-2.webp", "caption": "Ohrid old town", "isCoverImage": false },
       { "imageUrl": "/images/trails/ohrid-viewpoint-3.webp", "caption": "Sunset trail", "isCoverImage": false }
     ]
@@ -410,7 +410,7 @@
     "source": "Čeples route guides",
     "tags": ["Forest", "Mountain Hut", "Jakupica", "Point to Point"],
     "images": [
-      { "imageUrl": "/images/trails/cheples-1.webp", "caption": "Čeples trail", "isCoverImage": true },
+      { "imageUrl": "/img/trails/nezhilovo.jpg", "caption": "Nežilovo below the forested ascent", "isCoverImage": true },
       { "imageUrl": "/images/trails/cheples-2.webp", "caption": "Babuna forest", "isCoverImage": false },
       { "imageUrl": "/images/trails/cheples-3.webp", "caption": "Čeples hut", "isCoverImage": false }
     ]
@@ -433,7 +433,7 @@
     "source": "North Macedonia Timeless",
     "tags": ["Canyon", "Limestone", "Fortress", "History"],
     "images": [
-      { "imageUrl": "/images/trails/demir-kapija-1.webp", "caption": "Demir Kapija gorge", "isCoverImage": true },
+      { "imageUrl": "/img/trails/demir-kapija.jpg", "caption": "Demir Kapija gorge", "isCoverImage": true },
       { "imageUrl": "/images/trails/demir-kapija-2.webp", "caption": "Limestone trail", "isCoverImage": false },
       { "imageUrl": "/images/trails/demir-kapija-3.webp", "caption": "Vardar viewpoint", "isCoverImage": false }
     ]
@@ -456,7 +456,7 @@
     "source": "Eastern-region tourism sources",
     "tags": ["Peak", "Forest", "Ridge", "Eastern Mountains"],
     "images": [
-      { "imageUrl": "/images/trails/lisec-1.webp", "caption": "Lisec Peak", "isCoverImage": true },
+      { "imageUrl": "/img/trails/lisec-peak.jpg", "caption": "Lisec Peak seen from Čupino Brdo", "isCoverImage": true },
       { "imageUrl": "/images/trails/lisec-2.webp", "caption": "Plačkovica forest", "isCoverImage": false },
       { "imageUrl": "/images/trails/lisec-3.webp", "caption": "Eastern mountain ridge", "isCoverImage": false }
     ]

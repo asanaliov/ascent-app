@@ -24,3 +24,7 @@ their subjects were not altered.
 | `kokino.jpg` | Stone thrones at Kokino | BrankaVV | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Stone_throne,_Kokino,_Macedonia.jpg) |
 | `smolare-waterfall.jpg` | Smolare Waterfall approach | Cibrev | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Смоларски_водопад_70.jpg) |
 | `berovo-lake.jpg` | Berovo Lake | Lide Magde | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Поглед_кон_Беровско_Езеро_1.jpg) |
+| `velestovo.jpg` | Velestovo on Galičica | Rašo | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Velestovo_02.JPG) |
+| `nezhilovo.jpg` | Nežilovo | Elena Markova | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Поглед_на_Нежилово.jpg) |
+| `demir-kapija.jpg` | Demir Kapija gorge | Rašo | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Демир_Каписка.JPG) |
+| `lisec-peak.jpg` | Lisec Peak on Plačkovica | Kiril Simeonovski | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Поглед_кон_Лисец_од_Чупино_Брдо.jpg) |
