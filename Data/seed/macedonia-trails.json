@@ -157,7 +157,7 @@
     "tags": ["Peak", "National Park", "Forest", "Molika Pine"],
     "images": [
       { "imageUrl": "/img/trails/pelister_mountain.jpg", "caption": "Pelister mountain", "isCoverImage": true },
-      { "imageUrl": "/images/trails/pelister-2.webp", "caption": "Molika forest", "isCoverImage": false },
+      { "imageUrl": "/img/trails/pelister_01.jpg", "caption": "Trail through Pelister National Park", "isCoverImage": false },
       { "imageUrl": "/images/trails/pelister-3.webp", "caption": "Pelister summit", "isCoverImage": false }
     ]
   },
@@ -226,7 +226,7 @@
     "source": "Explore Šar Mountain trail guide",
     "tags": ["Valley", "Waterfall", "Forest", "Šar Mountain"],
     "images": [
-      { "imageUrl": "/images/trails/leshnica-1.webp", "caption": "Lešnica valley", "isCoverImage": true },
+      { "imageUrl": "/img/trails/gorna-leshnica.jpg", "caption": "Hiking toward Gorna Lešnica", "isCoverImage": true },
       { "imageUrl": "/images/trails/leshnica-2.webp", "caption": "Mountain stream", "isCoverImage": false },
       { "imageUrl": "/images/trails/leshnica-3.webp", "caption": "Lešnica cliffs", "isCoverImage": false }
     ]
@@ -249,7 +249,7 @@
     "source": "National Park Mavrovo",
     "tags": ["Peak", "Forest", "Pasture", "National Park"],
     "images": [
-      { "imageUrl": "/images/trails/mavrovo-1.webp", "caption": "Mavrovo lake", "isCoverImage": true },
+      { "imageUrl": "/img/trails/mavrovo_np.jpg", "caption": "Nikiforovo beneath the Korab mountains", "isCoverImage": true },
       { "imageUrl": "/images/trails/mavrovo-2.webp", "caption": "Forest trail", "isCoverImage": false },
       { "imageUrl": "/images/trails/mavrovo-3.webp", "caption": "Lakeside view", "isCoverImage": false }
     ]

@@ -12,3 +12,6 @@ their subjects were not altered.
 | `velky_korab_2011.jpg` | Golem Korab from the north | Pavouk | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Velky_Korab_2011.jpg) |
 | `galichitsa.jpg` | Galičica above Lake Ohrid | Apcbg | Public domain | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Galichitsa.jpg) |
 | `pelister_mountain.jpg` | Pelister Mountain | Niki Gango | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Pelister_Mountain.JPG) |
+| `pelister_01.jpg` | Pelister National Park | Ksenija Putilin | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Pelister_01.jpg) |
+| `gorna-leshnica.jpg` | Hiking toward Gorna Lešnica | Creshevo | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Горна_Лешница,_Шар_Планина.jpg) |
+| `mavrovo_np.jpg` | Nikiforovo with the Korab mountains | Benoît Vicart | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Mavrovo.jpg) |
