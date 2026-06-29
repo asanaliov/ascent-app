@@ -19,3 +19,8 @@ their subjects were not altered.
 | `ljuboten-peak.jpg` | Ljuboten from Piribeg | Македонец | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Љуботен_од_Пирибег_02.jpg) |
 | `solunska-glava.jpg` | Solunska Glava on Jakupica | Cilakov | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Jakupica_-_Solunska_Glava.JPG) |
 | `kozhuf.jpg` | Kožuf mountain | Македонец | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Кожуф_МК_06.jpg) |
+| `treskavec-monastery.jpg` | Treskavec Monastery | ГП | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Treskavec_monastery_(2).JPG) |
+| `meckin-kamen.jpg` | Mečkin Kamen memorial | Borjanaarsova | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Мечкин_Камен,_Крушево.JPG) |
+| `kokino.jpg` | Stone thrones at Kokino | BrankaVV | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Stone_throne,_Kokino,_Macedonia.jpg) |
+| `smolare-waterfall.jpg` | Smolare Waterfall approach | Cibrev | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Смоларски_водопад_70.jpg) |
+| `berovo-lake.jpg` | Berovo Lake | Lide Magde | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Поглед_кон_Беровско_Езеро_1.jpg) |

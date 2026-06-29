@@ -272,7 +272,7 @@
     "source": "Pella Trails",
     "tags": ["Monastery", "Rock Formations", "History", "Viewpoint"],
     "images": [
-      { "imageUrl": "/images/trails/treskavec-1.webp", "caption": "Treskavec Monastery", "isCoverImage": true },
+      { "imageUrl": "/img/trails/treskavec-monastery.jpg", "caption": "Treskavec Monastery", "isCoverImage": true },
       { "imageUrl": "/images/trails/treskavec-2.webp", "caption": "Granite landscape", "isCoverImage": false },
       { "imageUrl": "/images/trails/treskavec-3.webp", "caption": "Prilep view", "isCoverImage": false }
     ]
@@ -295,7 +295,7 @@
     "source": "Kruševo tourism sources",
     "tags": ["Forest", "History", "Family", "Viewpoint"],
     "images": [
-      { "imageUrl": "/images/trails/krushevo-1.webp", "caption": "Kruševo highlands", "isCoverImage": true },
+      { "imageUrl": "/img/trails/meckin-kamen.jpg", "caption": "Mečkin Kamen memorial", "isCoverImage": true },
       { "imageUrl": "/images/trails/krushevo-2.webp", "caption": "Forest path", "isCoverImage": false },
       { "imageUrl": "/images/trails/krushevo-3.webp", "caption": "Mečkin Kamen", "isCoverImage": false }
     ]
@@ -318,7 +318,7 @@
     "source": "Cultural Heritage Protection Office",
     "tags": ["Archaeology", "Family", "Rock Formations", "Short"],
     "images": [
-      { "imageUrl": "/images/trails/kokino-1.webp", "caption": "Kokino rocks", "isCoverImage": true },
+      { "imageUrl": "/img/trails/kokino.jpg", "caption": "Stone thrones at Kokino", "isCoverImage": true },
       { "imageUrl": "/images/trails/kokino-2.webp", "caption": "Observatory site", "isCoverImage": false },
       { "imageUrl": "/images/trails/kokino-3.webp", "caption": "Tatićev Kamen", "isCoverImage": false }
     ]
@@ -364,7 +364,7 @@
     "source": "North Macedonia Timeless",
     "tags": ["Waterfall", "Forest", "Family", "Belasica"],
     "images": [
-      { "imageUrl": "/images/trails/smolare-1.webp", "caption": "Smolare Waterfall", "isCoverImage": true },
+      { "imageUrl": "/img/trails/smolare-waterfall.jpg", "caption": "Forest stairway toward Smolare Waterfall", "isCoverImage": true },
       { "imageUrl": "/images/trails/smolare-2.webp", "caption": "Forest steps", "isCoverImage": false },
       { "imageUrl": "/images/trails/smolare-3.webp", "caption": "Lomnica stream", "isCoverImage": false }
     ]
@@ -387,7 +387,7 @@
     "source": "Visit Berovo",
     "tags": ["Lake", "Forest", "History", "Point to Point"],
     "images": [
-      { "imageUrl": "/images/trails/berovo-lake-1.webp", "caption": "Berovo Lake", "isCoverImage": true },
+      { "imageUrl": "/img/trails/berovo-lake.jpg", "caption": "Berovo Lake", "isCoverImage": true },
       { "imageUrl": "/images/trails/berovo-lake-2.webp", "caption": "Maleshevo forest", "isCoverImage": false },
       { "imageUrl": "/images/trails/berovo-lake-3.webp", "caption": "Lakeside path", "isCoverImage": false }
     ]
