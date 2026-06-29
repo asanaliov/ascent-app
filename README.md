@@ -22,7 +22,7 @@ MapLibre GL · Bootstrap 5
 Seed files live in `Data/seed/`:
 
 ```text
-macedonia-trails.json   20 curated North Macedonia trails and 62 image paths
+macedonia-trails.json   20 curated North Macedonia trails and image metadata
 demo-users.json         12 development-only Identity users
 demo-reviews.json       48 reviews
 demo-favorites.json     40 favorites
@@ -104,16 +104,17 @@ The generated database is local runtime state and must not be committed.
 
 The database stores image paths only; it never stores image binary data.
 
-- Trail assets: `wwwroot/images/trails/`
+- Curated trail photography: `wwwroot/img/trails/`
+- Trail fallbacks and planned assets: `wwwroot/images/trails/`
 - User assets: `wwwroot/images/users/`
 - Uploaded runtime assets: `wwwroot/uploads/` (gitignored)
 
-The repository includes safe SVG fallback images. Seed records intentionally
-reference descriptive `.webp` paths such as
-`/images/trails/vodno-1.webp` and `/images/users/marko-hiker.webp`. Add the
-corresponding licensed image files at those paths when final photography is
-available. Missing files fall back in the UI without breaking cards, galleries,
-or profiles.
+The repository includes safe SVG fallback images and a small set of
+subject-checked, attributed trail photos. During seeding, only local trail image
+files that actually exist are added to the database. Planned `.webp` paths can
+remain in the JSON until licensed photography is available; they do not create
+broken database records. Missing trail and profile files fall back in the UI.
+See `wwwroot/img/trails/ATTRIBUTION.md` for photo credits and licenses.
 
 ## Database and repository safety
 

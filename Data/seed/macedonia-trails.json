@@ -40,8 +40,8 @@
     "source": "Saraj and Matka active-tourism guide",
     "tags": ["Canyon", "Water", "Family", "Monastery"],
     "images": [
-      { "imageUrl": "/images/trails/matka-1.webp", "caption": "Matka Canyon", "isCoverImage": true },
-      { "imageUrl": "/images/trails/matka-2.webp", "caption": "Treska reservoir", "isCoverImage": false },
+      { "imageUrl": "/img/trails/matka_canyon_skopje_3.jpg", "caption": "Matka Canyon and the Treska reservoir", "isCoverImage": true },
+      { "imageUrl": "/img/trails/matka2_view_1.jpg", "caption": "Matka Canyon from above", "isCoverImage": false },
       { "imageUrl": "/images/trails/matka-3.webp", "caption": "Canyon path", "isCoverImage": false }
     ]
   },
@@ -86,7 +86,7 @@
     "source": "Šar Mountain trail study",
     "tags": ["Peak", "Alpine", "Long Distance", "Šar Mountain"],
     "images": [
-      { "imageUrl": "/images/trails/titov-vrv-1.webp", "caption": "Titov Vrv", "isCoverImage": true },
+      { "imageUrl": "/img/trails/titov_vrv_a_turcin.jpg", "caption": "Titov Vrv and Mal Turčin", "isCoverImage": true },
       { "imageUrl": "/images/trails/titov-vrv-2.webp", "caption": "Šar Mountain ridge", "isCoverImage": false },
       { "imageUrl": "/images/trails/titov-vrv-3.webp", "caption": "Summit tower", "isCoverImage": false }
     ]
@@ -109,7 +109,7 @@
     "source": "Mavrovo National Park sources",
     "tags": ["Peak", "Alpine", "National Park", "Highest Point"],
     "images": [
-      { "imageUrl": "/images/trails/korab-1.webp", "caption": "Mount Korab", "isCoverImage": true },
+      { "imageUrl": "/img/trails/velky_korab_2011.jpg", "caption": "Golem Korab", "isCoverImage": true },
       { "imageUrl": "/images/trails/korab-2.webp", "caption": "Korab approach", "isCoverImage": false },
       { "imageUrl": "/images/trails/korab-3.webp", "caption": "Golem Korab summit", "isCoverImage": false },
       { "imageUrl": "/images/trails/korab-4.webp", "caption": "Korab panorama", "isCoverImage": false }
@@ -133,7 +133,7 @@
     "source": "National Park Galičica",
     "tags": ["Peak", "National Park", "Lake View", "Limestone"],
     "images": [
-      { "imageUrl": "/images/trails/galichica-1.webp", "caption": "Galičica ridge", "isCoverImage": true },
+      { "imageUrl": "/img/trails/galichitsa.jpg", "caption": "Galičica above Lake Ohrid", "isCoverImage": true },
       { "imageUrl": "/images/trails/galichica-2.webp", "caption": "Ohrid lake view", "isCoverImage": false },
       { "imageUrl": "/images/trails/galichica-3.webp", "caption": "Magaro trail", "isCoverImage": false }
     ]
@@ -156,7 +156,7 @@
     "source": "National Park Pelister",
     "tags": ["Peak", "National Park", "Forest", "Molika Pine"],
     "images": [
-      { "imageUrl": "/images/trails/pelister-1.webp", "caption": "Pelister mountain", "isCoverImage": true },
+      { "imageUrl": "/img/trails/pelister_mountain.jpg", "caption": "Pelister mountain", "isCoverImage": true },
       { "imageUrl": "/images/trails/pelister-2.webp", "caption": "Molika forest", "isCoverImage": false },
       { "imageUrl": "/images/trails/pelister-3.webp", "caption": "Pelister summit", "isCoverImage": false }
     ]

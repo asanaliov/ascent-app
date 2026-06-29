@@ -41,7 +41,8 @@ public static class DatabaseSeeder
         {
             var trails = await ReadSeedFileAsync<TrailSeed>(
                 environment, "macedonia-trails.json", cancellationToken);
-            await SeedTrailsAsync(context, trails, cancellationToken);
+            await SeedTrailsAsync(
+                context, trails, environment.WebRootPath, cancellationToken);
         }
 
         var seedDemoData = environment.IsDevelopment()
@@ -147,6 +148,7 @@ public static class DatabaseSeeder
     private static async Task SeedTrailsAsync(
         AscentDbContext context,
         IReadOnlyCollection<TrailSeed> seeds,
+        string webRootPath,
         CancellationToken cancellationToken)
     {
         var difficulties = await context.Difficulties
@@ -215,12 +217,30 @@ public static class DatabaseSeeder
             trail.Difficulty = difficulty;
             trail.Source = seed.Source;
             trail.IsSeedData = true;
+            trail.PhotoUrl = null;
 
-            foreach (var imageSeed in seed.Images)
+            var imageSeeds = seed.Images
+                .Where(image => LocalAssetExists(webRootPath, image.ImageUrl))
+                .ToList();
+            var imageUrls = imageSeeds
+                .Select(image => image.ImageUrl)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var staleSeedPhotos = trail.Photos
+                .Where(photo => IsManagedSeedImage(photo.Url)
+                                && !imageUrls.Contains(photo.Url))
+                .ToList();
+            context.TrailPhotos.RemoveRange(staleSeedPhotos);
+
+            foreach (var imageSeed in imageSeeds)
             {
-                if (trail.Photos.Any(p =>
-                        p.Url.Equals(imageSeed.ImageUrl, StringComparison.OrdinalIgnoreCase)))
+                var photo = trail.Photos.FirstOrDefault(p =>
+                    p.Url.Equals(imageSeed.ImageUrl, StringComparison.OrdinalIgnoreCase));
+                if (photo is not null)
+                {
+                    photo.Caption = imageSeed.Caption;
+                    photo.IsCoverImage = imageSeed.IsCoverImage;
                     continue;
+                }
 
                 trail.Photos.Add(new TrailPhoto
                 {
@@ -254,6 +274,28 @@ public static class DatabaseSeeder
 
         await context.SaveChangesAsync(cancellationToken);
     }
+
+    private static bool LocalAssetExists(string webRootPath, string imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(webRootPath)
+            || !imageUrl.StartsWith('/')
+            || imageUrl.Contains("..", StringComparison.Ordinal))
+            return false;
+
+        var root = Path.GetFullPath(webRootPath);
+        var relativePath = imageUrl.TrimStart('/')
+            .Replace('/', Path.DirectorySeparatorChar);
+        var assetPath = Path.GetFullPath(Path.Combine(root, relativePath));
+        var rootPrefix = root.TrimEnd(Path.DirectorySeparatorChar)
+                         + Path.DirectorySeparatorChar;
+
+        return assetPath.StartsWith(rootPrefix, StringComparison.OrdinalIgnoreCase)
+               && File.Exists(assetPath);
+    }
+
+    private static bool IsManagedSeedImage(string imageUrl) =>
+        imageUrl.StartsWith("/images/trails/", StringComparison.OrdinalIgnoreCase)
+        || imageUrl.StartsWith("/img/trails/", StringComparison.OrdinalIgnoreCase);
 
     private static async Task SeedDemoUsersAsync(
         UserManager<ApplicationUser> userManager,
