@@ -15,17 +15,20 @@ public class TrailsController : Controller
     private readonly AscentDbContext _context;
     private readonly IDifficultyService _difficulty;
     private readonly IGeoService _geo;
+    private readonly ITrailAdviceService _advice;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public TrailsController(
         AscentDbContext context,
         IDifficultyService difficulty,
         IGeoService geo,
+        ITrailAdviceService advice,
         UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _difficulty = difficulty;
         _geo = geo;
+        _advice = advice;
         _userManager = userManager;
     }
 
@@ -154,6 +157,7 @@ public class TrailsController : Controller
         if (trail == null) return NotFound();
 
         ViewBag.FavoriteTrailIds = await GetFavoriteTrailIdsAsync();
+        ViewBag.Advice = _advice.For(trail);
         return View(trail);
     }
 

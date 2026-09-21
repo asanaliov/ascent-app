@@ -50,8 +50,8 @@
             <svg class="ridge-svg" viewBox="0 0 1000 400" preserveAspectRatio="none">
                 <defs>
                     <linearGradient id="ridge-fill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0" stop-color="#4F7A5B" stop-opacity=".28"/>
-                        <stop offset="1" stop-color="#4F7A5B" stop-opacity="0"/>
+                        <stop offset="0" stop-color="#2F4A2C" stop-opacity=".18"/>
+                        <stop offset="1" stop-color="#2F4A2C" stop-opacity="0"/>
                     </linearGradient>
                     <clipPath id="ridge-clip"><rect id="ridge-clip-rect" x="0" y="0" width="0" height="400"/></clipPath>
                 </defs>
@@ -228,7 +228,7 @@
         .wp-name { font-family: var(--font-display); font-size: 15px; color: var(--forest-dark); }
         .wp:hover .wp-name { color: var(--terracotta); }
         .wp-stats { font-size: 12px; color: var(--text-muted); }
-        .summit .wp-name { color: var(--paper); font-size: 16px; }
+        .summit .wp-name { color: var(--text); font-size: 16px; }
         .summit .wp-dot { border-color: var(--terracotta); background: var(--terracotta); }
 
         .climber { pointer-events: none; z-index: 3; }
@@ -246,7 +246,7 @@
             transform: translateY(-50%);
             font-family: var(--font-display);
             font-size: 22px;
-            color: var(--paper);
+            color: var(--text);
             white-space: nowrap;
             font-variant-numeric: tabular-nums;
         }
@@ -296,7 +296,7 @@
         }
         .rating h2 { font-size: 26px; margin-bottom: 10px; }
         .rating p { color: var(--text-secondary); max-width: 52ch; margin: 0; }
-        .formula { font-family: var(--font-display); font-style: italic; color: var(--paper); }
+        .formula { font-family: var(--font-display); font-style: italic; color: var(--text); }
         .scale-bar {
             position: relative;
             display: grid;
@@ -317,7 +317,7 @@
             top: -6px; bottom: -6px;
             width: 2px;
             margin-left: -1px;
-            background: var(--paper);
+            background: var(--forest-dark);
             border-radius: 2px;
         }
         .scale-ticks {
