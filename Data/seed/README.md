@@ -23,10 +23,15 @@ Descriptions and headline route figures were reviewed against these sources:
 - [High Scardus route: Staro Selo – Ljuboten hut](https://www.outdooractive.com/en/route/hiking-trail/north-macedonia/high-scardus-trail-stage-01-staro-selo-mountain-hut-ljuboten/65666968/)
 - [Pella Trails: Prilep – Treskavec Monastery](https://www.outdooractive.com/en/route/hiking-trail/north-macedonia/prilep-treskavec-monastery/809205012/)
 
-Route geometry in this demo catalog is illustrative, not a navigation-grade
-GPX track. Geometry is `null` where the previous line did not match the
-reviewed route. Users should obtain current official maps, check park and
-border rules, and verify trail conditions before hiking.
+Trailheads and destinations are OpenStreetMap features (Nominatim lookups),
+and each `routeGeometry` is a BRouter `hiking-mountain`/`trekking` route over
+OSM paths between them. `distanceKm` and `elevationGainM` come from that
+routing (round trips are routed out and back, so gain is cumulative), and
+`difficulty` is the label the `DifficultyService` formula gives those numbers.
+Berovo Lake – Dvorište – Bela Voda keeps the figures published by Visit
+Berovo and has no geometry, because its forest paths are not in OSM. This is
+still not a navigation-grade GPX track: users should obtain current official
+maps, check park and border rules, and verify trail conditions before hiking.
 
 `legacy-imported-trails.json` is an exact allowlist of obsolete trails produced
 by the former development-time external importer. In Development, the seeder
