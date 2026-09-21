@@ -2,10 +2,34 @@
 @using System.Globalization
 @{
     ViewData["Title"] = "Home";
-    var waypoints = Model.Take(4).ToList();
-    // Vertices on the ridge polyline where the featured trails sit (viewBox 1000x400)
-    var stops = new (int x, int y)[] { (250, 300), (390, 236), (540, 140), (680, 96) };
     string Pct(double v) => v.ToString(CultureInfo.InvariantCulture);
+
+    // Ridge: four picks spread across the gain range, lowest climb first, so the line
+    // climbs left to right. Each dot's height is that trail's real elevation gain
+    // (viewBox 1000x400: y 392 = 0 m, y 32 = the biggest climb of the four).
+    var byGain = Model.OrderBy(t => t.ElevationGainM).ToList();
+    var waypoints = byGain.Count <= 4
+        ? byGain
+        : new[] { 0, (byGain.Count - 1) / 3, 2 * (byGain.Count - 1) / 3, byGain.Count - 1 }.Select(i => byGain[i]).ToList();
+    var maxGain = Math.Max(1, waypoints.LastOrDefault()?.ElevationGainM ?? 1);
+    var stops = waypoints.Select((t, i) => (
+        x: waypoints.Count == 1 ? 760 : 250 + i * 510 / (waypoints.Count - 1),
+        y: 392 - (int)Math.Round(360.0 * t.ElevationGainM / maxGain))).ToList();
+
+    var verts = new List<(int x, int y)> { (0, 392) };
+    var prev = verts[0];
+    foreach (var st in stops)
+    {
+        // two saddles between dots, both below the straight line so the dot stays a local high
+        verts.Add((prev.x + (st.x - prev.x) / 3, Math.Min(392, prev.y + (st.y - prev.y) / 3 + 14)));
+        verts.Add((prev.x + 2 * (st.x - prev.x) / 3, Math.Min(392, prev.y + 2 * (st.y - prev.y) / 3 + 6)));
+        verts.Add(st);
+        prev = st;
+    }
+    verts.Add((prev.x + 50, Math.Min(380, prev.y + 40)));
+    verts.Add((prev.x + 100, Math.Min(380, prev.y + 70)));
+    verts.Add((900, Math.Min(380, prev.y + 110)));
+    var ridgePath = "M" + string.Join(" L", verts.Select(v => $"{v.x} {v.y}"));
     var example = Model.FirstOrDefault();
     var exampleScore = example == null ? 0 : Math.Sqrt(2 * example.ElevationGainM * example.DistanceKm);
 }
@@ -31,17 +55,16 @@
                     </linearGradient>
                     <clipPath id="ridge-clip"><rect id="ridge-clip-rect" x="0" y="0" width="0" height="400"/></clipPath>
                 </defs>
-                <path class="ridge-area" clip-path="url(#ridge-clip)" fill="url(#ridge-fill)"
-                      d="M0 392 L60 372 120 350 170 318 200 326 250 300 300 262 340 272 390 236 430 210 470 150 500 168 540 140 590 124 630 132 680 96 720 64 760 32 800 60 840 88 880 104 940 150 L940 400 L0 400 Z"/>
-                <path class="ridge-ghost" d="M0 392 L60 372 120 350 170 318 200 326 250 300 300 262 340 272 390 236 430 210 470 150 500 168 540 140 590 124 630 132 680 96 720 64 760 32 800 60 840 88 880 104 940 150"/>
-                <path class="ridge-line" id="ridge-line" d="M0 392 L60 372 120 350 170 318 200 326 250 300 300 262 340 272 390 236 430 210 470 150 500 168 540 140 590 124 630 132 680 96 720 64 760 32 800 60 840 88 880 104 940 150"/>
+                <path class="ridge-area" clip-path="url(#ridge-clip)" fill="url(#ridge-fill)" d="@ridgePath L900 400 L0 400 Z"/>
+                <path class="ridge-ghost" d="@ridgePath"/>
+                <path class="ridge-line" id="ridge-line" d="@ridgePath" data-max="@maxGain"/>
             </svg>
 
             @for (var i = 0; i < waypoints.Count; i++)
             {
                 var t = waypoints[i];
                 var s = stops[i];
-                <a class="wp" style="left:@Pct(s.x / 10.0)%; bottom:@Pct((400 - s.y) / 4.0)%" data-at="@Pct(s.x / 1000.0)"
+                <a class="wp@(i == waypoints.Count - 1 ? " summit" : "")" style="left:@Pct(s.x / 10.0)%; bottom:@Pct((400 - s.y) / 4.0)%" data-at="@Pct(s.x / 1000.0)"
                    asp-controller="Trails" asp-action="Details" asp-route-id="@t.Id">
                     <span class="wp-dot"></span>
                     <span class="wp-label">
@@ -51,14 +74,9 @@
                 </a>
             }
 
-            <div class="summit" style="left:76%; bottom:92%" data-at="0.76">
-                <span class="wp-dot"></span>
-                <span class="summit-label">Golem Korab, 2,764 m<small>Highest point in North Macedonia</small></span>
-            </div>
-
             <div class="climber" id="climber">
                 <span class="climber-dot"></span>
-                <span class="climber-alt"><b id="climber-m">0</b> m</span>
+                <span class="climber-alt"><b id="climber-m">0</b> m up</span>
             </div>
         </div>
     </div>
@@ -168,18 +186,18 @@
         .ridge-ghost { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 6; }
         .ridge-line { stroke: var(--forest-dark); stroke-width: 2; }
 
-        .wp, .summit, .climber {
+        .wp, .climber {
             position: absolute;
             width: 0; height: 0;
             color: var(--text);
         }
-        .wp, .summit {
+        .wp {
             opacity: 0;
             transition: opacity .45s ease, transform .45s ease;
             transform: translateY(8px);
             pointer-events: none;
         }
-        .wp.is-on, .summit.is-on { opacity: 1; transform: none; pointer-events: auto; }
+        .wp.is-on { opacity: 1; transform: none; pointer-events: auto; }
         .wp-dot {
             position: absolute;
             left: -5px; top: -5px;
@@ -189,7 +207,7 @@
             border: 2px solid var(--forest-dark);
         }
         .wp:hover .wp-dot { background: var(--terracotta); border-color: var(--terracotta); }
-        .wp-label, .summit-label {
+        .wp-label {
             position: absolute;
             bottom: 30px;
             display: flex;
@@ -198,8 +216,7 @@
             line-height: 1.3;
         }
         .wp-label { right: 0; align-items: flex-end; text-align: right; }
-        .summit-label { left: 0; transform: translateX(-50%); align-items: center; text-align: center; }
-        .wp-label::after, .summit-label::after {
+        .wp-label::after {
             content: "";
             position: absolute;
             top: 100%;
@@ -208,12 +225,10 @@
             background: var(--border-strong);
         }
         .wp-label::after { right: 0; }
-        .summit-label::after { left: 50%; }
         .wp-name { font-family: var(--font-display); font-size: 15px; color: var(--forest-dark); }
         .wp:hover .wp-name { color: var(--terracotta); }
         .wp-stats { font-size: 12px; color: var(--text-muted); }
-        .summit-label { font-family: var(--font-display); font-size: 16px; color: var(--paper); }
-        .summit-label small { font-family: var(--font-body); font-size: 12px; color: var(--text-muted); }
+        .summit .wp-name { color: var(--paper); font-size: 16px; }
         .summit .wp-dot { border-color: var(--terracotta); background: var(--terracotta); }
 
         .climber { pointer-events: none; z-index: 3; }
@@ -323,10 +338,9 @@
         @@media (max-width: 767px) {
             .ascent-scroll { height: 220vh; }
             .ridge { height: 34svh; }
-            .wp-label { display: none; }
-            .wp.is-on { pointer-events: none; }
-            .summit-label { font-size: 14px; }
-            .summit-label small { display: none; }
+            .wp:not(.summit) .wp-label { display: none; }
+            .wp:not(.summit).is-on { pointer-events: none; }
+            .summit .wp-name { font-size: 14px; }
             .climber-alt { font-size: 18px; left: 10px; top: auto; bottom: 12px; transform: translateX(-100%); }
             .pick { grid-template-columns: 56px 1fr; gap: 12px 14px; }
             .pick img { width: 56px; height: 42px; }
@@ -338,7 +352,7 @@
             .ascent-scroll { height: auto; }
             .ascent-stage { position: static; height: auto; min-height: 0; }
             .ridge { margin-top: 32px; height: 300px; }
-            .wp, .summit { transition: none; }
+            .wp { transition: none; }
             .scroll-hint { display: none; }
         }
     </style>
@@ -355,6 +369,7 @@
             const hint = document.getElementById("scroll-hint");
             const marks = Array.from(section.querySelectorAll("[data-at]"));
             if (!line) return;
+            const maxGain = parseFloat(line.dataset.max) || 1;
 
             const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
             const pts = line.getAttribute("d").match(/-?[\d.]+/g).map(Number);
@@ -386,7 +401,7 @@
                 clip.setAttribute("width", pt.x);
                 climber.style.left = pt.x / 10 + "%";
                 climber.style.top = pt.y / 4 + "%";
-                metres.textContent = Math.round((392 - pt.y) / 360 * 2764).toLocaleString("en");
+                metres.textContent = Math.max(0, Math.round((392 - pt.y) / 360 * maxGain)).toLocaleString("en");
                 const frac = pt.x / 1000;
                 marks.forEach(m => m.classList.toggle("is-on", frac >= parseFloat(m.dataset.at)));
                 hint.style.opacity = p > 0.2 ? "0" : "1";
