@@ -15,17 +15,23 @@ public class TrailsController : Controller
     private readonly AscentDbContext _context;
     private readonly IDifficultyService _difficulty;
     private readonly IGeoService _geo;
+    private readonly ITrailAdviceService _advice;
+    private readonly IImageStorage _images;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public TrailsController(
         AscentDbContext context,
         IDifficultyService difficulty,
         IGeoService geo,
+        ITrailAdviceService advice,
+        IImageStorage images,
         UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _difficulty = difficulty;
         _geo = geo;
+        _advice = advice;
+        _images = images;
         _userManager = userManager;
     }
 
@@ -154,6 +160,7 @@ public class TrailsController : Controller
         if (trail == null) return NotFound();
 
         ViewBag.FavoriteTrailIds = await GetFavoriteTrailIdsAsync();
+        ViewBag.Advice = _advice.For(trail);
         return View(trail);
     }
 
@@ -216,7 +223,6 @@ public class TrailsController : Controller
             ElevationGainM = form.ElevationGainM,
             Latitude = form.Latitude,
             Longitude = form.Longitude,
-            PhotoUrl = form.PhotoUrl,
             RouteGeoJson = form.RouteGeoJson,
             RegionId = form.RegionId,
             DifficultyId = await _difficulty.ResolveDifficultyIdAsync(form.DistanceKm, form.ElevationGainM),
@@ -227,7 +233,8 @@ public class TrailsController : Controller
 
         _context.Add(trail);
         await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
+        await AddPhotosAsync(trail.Id, form.PhotoFiles);
+        return RedirectToAction(nameof(Details), new { id = trail.Id });
     }
 
     [Authorize(Roles = "Guide,Admin")]
@@ -237,6 +244,8 @@ public class TrailsController : Controller
 
         var trail = await _context.Trails
             .Include(t => t.TrailTags)
+            .Include(t => t.Photos)
+            .AsNoTracking()
             .FirstOrDefaultAsync(t => t.Id == id);
         if (trail == null) return NotFound();
 
@@ -245,6 +254,7 @@ public class TrailsController : Controller
 
         var form = ToForm(trail);
         form.SelectedTagIds = trail.TrailTags.Select(tt => tt.TagId).ToList();
+        form.ExistingPhotos = trail.Photos.OrderByDescending(p => p.IsCoverImage).ThenBy(p => p.Id).ToList();
         return View(form);
     }
 
@@ -261,11 +271,16 @@ public class TrailsController : Controller
         {
             await PopulateRegionsAsync(form.RegionId);
             await PopulateTagsAsync();
+            form.ExistingPhotos = await _context.TrailPhotos.AsNoTracking()
+                .Where(p => p.TrailId == id)
+                .OrderByDescending(p => p.IsCoverImage).ThenBy(p => p.Id)
+                .ToListAsync();
             return View(form);
         }
 
         var trail = await _context.Trails
             .Include(t => t.TrailTags)
+            .Include(t => t.Photos)
             .FirstOrDefaultAsync(t => t.Id == id);
         if (trail == null) return NotFound();
 
@@ -276,7 +291,6 @@ public class TrailsController : Controller
         trail.ElevationGainM = form.ElevationGainM;
         trail.Latitude = form.Latitude;
         trail.Longitude = form.Longitude;
-        trail.PhotoUrl = form.PhotoUrl;
         trail.RouteGeoJson = form.RouteGeoJson;
         trail.RegionId = form.RegionId;
         trail.DifficultyId = await _difficulty.ResolveDifficultyIdAsync(form.DistanceKm, form.ElevationGainM);
@@ -284,6 +298,14 @@ public class TrailsController : Controller
         trail.TrailTags.Clear();
         foreach (var tid in form.SelectedTagIds)
             trail.TrailTags.Add(new TrailTag { TagId = tid });
+
+        foreach (var photo in trail.Photos.Where(p => form.RemovePhotoIds.Contains(p.Id)).ToList())
+            trail.Photos.Remove(photo);
+        if (form.CoverPhotoId is int coverId && trail.Photos.Any(p => p.Id == coverId))
+            foreach (var photo in trail.Photos)
+                photo.IsCoverImage = photo.Id == coverId;
+        if (trail.Photos.Count > 0 && !trail.Photos.Any(p => p.IsCoverImage))
+            trail.Photos.OrderBy(p => p.Id).First().IsCoverImage = true;
 
         try
         {
@@ -295,7 +317,30 @@ public class TrailsController : Controller
             throw;
         }
 
-        return RedirectToAction(nameof(Index));
+        await AddPhotosAsync(trail.Id, form.PhotoFiles);
+        return RedirectToAction(nameof(Details), new { id = trail.Id });
+    }
+
+    // Saves each uploaded file and attaches it; the first photo a trail gets becomes its cover.
+    private async Task AddPhotosAsync(int trailId, List<IFormFile>? files)
+    {
+        var errors = new List<string>();
+        foreach (var file in (files ?? new()).Where(f => f.Length > 0))
+        {
+            var (ok, url, error) = await _images.SaveAsync(file, "trails");
+            if (!ok)
+            {
+                errors.Add($"{file.FileName}: {error}");
+                continue;
+            }
+
+            var hasPhotos = await _context.TrailPhotos.AnyAsync(p => p.TrailId == trailId);
+            _context.TrailPhotos.Add(new TrailPhoto { TrailId = trailId, Url = url!, IsCoverImage = !hasPhotos });
+            await _context.SaveChangesAsync();
+        }
+
+        if (errors.Count > 0)
+            TempData["TrailPhotoError"] = string.Join(" ", errors);
     }
 
     [Authorize(Roles = "Guide,Admin")]
@@ -378,6 +423,12 @@ public class TrailsController : Controller
     private async Task PopulateTagsAsync()
     {
         ViewBag.AllTags = await _context.Tags.OrderBy(t => t.Name).AsNoTracking().ToListAsync();
+        // the form previews the difficulty label live, using the same bins the service resolves against
+        ViewBag.DifficultyBins = await _context.Difficulties
+            .OrderBy(d => d.MinScore)
+            .Select(d => new { d.Label, d.MinScore, d.BadgeClass })
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     private static TrailFormViewModel ToForm(Trail t) => new()
@@ -390,7 +441,6 @@ public class TrailsController : Controller
         ElevationGainM = t.ElevationGainM,
         Latitude = t.Latitude,
         Longitude = t.Longitude,
-        PhotoUrl = t.PhotoUrl,
         RouteGeoJson = t.RouteGeoJson,
         RegionId = t.RegionId,
     };

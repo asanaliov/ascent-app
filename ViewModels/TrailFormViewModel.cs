@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using ascent_app.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace ascent_app.ViewModels;
 
@@ -32,10 +34,6 @@ public class TrailFormViewModel
     [Range(-180, 180)]
     public double Longitude { get; set; }
 
-    [MaxLength(400)]
-    [Display(Name = "Photo URL")]
-    public string? PhotoUrl { get; set; }
-
     [Required]
     [Display(Name = "Region")]
     public int RegionId { get; set; }
@@ -43,4 +41,14 @@ public class TrailFormViewModel
     public string? RouteGeoJson { get; set; }
 
     public List<int> SelectedTagIds { get; set; } = new();
+
+    [Display(Name = "Add photos")]
+    public List<IFormFile>? PhotoFiles { get; set; }
+
+    public List<int> RemovePhotoIds { get; set; } = new();
+
+    public int? CoverPhotoId { get; set; }
+
+    [BindNever]
+    public List<TrailPhoto> ExistingPhotos { get; set; } = new();
 }

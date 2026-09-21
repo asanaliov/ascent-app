@@ -1,6 +1,7 @@
 @model ascent_app.Models.Trail
 @using Microsoft.AspNetCore.Identity
 @using ascent_app.Models
+@using ascent_app.Services
 @inject UserManager<ApplicationUser> UserManager
 
 @{
@@ -13,6 +14,7 @@
     var avg = Model.AverageRating;
     var myId = UserManager.GetUserId(User);
     var myReview = myId is null ? null : reviews.FirstOrDefault(r => r.UserId == myId);
+    var advice = ViewBag.Advice as TrailAdvice;
 }
 
 <a class="asc-nav-link d-inline-flex align-items-center gap-1 mt-4" asp-action="Index">
@@ -190,62 +192,41 @@
     </div>
 </div>
 
-@if (canManage)
+@if (advice is not null)
 {
-    <div class="asc-panel mt-4">
-        <p class="eyebrow mb-2"><i class="ti ti-photo"></i> MANAGE PHOTOS</p>
-        <p class="text-muted mb-3" style="font-size:13px">Photos you add appear in the gallery at the top of the page.</p>
-
-        @if (TempData["TrailPhotoError"] is string photoError)
-        {
-            <div class="asc-panel mb-3" style="border-color:var(--terracotta)">
-                <i class="ti ti-alert-triangle" style="color:var(--terracotta)"></i> @photoError
+    <div class="row g-3 mt-2">
+        <div class="col-md-5">
+            <div class="asc-panel h-100">
+                <p class="eyebrow mb-2"><i class="ti ti-chart-dots"></i> BY THE NUMBERS</p>
+                <div class="facts-list">
+                    @foreach (var f in advice.Facts)
+                    {
+                        <div class="row-item">
+                            <span class="k"><i class="ti @f.Icon"></i> @f.Label</span>
+                            <span class="v">@f.Value</span>
+                        </div>
+                    }
+                </div>
             </div>
-        }
-
-        @if (Model.Photos.Any())
-        {
-            <div class="photo-strip">
-                @foreach (var p in Model.Photos)
-                {
-                    <figure class="photo-thumb">
-                        <img src="@p.Url"
-                             alt="@(p.Caption ?? Model.Name)"
-                             onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';" />
-                        @if (canManage)
-                        {
-                            <form asp-controller="TrailPhotos" asp-action="Delete" asp-route-id="@p.Id" method="post"
-                                  onsubmit="return confirm('Delete this photo?');">
-                                <button type="submit" class="photo-del" title="Delete photo"><i class="ti ti-x"></i></button>
-                            </form>
-                        }
-                        @if (!string.IsNullOrWhiteSpace(p.Caption))
-                        {
-                            <figcaption>@p.Caption</figcaption>
-                        }
-                    </figure>
-                }
+        </div>
+        <div class="col-md-7">
+            <div class="asc-panel h-100">
+                <p class="eyebrow mb-2"><i class="ti ti-backpack"></i> BEFORE YOU GO</p>
+                <ul class="advice-list">
+                    @foreach (var tip in advice.Tips)
+                    {
+                        <li><i class="ti @tip.Icon"></i><span>@tip.Text</span></li>
+                    }
+                </ul>
             </div>
-        }
-        else
-        {
-            <p class="text-muted mb-0" style="font-size:14px">No photos yet — add the first one below.</p>
-        }
+        </div>
+    </div>
+}
 
-        @if (canManage)
-        {
-            <form asp-controller="TrailPhotos" asp-action="Add" method="post" enctype="multipart/form-data"
-                  class="d-flex gap-2 align-items-center mt-3 flex-wrap">
-                <input type="hidden" name="trailId" value="@Model.Id" />
-                <input type="file" name="photoFile" accept="image/png,image/jpeg,image/webp"
-                       class="form-control form-control-sm" style="max-width:240px" required />
-                <input type="text" name="caption" placeholder="Caption (optional)"
-                       class="form-control form-control-sm" style="max-width:200px" maxlength="200" />
-                <button type="submit" class="btn-ascent-outline" style="padding:6px 12px;font-size:13px">
-                    <i class="ti ti-camera-plus"></i> Add photo
-                </button>
-            </form>
-        }
+@if (canManage && TempData["TrailPhotoError"] is string photoError)
+{
+    <div class="asc-panel mt-4" style="border-color:var(--terracotta)">
+        <i class="ti ti-alert-triangle" style="color:var(--terracotta)"></i> @photoError
     </div>
 }
 

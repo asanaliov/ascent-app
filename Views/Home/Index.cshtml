@@ -36,6 +36,13 @@
 
 <section class="ascent-scroll" id="ascent">
     <div class="ascent-stage">
+        <div class="stage-bg" aria-hidden="true">
+            @for (var i = 0; i < waypoints.Count; i++)
+            {
+                <img src="@waypoints[i].CoverImageUrl" alt="" decoding="async" data-i="@i"
+                     onerror="this.remove();"/>
+            }
+        </div>
         <div class="ascent-copy">
             <h1>Know the climb<br>before you go.</h1>
             <p>Real hiking routes with distance, elevation and a difficulty that is computed from the numbers, not guessed. Sorted by what is nearest to you.</p>
@@ -50,8 +57,8 @@
             <svg class="ridge-svg" viewBox="0 0 1000 400" preserveAspectRatio="none">
                 <defs>
                     <linearGradient id="ridge-fill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0" stop-color="#4F7A5B" stop-opacity=".28"/>
-                        <stop offset="1" stop-color="#4F7A5B" stop-opacity="0"/>
+                        <stop offset="0" stop-color="#2C5F4A" stop-opacity=".18"/>
+                        <stop offset="1" stop-color="#2C5F4A" stop-opacity="0"/>
                     </linearGradient>
                     <clipPath id="ridge-clip"><rect id="ridge-clip-rect" x="0" y="0" width="0" height="400"/></clipPath>
                 </defs>
@@ -119,12 +126,11 @@
 {
     <section class="rating">
         <div class="rating-copy">
-            <h2>Difficulty is computed, not guessed.</h2>
+            <h2>How is the difficulty computed?</h2>
             <p>
                 Every trail gets a score of <span class="formula">√(2 × climb × distance)</span>.
                 @example.Name is @example.DistanceKm.ToString("0.#") km with @example.ElevationGainM.ToString("N0") m of climb,
                 which scores @exampleScore.ToString("0") and lands in @example.Difficulty?.Label.
-                Nobody can override it, so a Hard trail in one region is a Hard trail everywhere.
             </p>
         </div>
         <div class="rating-scale">
@@ -153,6 +159,24 @@
             overflow: hidden;
         }
 
+        .stage-bg { position: absolute; inset: 0; z-index: 0; }
+        .stage-bg img {
+            position: absolute;
+            inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity .9s ease;
+        }
+        .stage-bg img.is-on { opacity: 1; }
+        .stage-bg::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(var(--bg-rgb), .97) 0%, rgba(var(--bg-rgb), .8) 38%, rgba(var(--bg-rgb), .3) 68%, rgba(var(--bg-rgb), .35) 88%, rgba(var(--bg-rgb), .95) 100%),
+                linear-gradient(180deg, rgba(var(--bg-rgb), .9) 0%, rgba(var(--bg-rgb), .2) 28%, rgba(var(--bg-rgb), .1) 50%, rgba(var(--bg-rgb), .92) 100%);
+        }
         .ascent-copy { padding-top: clamp(28px, 7vh, 72px); max-width: 620px; position: relative; z-index: 2; }
         .ascent-copy h1 {
             font-size: clamp(40px, 6.4vw, 78px);
@@ -171,6 +195,7 @@
 
         .ridge {
             position: relative;
+            z-index: 1;
             margin-top: auto;
             height: 52vh;
             height: 52svh;
@@ -215,7 +240,8 @@
             white-space: nowrap;
             line-height: 1.3;
         }
-        .wp-label { right: 0; align-items: flex-end; text-align: right; }
+        .wp-label { right: 0; align-items: flex-end; text-align: right; text-shadow: 0 0 2px var(--bg), 0 0 10px var(--bg), 0 0 18px var(--bg); }
+        .climber-alt { text-shadow: 0 0 2px var(--bg), 0 0 10px var(--bg), 0 0 18px var(--bg); }
         .wp-label::after {
             content: "";
             position: absolute;
@@ -228,7 +254,7 @@
         .wp-name { font-family: var(--font-display); font-size: 15px; color: var(--forest-dark); }
         .wp:hover .wp-name { color: var(--terracotta); }
         .wp-stats { font-size: 12px; color: var(--text-muted); }
-        .summit .wp-name { color: var(--paper); font-size: 16px; }
+        .summit .wp-name { color: var(--text); font-size: 16px; }
         .summit .wp-dot { border-color: var(--terracotta); background: var(--terracotta); }
 
         .climber { pointer-events: none; z-index: 3; }
@@ -246,7 +272,7 @@
             transform: translateY(-50%);
             font-family: var(--font-display);
             font-size: 22px;
-            color: var(--paper);
+            color: var(--text);
             white-space: nowrap;
             font-variant-numeric: tabular-nums;
         }
@@ -296,7 +322,7 @@
         }
         .rating h2 { font-size: 26px; margin-bottom: 10px; }
         .rating p { color: var(--text-secondary); max-width: 52ch; margin: 0; }
-        .formula { font-family: var(--font-display); font-style: italic; color: var(--paper); }
+        .formula { font-family: var(--font-display); font-style: italic; color: var(--text); }
         .scale-bar {
             position: relative;
             display: grid;
@@ -317,7 +343,7 @@
             top: -6px; bottom: -6px;
             width: 2px;
             margin-left: -1px;
-            background: var(--paper);
+            background: var(--forest-dark);
             border-radius: 2px;
         }
         .scale-ticks {
@@ -337,6 +363,9 @@
         }
         @@media (max-width: 767px) {
             .ascent-scroll { height: 220vh; }
+            .stage-bg::after {
+                background: linear-gradient(180deg, rgba(var(--bg-rgb), .96) 0%, rgba(var(--bg-rgb), .9) 42%, rgba(var(--bg-rgb), .5) 62%, rgba(var(--bg-rgb), .45) 80%, rgba(var(--bg-rgb), .92) 100%);
+            }
             .ridge { height: 34svh; }
             .wp:not(.summit) .wp-label { display: none; }
             .wp:not(.summit).is-on { pointer-events: none; }
@@ -349,6 +378,7 @@
             .pick-rating { min-width: 0; }
         }
         @@media (prefers-reduced-motion: reduce) {
+            .stage-bg img { transition: none; }
             .ascent-scroll { height: auto; }
             .ascent-stage { position: static; height: auto; min-height: 0; }
             .ridge { margin-top: 32px; height: 300px; }
@@ -368,6 +398,7 @@
             const metres = document.getElementById("climber-m");
             const hint = document.getElementById("scroll-hint");
             const marks = Array.from(section.querySelectorAll("[data-at]"));
+            const photos = Array.from(section.querySelectorAll(".stage-bg img"));
             if (!line) return;
             const maxGain = parseFloat(line.dataset.max) || 1;
 
@@ -404,6 +435,8 @@
                 metres.textContent = Math.max(0, Math.round((392 - pt.y) / 360 * maxGain)).toLocaleString("en");
                 const frac = pt.x / 1000;
                 marks.forEach(m => m.classList.toggle("is-on", frac >= parseFloat(m.dataset.at)));
+                const passed = marks.filter(m => frac >= parseFloat(m.dataset.at)).length;
+                photos.forEach(img => img.classList.toggle("is-on", parseInt(img.dataset.i) === passed - 1));
                 hint.style.opacity = p > 0.2 ? "0" : "1";
             }
 

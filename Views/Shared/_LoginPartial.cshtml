@@ -5,39 +5,39 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <a class="asc-nav-link" asp-area="" asp-controller="Dashboard" asp-action="Index">
-        <i class="ti ti-layout-dashboard"></i> Dashboard
-    </a>
-    <a class="asc-nav-link" asp-area="" asp-controller="HikeLogs" asp-action="Index">
-        <i class="ti ti-route"></i> My hikes
-    </a>
-    <a class="asc-nav-link" asp-area="" asp-controller="Favorites" asp-action="Index">
-        <i class="ti ti-heart"></i> Saved
-    </a>
-    @if (User.IsInRole("Guide") || User.IsInRole("Admin"))
-    {
-        <a class="asc-nav-link" asp-area="" asp-controller="Guide" asp-action="Index">
-            <i class="ti ti-map-2"></i> My trails
-        </a>
-        <a class="asc-nav-link" asp-area="" asp-controller="Trails" asp-action="Create">
-            <i class="ti ti-plus"></i> Add trail
-        </a>
-    }
-    @if (User.IsInRole("Admin"))
-    {
-        <a class="asc-nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
-            <i class="ti ti-settings"></i> Admin
-        </a>
-    }
-    <a class="asc-nav-link" asp-area="" asp-controller="Profile" asp-action="Index" asp-route-id="@UserManager.GetUserId(User)">
-        <i class="ti ti-user"></i> @UserManager.GetUserName(User)
-    </a>
-    <a class="asc-nav-link" asp-area="" asp-controller="Manage" asp-action="Index">
-        <i class="ti ti-settings"></i> Edit profile
-    </a>
-    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-        <button type="submit" class="btn-ascent-outline">Log out</button>
-    </form>
+    var me = await UserManager.GetUserAsync(User);
+    var name = string.IsNullOrWhiteSpace(me?.DisplayName) ? (me?.UserName ?? "Account") : me.DisplayName;
+    var isGuide = User.IsInRole("Guide") || User.IsInRole("Admin");
+
+    <a class="asc-nav-link" asp-area="" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+
+    <div class="dropdown asc-user">
+        <button type="button" class="asc-user-btn" data-bs-toggle="dropdown" data-bs-offset="0,10" aria-expanded="false">
+            <span class="asc-avatar">@name[0]</span>
+            <span class="asc-user-name">@name</span>
+            <i class="ti ti-chevron-down"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end asc-menu">
+            <a class="dropdown-item" asp-area="" asp-controller="HikeLogs" asp-action="Index"><i class="ti ti-route"></i> My hikes</a>
+            <a class="dropdown-item" asp-area="" asp-controller="Favorites" asp-action="Index"><i class="ti ti-heart"></i> Saved trails</a>
+            <a class="dropdown-item" asp-area="" asp-controller="Profile" asp-action="Index" asp-route-id="@me?.Id"><i class="ti ti-user"></i> Public profile</a>
+            <a class="dropdown-item" asp-area="" asp-controller="Manage" asp-action="Index"><i class="ti ti-adjustments"></i> Account settings</a>
+            @if (isGuide)
+            {
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" asp-area="" asp-controller="Guide" asp-action="Index"><i class="ti ti-map-2"></i> My trails</a>
+                <a class="dropdown-item" asp-area="" asp-controller="Trails" asp-action="Create"><i class="ti ti-plus"></i> Add trail</a>
+            }
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index"><i class="ti ti-shield"></i> Admin</a>
+            }
+            <div class="dropdown-divider"></div>
+            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                <button type="submit" class="dropdown-item"><i class="ti ti-logout"></i> Log out</button>
+            </form>
+        </div>
+    </div>
 }
 else
 {

@@ -56,6 +56,7 @@ public static class DatabaseSeeder
                 environment, "legacy-imported-trails.json", cancellationToken);
             await RemoveLegacyImportedTrailsAsync(
                 context, legacyTrailNames, logger, cancellationToken);
+            await RemoveOrphanTagsAsync(context, logger, cancellationToken);
         }
 
         var users = await ReadSeedFileAsync<DemoUserSeed>(
@@ -383,6 +384,24 @@ public static class DatabaseSeeder
         logger.LogInformation(
             "Removed {Count} legacy externally imported development trails.",
             legacyTrails.Count);
+    }
+
+    // Tags left behind by removed trails (importer route-network codes, old seed
+    // tags) still show in the trail-list filter, so drop any tag no trail uses.
+    private static async Task RemoveOrphanTagsAsync(
+        AscentDbContext context,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        var orphans = await context.Tags
+            .Where(t => !context.TrailTags.Any(tt => tt.TagId == t.Id))
+            .ToListAsync(cancellationToken);
+        if (orphans.Count == 0)
+            return;
+
+        context.Tags.RemoveRange(orphans);
+        await context.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Removed {Count} tags no trail uses.", orphans.Count);
     }
 
     private static async Task SeedReviewsAsync(
