@@ -20,19 +20,10 @@
   <strong>Bootstrap 5</strong>
 </p>
 
----
 
-## 🖥️ Preview
+## Features
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/92a53a78-cfd0-4628-bf7a-839dab2d34ad" alt="Ascent Trail Discovery" width="900">
-</p>
-
----
-
-## ✨ Features
-
-### 🗺️ Trail Discovery
+### Trail Discovery
 
 * Browse a curated catalog of hiking trails across North Macedonia
 * Search, filter, and sort trails
@@ -41,7 +32,7 @@
 * Discover nearby trails using a saved home location or browser geolocation
 * Save trails to favorites
 
-### 🥾 Hiking & Activity
+### Hiking & Activity
 
 * Log completed hikes
 * Upload photos from hiking activities
@@ -49,7 +40,7 @@
 * Track hiking activity through your profile
 * View personal hiking history
 
-### ⭐ Reviews & Profiles
+### Reviews & Profiles
 
 * Review and rate trails
 * Browse reviews from other hikers
@@ -57,7 +48,7 @@
 * Explore uploaded hiking photos
 * View earned badges and activity
 
-### 🧭 Guide & Admin Tools
+### Guide & Admin Tools
 
 * Dedicated Guide tools for trail management
 * Administrative tools for site management
