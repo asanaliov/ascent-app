@@ -56,7 +56,7 @@ public static class DatabaseSeeder
                 environment, "legacy-imported-trails.json", cancellationToken);
             await RemoveLegacyImportedTrailsAsync(
                 context, legacyTrailNames, logger, cancellationToken);
-            await RemoveOrphanTagsAsync(context, logger, cancellationToken);
+            await RemoveOrphanLookupsAsync(context, logger, cancellationToken);
         }
 
         var users = await ReadSeedFileAsync<DemoUserSeed>(
@@ -386,22 +386,27 @@ public static class DatabaseSeeder
             legacyTrails.Count);
     }
 
-    // Tags left behind by removed trails (importer route-network codes, old seed
-    // tags) still show in the trail-list filter, so drop any tag no trail uses.
-    private static async Task RemoveOrphanTagsAsync(
+    // Tags and regions left behind by removed trails (importer route-network codes,
+    // operator names, ASCII spellings) still show in the trail-list filters, so drop
+    // any tag or region no trail uses.
+    private static async Task RemoveOrphanLookupsAsync(
         AscentDbContext context,
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        var orphans = await context.Tags
+        var tags = await context.Tags
             .Where(t => !context.TrailTags.Any(tt => tt.TagId == t.Id))
             .ToListAsync(cancellationToken);
-        if (orphans.Count == 0)
+        var regions = await context.Regions
+            .Where(r => !context.Trails.Any(t => t.RegionId == r.Id))
+            .ToListAsync(cancellationToken);
+        if (tags.Count == 0 && regions.Count == 0)
             return;
 
-        context.Tags.RemoveRange(orphans);
+        context.Tags.RemoveRange(tags);
+        context.Regions.RemoveRange(regions);
         await context.SaveChangesAsync(cancellationToken);
-        logger.LogInformation("Removed {Count} tags no trail uses.", orphans.Count);
+        logger.LogInformation("Removed {Tags} tags and {Regions} regions no trail uses.", tags.Count, regions.Count);
     }
 
     private static async Task SeedReviewsAsync(

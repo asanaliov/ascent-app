@@ -43,17 +43,9 @@ public class TrailsController : Controller
             .Include(t => t.Region)
             .Include(t => t.Reviews)
             .Include(t => t.Photos)
-            .Include(t => t.TrailTags)
+            .Include(t => t.TrailTags).ThenInclude(tt => tt.Tag)
             .AsNoTracking()
             .AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(q))
-        {
-            var term = q.Trim();
-            query = query.Where(t =>
-                EF.Functions.Like(t.Name, $"%{term}%") ||
-                EF.Functions.Like(t.ShortDescription, $"%{term}%"));
-        }
 
         if (regionId.HasValue)
             query = query.Where(t => t.RegionId == regionId);
@@ -65,6 +57,19 @@ public class TrailsController : Controller
             query = query.Where(t => t.TrailTags.Any(tt => tt.TagId == tagId));
 
         var trails = await query.ToListAsync();
+
+        // every word must appear somewhere in the trail's text, ignoring case and
+        // diacritics, so "galicica waterfall" finds Galičica trails tagged Waterfall.
+        var words = (q ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(Fold).ToList();
+        if (words.Count > 0)
+            trails = trails.Where(t =>
+            {
+                var haystack = Fold(string.Join(' ',
+                    t.Name, t.ShortDescription, t.Description, t.Region?.Name, t.Region?.Country,
+                    string.Join(' ', t.TrailTags.Select(tt => tt.Tag?.Name))));
+                return words.All(haystack.Contains);
+            }).ToList();
 
         var liveLocation = lat.HasValue && lng.HasValue;
         double? effLat = lat, effLng = lng;
@@ -300,7 +305,10 @@ public class TrailsController : Controller
             trail.TrailTags.Add(new TrailTag { TagId = tid });
 
         foreach (var photo in trail.Photos.Where(p => form.RemovePhotoIds.Contains(p.Id)).ToList())
+        {
             trail.Photos.Remove(photo);
+            _images.Delete(photo.Url);
+        }
         if (form.CoverPhotoId is int coverId && trail.Photos.Any(p => p.Id == coverId))
             foreach (var photo in trail.Photos)
                 photo.IsCoverImage = photo.Id == coverId;
@@ -365,17 +373,28 @@ public class TrailsController : Controller
     [Authorize(Roles = "Guide,Admin")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var trail = await _context.Trails.FindAsync(id);
+        var trail = await _context.Trails.Include(t => t.Photos).FirstOrDefaultAsync(t => t.Id == id);
         if (trail != null)
         {
             _context.Trails.Remove(trail);
             await _context.SaveChangesAsync();
+            foreach (var photo in trail.Photos)
+                _images.Delete(photo.Url);
         }
 
         return RedirectToAction(nameof(Index));
     }
 
     private bool TrailExists(int id) => _context.Trails.Any(e => e.Id == id);
+
+    // lower-case and strip combining marks: "Galičica" -> "galicica"
+    private static string Fold(string? s)
+    {
+        if (string.IsNullOrEmpty(s)) return "";
+        var chars = s.Normalize(System.Text.NormalizationForm.FormD)
+            .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark);
+        return new string(chars.ToArray()).ToLowerInvariant();
+    }
 
     private void NormalizeRoute(TrailFormViewModel form)
     {
