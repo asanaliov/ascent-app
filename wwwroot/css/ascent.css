@@ -598,10 +598,81 @@ footer.footer {
 .badge-row.earned .progress-fill { background: var(--terracotta); }
 
 .map-box {
-    height: 440px;
-    border-radius: var(--r-card);
+    height: 520px;
+    border-radius: 20px;
     border: 0.5px solid var(--border);
     overflow: hidden; z-index: 0;
+}
+.route-map { position: relative; }
+.route-map .map-box { box-shadow: var(--glass-shadow), inset 0 0 0 1px rgba(255, 255, 255, .5); }
+.map-toolbar {
+    position: absolute;
+    left: 14px;
+    bottom: 34px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: var(--r-pill);
+    background: var(--glass-bg-strong);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+}
+@media (max-width: 767px) {
+    .map-box { height: 420px; }
+    .map-toolbar { left: 10px; right: 10px; bottom: 28px; flex-wrap: wrap; border-radius: 18px; }
+}
+
+/* maplibre chrome as glass */
+.maplibregl-ctrl-group {
+    background: var(--glass-bg-strong) !important;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px !important;
+    box-shadow: var(--glass-shadow) !important;
+    overflow: hidden;
+}
+.maplibregl-ctrl-group button { background: transparent !important; }
+.maplibregl-ctrl-group button + button { border-top: 1px solid rgba(23, 53, 43, .1) !important; }
+.maplibregl-ctrl-scale {
+    border-color: rgba(23, 53, 43, .5) !important;
+    background: rgba(255, 255, 255, .6) !important;
+    color: var(--text-secondary) !important;
+    font-size: 11px !important;
+    border-radius: 0 0 6px 6px;
+}
+.maplibregl-ctrl-attrib { background: rgba(255, 255, 255, .7) !important; font-size: 11px; }
+
+/* markers */
+.asc-marker { display: flex; align-items: center; gap: 6px; }
+.asc-marker-dot {
+    display: grid;
+    place-items: center;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--forest);
+    color: #fff;
+    font-size: 15px;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+}
+.asc-marker-end .asc-marker-dot { background: var(--terracotta); }
+.asc-marker-label {
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, .85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, .8);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--forest-dark);
+    white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
 }
 .map-box-sm {
     height: 180px;
@@ -618,23 +689,23 @@ footer.footer {
     z-index: 0;
 }
 
-.asc-basemap {
+.maplibregl-ctrl-group.asc-basemap {
     display: flex;
+    padding: 3px;
+    border-radius: var(--r-pill) !important;
 }
-.asc-basemap button {
-    width: auto;
-    height: auto;
-    padding: 5px 11px;
+.maplibregl-ctrl-group.asc-basemap button {
+    width: auto !important;
+    height: auto !important;
+    padding: 4px 11px;
+    border: 0 !important;
+    border-radius: var(--r-pill);
     font-size: 12px;
     font-weight: 600;
-    background: #fff;
-    border: none;
-    border-right: 1px solid #E0DACA;
-    color: #2F4A2C;
+    color: var(--text-secondary);
     cursor: pointer;
 }
-.asc-basemap button:last-child { border-right: none; }
-.asc-basemap button.active { background: var(--forest); color: #fff; }
+.maplibregl-ctrl-group.asc-basemap button.active { background: var(--forest) !important; color: #fff; }
 
 .asc-sim-dot {
     width: 16px;
@@ -642,7 +713,7 @@ footer.footer {
     border-radius: 50%;
     background: var(--terracotta);
     border: 3px solid #fff;
-    box-shadow: 0 0 0 2px rgba(176, 94, 59, .5), 0 2px 6px rgba(0, 0, 0, .4);
+    box-shadow: 0 0 0 4px rgba(46, 110, 142, .35), 0 2px 6px rgba(0, 0, 0, .4);
 }
 .dist-badge {
     font-size: 13px;
@@ -1168,7 +1239,7 @@ footer.footer {
     font-weight: 600;
     cursor: pointer;
     border: 0.5px solid var(--border-strong);
-    background: var(--surface);
+    background: rgba(255, 255, 255, .8);
     color: var(--forest-dark);
     transition: border-color .15s, color .15s;
 }
@@ -1183,7 +1254,7 @@ footer.footer {
 }
 .speed-opt {
     border: 0;
-    background: var(--surface);
+    background: rgba(255, 255, 255, .8);
     color: var(--text-secondary);
     font-size: 12px;
     font-weight: 600;
