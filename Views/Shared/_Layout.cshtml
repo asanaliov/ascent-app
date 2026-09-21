@@ -53,9 +53,42 @@ else
     </div>
 }
 
-<footer class="footer py-3 mt-4">
+<footer class="footer mt-5">
     <div class="container">
-        &copy; 2026 Ascent &middot; <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+        <div class="ft-grid">
+            <div class="ft-brand">
+                <a class="asc-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span class="mark"><i class="ti ti-mountain"></i></span>
+                    <span class="wm">Ascent<small>NORTH MACEDONIA</small></span>
+                </a>
+                <p>Real hiking routes with distance, elevation and a difficulty computed from the numbers.</p>
+            </div>
+            <div class="ft-col">
+                <h4>Explore</h4>
+                <a asp-area="" asp-controller="Trails" asp-action="Index">All trails</a>
+                <a asp-area="" asp-controller="Trails" asp-action="Nearby">Trails near me</a>
+                <a asp-area="" asp-controller="Community" asp-action="Index">Community</a>
+            </div>
+            <div class="ft-col">
+                <h4>Your account</h4>
+                <a asp-area="" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                <a asp-area="" asp-controller="HikeLogs" asp-action="Index">My hikes</a>
+                <a asp-area="" asp-controller="Favorites" asp-action="Index">Saved trails</a>
+            </div>
+            <div class="ft-col">
+                <h4>Data</h4>
+                <a href="https://www.openstreetmap.org/copyright" rel="noopener" target="_blank">Map data © OpenStreetMap</a>
+                <a href="https://brouter.de/" rel="noopener" target="_blank">Routes by BRouter</a>
+                <a href="https://commons.wikimedia.org/" rel="noopener" target="_blank">Photos via Wikimedia Commons</a>
+            </div>
+        </div>
+        <div class="ft-bottom">
+            <span>&copy; 2026 Ascent. Designed and built by <a href="https://github.com/asanaliov" rel="noopener" target="_blank">Asan Aliov</a>.</span>
+            <span>
+                <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                <a href="https://github.com/asanaliov/ascent-app" rel="noopener" target="_blank"><i class="ti ti-brand-github"></i> Source</a>
+            </span>
+        </div>
     </div>
 </footer>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
