@@ -223,62 +223,10 @@
     </div>
 }
 
-@if (canManage)
+@if (canManage && TempData["TrailPhotoError"] is string photoError)
 {
-    <div class="asc-panel mt-4">
-        <p class="eyebrow mb-2"><i class="ti ti-photo"></i> MANAGE PHOTOS</p>
-        <p class="text-muted mb-3" style="font-size:13px">Photos you add appear in the gallery at the top of the page.</p>
-
-        @if (TempData["TrailPhotoError"] is string photoError)
-        {
-            <div class="asc-panel mb-3" style="border-color:var(--terracotta)">
-                <i class="ti ti-alert-triangle" style="color:var(--terracotta)"></i> @photoError
-            </div>
-        }
-
-        @if (Model.Photos.Any())
-        {
-            <div class="photo-strip">
-                @foreach (var p in Model.Photos)
-                {
-                    <figure class="photo-thumb">
-                        <img src="@p.Url"
-                             alt="@(p.Caption ?? Model.Name)"
-                             onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';" />
-                        @if (canManage)
-                        {
-                            <form asp-controller="TrailPhotos" asp-action="Delete" asp-route-id="@p.Id" method="post"
-                                  onsubmit="return confirm('Delete this photo?');">
-                                <button type="submit" class="photo-del" title="Delete photo"><i class="ti ti-x"></i></button>
-                            </form>
-                        }
-                        @if (!string.IsNullOrWhiteSpace(p.Caption))
-                        {
-                            <figcaption>@p.Caption</figcaption>
-                        }
-                    </figure>
-                }
-            </div>
-        }
-        else
-        {
-            <p class="text-muted mb-0" style="font-size:14px">No photos yet — add the first one below.</p>
-        }
-
-        @if (canManage)
-        {
-            <form asp-controller="TrailPhotos" asp-action="Add" method="post" enctype="multipart/form-data"
-                  class="d-flex gap-2 align-items-center mt-3 flex-wrap">
-                <input type="hidden" name="trailId" value="@Model.Id" />
-                <input type="file" name="photoFile" accept="image/png,image/jpeg,image/webp"
-                       class="form-control form-control-sm" style="max-width:240px" required />
-                <input type="text" name="caption" placeholder="Caption (optional)"
-                       class="form-control form-control-sm" style="max-width:200px" maxlength="200" />
-                <button type="submit" class="btn-ascent-outline" style="padding:6px 12px;font-size:13px">
-                    <i class="ti ti-camera-plus"></i> Add photo
-                </button>
-            </form>
-        }
+    <div class="asc-panel mt-4" style="border-color:var(--terracotta)">
+        <i class="ti ti-alert-triangle" style="color:var(--terracotta)"></i> @photoError
     </div>
 }
 

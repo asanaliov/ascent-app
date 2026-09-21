@@ -1,0 +1,129 @@
+@model ascent_app.ViewModels.TrailFormViewModel
+@using System.Text.Json
+@{
+    var isEdit = Model.Id > 0;
+    var bins = JsonSerializer.Serialize(ViewBag.DifficultyBins);
+}
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+@if (isEdit)
+{
+    <input type="hidden" asp-for="Id" />
+}
+
+<div class="tf-grid">
+    <div class="tf-main">
+        <section class="asc-panel">
+            <p class="eyebrow mb-3">BASICS</p>
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ShortDescription" class="form-label"></label>
+                <input asp-for="ShortDescription" class="form-control" placeholder="One sentence hikers see on the trail card" />
+                <span asp-validation-for="ShortDescription" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="6"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="mb-0">
+                <label asp-for="RegionId" class="form-label"></label>
+                <select asp-for="RegionId" class="form-select" asp-items="ViewBag.RegionId">
+                    @if (!isEdit)
+                    {
+                        <option value="">Choose a region</option>
+                    }
+                </select>
+                <span asp-validation-for="RegionId" class="text-danger"></span>
+            </div>
+        </section>
+
+        <section class="asc-panel">
+            <p class="eyebrow mb-3">THE NUMBERS</p>
+            <div class="row">
+                <div class="col-sm-4 mb-3">
+                    <label asp-for="DistanceKm" class="form-label"></label>
+                    <input asp-for="DistanceKm" class="form-control" id="tfDistance" />
+                    <span asp-validation-for="DistanceKm" class="text-danger"></span>
+                </div>
+                <div class="col-sm-4 mb-3">
+                    <label asp-for="ElevationGainM" class="form-label"></label>
+                    <input asp-for="ElevationGainM" class="form-control" id="tfGain" />
+                    <span asp-validation-for="ElevationGainM" class="text-danger"></span>
+                </div>
+                <div class="col-sm-4 mb-3">
+                    <label class="form-label">Difficulty</label>
+                    <div class="tf-diff" id="tfDiff" data-bins='@Html.Raw(bins)'>
+                        <span class="diff-inline" id="tfDiffLabel">—</span>
+                        <span class="text-muted" id="tfDiffScore"></span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-muted mb-0" style="font-size:13px">
+                <i class="ti ti-info-circle"></i>
+                Difficulty is computed from distance and elevation gain when you save; it cannot be set by hand.
+            </p>
+        </section>
+
+        <section class="asc-panel">
+            <p class="eyebrow mb-3">LOCATION AND ROUTE</p>
+            <div class="row">
+                <div class="col-sm-6 mb-3">
+                    <label asp-for="Latitude" class="form-label">Trailhead latitude</label>
+                    <input asp-for="Latitude" class="form-control" />
+                    <span asp-validation-for="Latitude" class="text-danger"></span>
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <label asp-for="Longitude" class="form-label">Trailhead longitude</label>
+                    <input asp-for="Longitude" class="form-control" />
+                    <span asp-validation-for="Longitude" class="text-danger"></span>
+                </div>
+            </div>
+            <partial name="_RouteEditor" model="Model" />
+        </section>
+
+        <section class="asc-panel">
+            <p class="eyebrow mb-3">TAGS</p>
+            <partial name="_TagPicker" model="Model" />
+        </section>
+    </div>
+
+    <aside class="tf-side">
+        <section class="asc-panel">
+            <p class="eyebrow mb-3">PHOTOS</p>
+            @if (Model.ExistingPhotos.Count > 0)
+            {
+                <div class="tf-photos">
+                    @foreach (var p in Model.ExistingPhotos)
+                    {
+                        <div class="tf-photo">
+                            <img src="@p.Url" alt="@(p.Caption ?? "")" onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';" />
+                            <label class="tf-photo-cover" title="Use as cover photo">
+                                <input type="radio" name="CoverPhotoId" value="@p.Id" checked="@p.IsCoverImage" />
+                                <span>Cover</span>
+                            </label>
+                            <label class="tf-photo-remove" title="Remove on save">
+                                <input type="checkbox" name="RemovePhotoIds" value="@p.Id" />
+                                <span><i class="ti ti-trash"></i></span>
+                            </label>
+                        </div>
+                    }
+                </div>
+                <p class="text-muted mb-3" style="font-size:12px">Pick the cover, or tick the bin to remove a photo when you save.</p>
+            }
+            else
+            {
+                <p class="text-muted mb-3" style="font-size:13px">No photos yet. The first one you add becomes the cover.</p>
+            }
+            <label asp-for="PhotoFiles" class="form-label"></label>
+            <input asp-for="PhotoFiles" type="file" class="form-control" multiple accept="image/png,image/jpeg,image/webp" id="tfFiles" />
+            <div class="tf-preview" id="tfPreview"></div>
+            <p class="text-muted mb-0 mt-2" style="font-size:12px">JPEG, PNG or WebP, up to 5 MB each. Select several at once.</p>
+            <span asp-validation-for="PhotoFiles" class="text-danger"></span>
+        </section>
+    </aside>
+</div>

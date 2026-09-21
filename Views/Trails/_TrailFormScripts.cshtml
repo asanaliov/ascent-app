@@ -1,0 +1,34 @@
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="~/js/ascent-map.js" asp-append-version="true"></script>
+<script src="~/js/ascent-route-editor.js" asp-append-version="true"></script>
+<script>
+    AscentRouteEditor({
+        mapId: 'routeeditor', inputId: 'RouteGeoJson',
+        undoId: 'routeundo', clearId: 'routeclear', countId: 'routecount',
+    });
+
+    (function () {
+        const dist = document.getElementById('tfDistance'), gain = document.getElementById('tfGain');
+        const box = document.getElementById('tfDiff'), label = document.getElementById('tfDiffLabel'), out = document.getElementById('tfDiffScore');
+        const bins = JSON.parse(box.dataset.bins);
+        function update() {
+            const km = parseFloat(dist.value), m = parseFloat(gain.value);
+            if (!(km > 0) || !(m >= 0)) { label.textContent = '—'; label.className = 'diff-inline'; out.textContent = ''; return; }
+            const score = Math.sqrt(2 * m * km);
+            const bin = bins.filter(b => score >= b.MinScore).pop() || bins[0];
+            label.textContent = bin.Label; label.className = 'diff-inline ' + bin.BadgeClass;
+            out.textContent = 'score ' + Math.round(score);
+        }
+        dist.addEventListener('input', update); gain.addEventListener('input', update); update();
+
+        const files = document.getElementById('tfFiles'), preview = document.getElementById('tfPreview');
+        files.addEventListener('change', () => {
+            preview.innerHTML = '';
+            for (const f of files.files) {
+                const img = document.createElement('img'); img.src = URL.createObjectURL(f); img.onload = () => URL.revokeObjectURL(img.src);
+                preview.appendChild(img);
+            }
+        });
+    })();
+</script>
