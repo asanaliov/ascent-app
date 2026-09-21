@@ -1,6 +1,6 @@
 :root {
-    --bg: #EDF1EE;
-    --bg-rgb: 237, 241, 238;
+    --bg: #CDD9D1;
+    --bg-rgb: 205, 217, 209;
     --paper: #FFFFFF;
     --surface: #FFFFFF;
     --surface-alt: #E1E7E3;
@@ -35,11 +35,11 @@
 body {
     /* soft colour fields the glass surfaces refract; fixed so panels shift over them while scrolling */
     background:
-        radial-gradient(900px 600px at 8% -5%, rgba(44, 95, 74, 0.22), transparent 60%),
-        radial-gradient(800px 560px at 100% 5%, rgba(46, 110, 142, 0.20), transparent 58%),
-        radial-gradient(700px 500px at 50% 60%, rgba(194, 178, 128, 0.16), transparent 60%),
-        radial-gradient(800px 600px at 5% 100%, rgba(46, 110, 142, 0.14), transparent 60%),
-        radial-gradient(700px 500px at 95% 95%, rgba(44, 95, 74, 0.18), transparent 60%),
+        radial-gradient(1000px 640px at 6% -8%, rgba(44, 95, 74, 0.38), transparent 62%),
+        radial-gradient(900px 600px at 102% 2%, rgba(46, 110, 142, 0.34), transparent 60%),
+        radial-gradient(800px 560px at 55% 55%, rgba(206, 186, 120, 0.22), transparent 62%),
+        radial-gradient(900px 640px at 0% 105%, rgba(46, 110, 142, 0.26), transparent 60%),
+        radial-gradient(800px 560px at 100% 100%, rgba(44, 95, 74, 0.30), transparent 60%),
         var(--bg);
     background-attachment: fixed;
     color: var(--text);
@@ -476,7 +476,26 @@ footer.footer {
 }
 .review-del:hover { color: var(--terracotta); background: var(--surface-alt); }
 
-.trail-card-wrap { position: relative; height: 100%; }
+.trail-card-wrap { position: relative; height: 100%; display: flex; flex-direction: column; gap: 8px; }
+.trail-card-wrap > .trail-card { flex: 1; }
+.tc-admin {
+    display: flex;
+    gap: 6px;
+}
+.tc-admin a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+}
+.tc-admin a:hover { color: var(--forest-dark); background: rgba(255, 255, 255, .9); }
+.tc-admin a:last-child:hover { color: #9E4B3F; }
 .trail-card-wrap > .fav-form {
     position: absolute;
     top: 10px; right: 10px;
