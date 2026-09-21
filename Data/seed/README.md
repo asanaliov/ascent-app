@@ -25,9 +25,11 @@ Descriptions and headline route figures were reviewed against these sources:
 
 Trailheads and destinations are OpenStreetMap features (Nominatim lookups),
 and each `routeGeometry` is a BRouter `hiking-mountain`/`trekking` route over
-OSM paths between them. `distanceKm` and `elevationGainM` come from that
-routing (round trips are routed out and back, so gain is cumulative), and
-`difficulty` is the label the `DifficultyService` formula gives those numbers.
+OSM paths between them. `distanceKm` is that route's length (round trips are
+routed out and back), `elevationGainM` is the net climb from the trailhead to
+the route's highest point (the figure guides and park sites quote, not a
+cumulative DEM sum), and `difficulty` is the label the `DifficultyService`
+formula gives those numbers.
 Berovo Lake – Dvorište – Bela Voda keeps the figures published by Visit
 Berovo and has no geometry, because its forest paths are not in OSM. This is
 still not a navigation-grade GPX track: users should obtain current official
