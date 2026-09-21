@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using ascent_app.Models;
+using ascent_app.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,7 +57,7 @@ public static class DatabaseSeeder
                 environment, "legacy-imported-trails.json", cancellationToken);
             await RemoveLegacyImportedTrailsAsync(
                 context, legacyTrailNames, logger, cancellationToken);
-            await RemoveOrphanTagsAsync(context, logger, cancellationToken);
+            await RemoveOrphanLookupsAsync(context, logger, cancellationToken);
         }
 
         var users = await ReadSeedFileAsync<DemoUserSeed>(
@@ -83,6 +84,8 @@ public static class DatabaseSeeder
             await ReadSeedFileAsync<DemoHikeEventSeed>(
                 environment, "demo-hike-events.json", cancellationToken),
             cancellationToken);
+        await AwardDemoBadgesAsync(
+            context, provider.GetRequiredService<IBadgeService>(), logger, cancellationToken);
 
         logger.LogInformation(
             "Development seed ready: {Trails} trails, {TrailImages} trail images, " +
@@ -386,22 +389,27 @@ public static class DatabaseSeeder
             legacyTrails.Count);
     }
 
-    // Tags left behind by removed trails (importer route-network codes, old seed
-    // tags) still show in the trail-list filter, so drop any tag no trail uses.
-    private static async Task RemoveOrphanTagsAsync(
+    // Tags and regions left behind by removed trails (importer route-network codes,
+    // operator names, ASCII spellings) still show in the trail-list filters, so drop
+    // any tag or region no trail uses.
+    private static async Task RemoveOrphanLookupsAsync(
         AscentDbContext context,
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        var orphans = await context.Tags
+        var tags = await context.Tags
             .Where(t => !context.TrailTags.Any(tt => tt.TagId == t.Id))
             .ToListAsync(cancellationToken);
-        if (orphans.Count == 0)
+        var regions = await context.Regions
+            .Where(r => !context.Trails.Any(t => t.RegionId == r.Id))
+            .ToListAsync(cancellationToken);
+        if (tags.Count == 0 && regions.Count == 0)
             return;
 
-        context.Tags.RemoveRange(orphans);
+        context.Tags.RemoveRange(tags);
+        context.Regions.RemoveRange(regions);
         await context.SaveChangesAsync(cancellationToken);
-        logger.LogInformation("Removed {Count} tags no trail uses.", orphans.Count);
+        logger.LogInformation("Removed {Tags} tags and {Regions} regions no trail uses.", tags.Count, regions.Count);
     }
 
     private static async Task SeedReviewsAsync(
@@ -496,6 +504,38 @@ public static class DatabaseSeeder
         }
 
         await context.SaveChangesAsync(cancellationToken);
+    }
+
+    // Demo hike logs are inserted directly, so run the same badge evaluation a real
+    // hike log triggers; awards are backdated to the hiker's latest logged hike.
+    private static async Task AwardDemoBadgesAsync(
+        AscentDbContext context,
+        IBadgeService badges,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        var hikers = await context.HikeLogs
+            .Where(h => h.IsDemoData)
+            .GroupBy(h => h.UserId)
+            .Select(g => new { UserId = g.Key, LastHike = g.Max(h => h.HikedOn) })
+            .ToListAsync(cancellationToken);
+
+        var awarded = 0;
+        foreach (var hiker in hikers)
+        {
+            var earned = await badges.EvaluateAsync(hiker.UserId);
+            if (earned.Count == 0)
+                continue;
+
+            var ids = earned.Select(b => b.Id).ToList();
+            await context.UserBadges
+                .Where(ub => ub.UserId == hiker.UserId && ids.Contains(ub.BadgeId))
+                .ExecuteUpdateAsync(u => u.SetProperty(ub => ub.AwardedAt, hiker.LastHike), cancellationToken);
+            awarded += earned.Count;
+        }
+
+        if (awarded > 0)
+            logger.LogInformation("Awarded {Count} badges to demo hikers.", awarded);
     }
 
     private static async Task SeedHikeEventsAsync(

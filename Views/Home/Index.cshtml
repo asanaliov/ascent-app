@@ -2,6 +2,7 @@
 @using System.Globalization
 @{
     ViewData["Title"] = "Home";
+    ViewData["FullWidth"] = true;
     string Pct(double v) => v.ToString(CultureInfo.InvariantCulture);
 
     // Ridge: four picks spread across the gain range, lowest climb first, so the line
@@ -43,9 +44,9 @@
                      onerror="this.remove();"/>
             }
         </div>
+        <div class="container ascent-inner">
         <div class="ascent-copy">
-            <h1>Know the climb<br>before you go.</h1>
-            <p>Real hiking routes with distance, elevation and a difficulty that is computed from the numbers, not guessed. Sorted by what is nearest to you.</p>
+            <h1>Know the trail<br>before you go.</h1>
             <div class="ascent-actions">
                 <a class="btn-ascent" asp-controller="Trails" asp-action="Index">Browse trails</a>
                 <a class="btn-ascent-outline" asp-controller="Trails" asp-action="Nearby"><i class="ti ti-navigation"></i> Trails near me</a>
@@ -86,9 +87,11 @@
                 <span class="climber-alt"><b id="climber-m">0</b> m up</span>
             </div>
         </div>
+        </div>
     </div>
 </section>
 
+<div class="container">
 <section class="picks">
     <div class="picks-head">
         <h2>Hikers' picks</h2>
@@ -110,7 +113,7 @@
                 <span class="pick-rating">
                     @if (t.AverageRating > 0)
                     {
-                        <i class="ti ti-star-filled"></i> @t.AverageRating.ToString("0.0")
+                        <i class="ti ti-star"></i> @t.AverageRating.ToString("0.0")
                     }
                     else
                     {
@@ -145,18 +148,24 @@
         </div>
     </section>
 }
+</div>
 
 @section Styles {
     <style>
         .ascent-scroll { height: 280vh; margin: 0 0 24px; }
         .ascent-stage {
             position: sticky;
-            top: 0;
-            height: calc(100vh - 75px);
-            height: calc(100svh - 75px);
+            top: var(--nav-h);
+            height: calc(100vh - var(--nav-h));
+            height: calc(100svh - var(--nav-h));
+            overflow: hidden;
+        }
+        .ascent-inner {
+            position: relative;
+            z-index: 1;
+            height: 100%;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
         .stage-bg { position: absolute; inset: 0; z-index: 0; }
@@ -174,8 +183,8 @@
             position: absolute;
             inset: 0;
             background:
-                linear-gradient(90deg, rgba(var(--bg-rgb), .97) 0%, rgba(var(--bg-rgb), .8) 38%, rgba(var(--bg-rgb), .3) 68%, rgba(var(--bg-rgb), .35) 88%, rgba(var(--bg-rgb), .95) 100%),
-                linear-gradient(180deg, rgba(var(--bg-rgb), .9) 0%, rgba(var(--bg-rgb), .2) 28%, rgba(var(--bg-rgb), .1) 50%, rgba(var(--bg-rgb), .92) 100%);
+                linear-gradient(90deg, rgba(var(--bg-rgb), .92) 0%, rgba(var(--bg-rgb), .7) 30%, rgba(var(--bg-rgb), .25) 55%, rgba(var(--bg-rgb), .2) 100%),
+                linear-gradient(180deg, rgba(var(--bg-rgb), .55) 0%, rgba(var(--bg-rgb), .15) 25%, rgba(var(--bg-rgb), .1) 55%, rgba(var(--bg-rgb), 1) 100%);
         }
         .ascent-copy { padding-top: clamp(28px, 7vh, 72px); max-width: 620px; position: relative; z-index: 2; }
         .ascent-copy h1 {
@@ -288,7 +297,7 @@
         .scroll-hint .ti { animation: hint-bob 1.6s ease-in-out infinite; }
         @@keyframes hint-bob { 50% { transform: translateY(4px); } }
 
-        .picks { margin-top: 32px; }
+        .picks { margin-top: 8px; }
         .picks-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
         .picks-head h2 { font-size: 30px; margin: 0; }
         .picks-head a { font-size: 14px; }
@@ -448,8 +457,9 @@
                 if (ticking) return;
                 ticking = true;
                 requestAnimationFrame(() => {
-                    const travel = section.offsetHeight - window.innerHeight;
-                    const scrolled = -section.getBoundingClientRect().top;
+                    const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--nav-h")) || 0;
+                    const travel = section.offsetHeight - (window.innerHeight - navH);
+                    const scrolled = navH - section.getBoundingClientRect().top;
                     const p = Math.min(Math.max(scrolled / travel, 0), 1);
                     render(0.06 + p * 0.94);
                     ticking = false;

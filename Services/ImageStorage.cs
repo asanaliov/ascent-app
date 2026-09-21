@@ -5,6 +5,7 @@ namespace ascent_app.Services;
 public interface IImageStorage
 {
     Task<(bool Ok, string? Url, string? Error)> SaveAsync(IFormFile file, string subfolder);
+    void Delete(string? url);
 }
 
 public class ImageStorage : IImageStorage
@@ -38,5 +39,15 @@ public class ImageStorage : IImageStorage
             await file.CopyToAsync(stream);
 
         return (true, $"/uploads/{subfolder}/{name}", null);
+    }
+    public void Delete(string? url)
+    {
+        if (string.IsNullOrEmpty(url) || !url.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        var root = Path.GetFullPath(Path.Combine(_env.WebRootPath, "uploads"));
+        var path = Path.GetFullPath(Path.Combine(_env.WebRootPath, url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar)));
+        if (path.StartsWith(root, StringComparison.OrdinalIgnoreCase) && File.Exists(path))
+            File.Delete(path);
     }
 }

@@ -130,7 +130,7 @@
                 </span>
             </div>
             <div class="row-item">
-                <span class="k"><i class="ti ti-current-location"></i> Trailhead</span>
+                <span class="k"><i class="ti ti-current-location"></i> Start point</span>
                 <span class="v" style="font-size:14px;font-family:var(--font-body)">@Model.Latitude.ToString("0.000"), @Model.Longitude.ToString("0.000")</span>
             </div>
         </div>
@@ -140,17 +140,17 @@
     </aside>
 </div>
 
-<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+<div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-2">
     <p class="eyebrow mb-0"><i class="ti ti-route"></i> ROUTE</p>
+    <span class="text-muted" style="font-size:12px">Right-drag or use the compass to rotate and tilt. Ctrl + scroll to zoom.</span>
+</div>
+<div class="route-map mb-4">
+    <div id="routemap" class="map-box"></div>
     @if (!string.IsNullOrEmpty(Model.RouteGeoJson))
     {
-        <div class="map-actions">
-            <span class="text-muted me-1" style="font-size:13px">
-                <i class="ti ti-map-pin-filled" style="color:var(--forest)"></i> Trailhead
-                &nbsp;<i class="ti ti-flag" style="color:var(--terracotta)"></i> Summit
-            </span>
+        <div class="map-toolbar">
             <button id="simbtn" type="button" class="btn-play">
-                <i class="ti ti-player-play-filled"></i> Play
+                <i class="ti ti-player-play"></i> Play
             </button>
             <button id="followbtn" type="button" class="btn-follow">
                 <i class="ti ti-drone"></i> Follow route
@@ -164,10 +164,6 @@
         </div>
     }
 </div>
-<div id="routemap" class="map-box mb-2"></div>
-<p class="text-muted mb-4" style="font-size:12px">
-    <i class="ti ti-rotate-360"></i> Right-drag (or the compass) to rotate &amp; tilt · Ctrl+scroll to zoom
-</p>
 
 <div class="row">
     <div class="col-md-9">
@@ -374,8 +370,8 @@
             AscentMap.setBasemap(map, 'bm-satellite');
             const coords = AscentMap.addRoute(map, route, { width: 5 });
             if (coords) {
-                AscentMap.marker(map, coords[0], { color: AscentMap.GREEN, popup: 'Trailhead' });
-                AscentMap.marker(map, coords[coords.length - 1], { color: AscentMap.TERRACOTTA, popup: name + ' — summit' });
+                AscentMap.marker(map, coords[0], { icon: 'ti-flag-3', kind: 'start', label: 'Start' });
+                AscentMap.marker(map, coords[coords.length - 1], { icon: 'ti-flag-check', kind: 'end', label: 'End' });
                 AscentMap.fit(map, coords, { padding: 70, pitch: 60, bearing: -18 });
 
                 const playBtn = document.getElementById('simbtn');
@@ -385,10 +381,10 @@
                 let speed = 1;
 
                 const playHtml = m => m
-                    ? '<i class="ti ti-player-stop-filled"></i> Stop'
-                    : '<i class="ti ti-player-play-filled"></i> Play';
+                    ? '<i class="ti ti-player-stop"></i> Stop'
+                    : '<i class="ti ti-player-play"></i> Play';
                 const followHtml = m => m
-                    ? '<i class="ti ti-player-stop-filled"></i> Stop'
+                    ? '<i class="ti ti-player-stop"></i> Stop'
                     : '<i class="ti ti-drone"></i> Follow route';
 
                 function paint() {

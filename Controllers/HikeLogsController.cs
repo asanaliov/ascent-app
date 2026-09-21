@@ -116,12 +116,15 @@ public class HikeLogsController : Controller
     {
         var userId = _userManager.GetUserId(User)!;
         var hike = await _context.HikeLogs
+            .Include(h => h.Photos)
             .FirstOrDefaultAsync(h => h.Id == id && h.UserId == userId);
 
         if (hike != null)
         {
             _context.HikeLogs.Remove(hike);
             await _context.SaveChangesAsync();
+            foreach (var photo in hike.Photos)
+                _images.Delete(photo.Url);
         }
 
         return RedirectToAction(nameof(Index));
@@ -166,6 +169,7 @@ public class HikeLogsController : Controller
         {
             _context.Photos.Remove(photo);
             await _context.SaveChangesAsync();
+            _images.Delete(photo.Url);
         }
 
         return RedirectToAction(nameof(Index));

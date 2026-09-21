@@ -41,9 +41,9 @@
     </a>
     @if (canManage)
     {
-        <div class="d-flex gap-3 mt-2 px-1" style="font-size:13px">
-            <a asp-controller="Trails" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
-            <a asp-controller="Trails" asp-action="Delete" asp-route-id="@Model.Id" class="text-muted">Delete</a>
+        <div class="tc-admin">
+            <a asp-controller="Trails" asp-action="Edit" asp-route-id="@Model.Id"><i class="ti ti-edit"></i> Edit</a>
+            <a asp-controller="Trails" asp-action="Delete" asp-route-id="@Model.Id"><i class="ti ti-trash"></i> Delete</a>
         </div>
     }
 </div>

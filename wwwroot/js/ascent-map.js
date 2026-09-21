@@ -1,6 +1,8 @@
 window.AscentMap = (function () {
-    const GREEN = '#2F4A2C';
-    const TERRACOTTA = '#B05E3B';
+    // brand colours come from the CSS tokens so the maps never drift from the palette
+    const css = getComputedStyle(document.documentElement);
+    const GREEN = css.getPropertyValue('--forest').trim() || '#2C5F4A';
+    const TERRACOTTA = css.getPropertyValue('--terracotta').trim() || '#2E6E8E';
     const NM_CENTER = [21.7, 41.6];
     const NM_ZOOM = 7;
 
@@ -119,18 +121,36 @@ window.AscentMap = (function () {
         const g = normalize(geojson);
         if (!g) return null;
         const id = 'route-' + (routeSeq++);
+        const width = opts.width || 5;
         map.addSource(id, { type: 'geojson', data: { type: 'Feature', geometry: g, properties: {} } });
+        // a light casing under the line keeps it legible on satellite imagery and dark terrain
+        map.addLayer({
+            id: id + '-casing', type: 'line', source: id,
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+            paint: { 'line-color': '#ffffff', 'line-width': width + 4, 'line-opacity': 0.85 },
+        });
         map.addLayer({
             id: id + '-line', type: 'line', source: id,
             layout: { 'line-cap': 'round', 'line-join': 'round' },
-            paint: { 'line-color': opts.color || GREEN, 'line-width': opts.width || 5, 'line-opacity': 0.9 },
+            paint: { 'line-color': opts.color || GREEN, 'line-width': width, 'line-opacity': 0.95 },
         });
         return g.coordinates;
     }
 
     function marker(map, lngLat, opts) {
         opts = opts || {};
-        const m = new maplibregl.Marker({ color: opts.color || GREEN }).setLngLat(lngLat);
+        let m;
+        if (opts.icon) {
+            // glass disc with a tabler icon and an always-visible label, e.g. start / end
+            const el = document.createElement('div');
+            el.className = 'asc-marker' + (opts.kind ? ' asc-marker-' + opts.kind : '');
+            el.innerHTML = '<span class="asc-marker-dot"><i class="ti ' + opts.icon + '"></i></span>'
+                + (opts.label ? '<span class="asc-marker-label">' + opts.label + '</span>' : '');
+            // opacityWhenCovered: terrain occlusion would otherwise ghost markers down in valleys
+            m = new maplibregl.Marker({ element: el, anchor: 'left', offset: [-14, 0], opacityWhenCovered: '1' }).setLngLat(lngLat);
+        } else {
+            m = new maplibregl.Marker({ color: opts.color || GREEN }).setLngLat(lngLat);
+        }
         if (opts.popup) m.setPopup(new maplibregl.Popup({ offset: 24 }).setHTML(opts.popup));
         m.addTo(map);
         return m;
@@ -202,7 +222,7 @@ window.AscentMap = (function () {
             map.addLayer({
                 id: PROG + '-l', type: 'line', source: PROG,
                 layout: { 'line-cap': 'round', 'line-join': 'round' },
-                paint: { 'line-color': opts.progressColor || TERRACOTTA, 'line-width': 6 },
+                paint: { 'line-color': opts.progressColor || TERRACOTTA, 'line-width': 7 },
             });
         }
 
@@ -264,7 +284,8 @@ window.AscentMap = (function () {
         if (!coords || !coords.length) { map.jumpTo({ center: NM_CENTER, zoom: NM_ZOOM }); return; }
         const b = new maplibregl.LngLatBounds(coords[0], coords[0]);
         coords.forEach(c => b.extend(c));
-        map.fitBounds(b, { padding: opts.padding || 40, maxZoom: opts.maxZoom || 15, animate: false });
+        const pad = opts.padding || 40;
+        map.fitBounds(b, { padding: typeof pad === 'number' ? { top: pad + 50, bottom: pad, left: pad, right: pad } : pad, maxZoom: opts.maxZoom || 15, animate: false });
         if (opts.pitch != null) map.setPitch(opts.pitch);
         if (opts.bearing != null) map.setBearing(opts.bearing);
     }

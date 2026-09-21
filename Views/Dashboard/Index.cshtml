@@ -3,113 +3,241 @@
 @{
     ViewData["Title"] = "Dashboard";
     var currentUserId = UserManager.GetUserId(User);
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    var korabs = Model.TotalElevationM / 2764.0;
+    var last = Model.RecentHikes.FirstOrDefault();
+    var mapTrails = System.Text.Json.JsonSerializer.Serialize(Model.HikedTrails.Select(t => new
+    {
+        name = t.Name, lat = t.Latitude, lng = t.Longitude, route = t.RouteGeoJson,
+        diff = t.Difficulty?.Label ?? "", url = Url.Action("Details", "Trails", new { id = t.Id }),
+    }));
 }
 
-<div class="d-flex align-items-end justify-content-between mt-4 mb-3">
+<div class="db-head">
     <div>
-        <p class="eyebrow mb-1">YOUR PROGRESS</p>
-        <h1 class="mb-0">Welcome back, @Model.DisplayName</h1>
+        <h1 class="mb-1">Welcome back, @Model.DisplayName</h1>
+        <p class="text-secondary mb-0">
+            @if (last != null)
+            {
+                <text>Last out on <b>@last.Trail.Name</b>, @last.HikedOn.ToString("MMMM d").</text>
+            }
+            else
+            {
+                <text>No hikes logged yet. Pick a trail and start your record.</text>
+            }
+        </p>
     </div>
-    <div class="d-flex gap-2 align-items-center">
-        <a class="btn-ascent-outline" asp-controller="Profile" asp-action="Index" asp-route-id="@currentUserId">
-            <i class="ti ti-user"></i> View my public profile
-        </a>
-        <a class="btn-ascent-outline" asp-controller="Trails" asp-action="Index">
-            <i class="ti ti-compass"></i> Find a trail
-        </a>
-    </div>
-</div>
-
-<div class="stat-row mb-4">
-    <div class="stat-card">
-        <div class="label"><i class="ti ti-route"></i> Hikes logged</div>
-        <div class="value">@Model.TotalHikes</div>
-    </div>
-    <div class="stat-card">
-        <div class="label"><i class="ti ti-mountain"></i> Elevation gained</div>
-        <div class="value">@Model.TotalElevationM m</div>
-    </div>
-    <div class="stat-card">
-        <div class="label"><i class="ti ti-ruler-2"></i> Distance covered</div>
-        <div class="value">@Model.TotalDistanceKm km</div>
-    </div>
-    <div class="stat-card">
-        <div class="label"><i class="ti ti-map-2"></i> Regions explored</div>
-        <div class="value">@Model.DistinctRegions</div>
-    </div>
-    <div class="stat-card">
-        <div class="label"><i class="ti ti-award"></i> Badges earned</div>
-        <div class="value">@Model.BadgesEarned / @Model.Badges.Count</div>
-    </div>
-    <div class="stat-card">
-        <div class="label"><i class="ti ti-star"></i> Reviews / Saved</div>
-        <div class="value">@Model.ReviewsWritten · @Model.SavedTrails</div>
+    <div class="d-flex gap-2">
+        <a class="btn-ascent-outline" asp-controller="Profile" asp-action="Index" asp-route-id="@currentUserId"><i class="ti ti-user"></i> Public profile</a>
+        <a class="btn-ascent" asp-controller="Trails" asp-action="Index"><i class="ti ti-plus"></i> Log a hike</a>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-7">
-        <p class="eyebrow mb-3">BADGE PROGRESS</p>
-        @foreach (var bp in Model.Badges)
+<section class="db-climb asc-panel">
+    <div class="db-climb-num">
+        <span class="db-big">@Model.TotalElevationM.ToString("N0")<small>m climbed</small></span>
+        <span class="db-korab">
+            @if (Model.TotalElevationM == 0) { <text>Golem Korab is 2,764 m. Every hike counts toward it.</text> }
+            else if (korabs < 1) { <text>@((korabs * 100).ToString("0"))% of the way up Golem Korab (2,764 m).</text> }
+            else { <text>That is Golem Korab, the country's highest peak, <b>@korabs.ToString("0.#") times</b> over.</text> }
+        </span>
+    </div>
+    <div class="db-korab-bar" aria-hidden="true">
+        @for (var i = 0; i < Math.Max(1, Math.Min(12, (int)Math.Ceiling(korabs))); i++)
         {
-            <div class="badge-row @(bp.Earned ? "earned" : "")">
-                <i class="ti @bp.Badge.IconName badge-ico"></i>
-                <div class="flex-grow-1">
-                    <div class="d-flex justify-content-between align-items-baseline">
-                        <span class="badge-name">@bp.Badge.Name</span>
-                        @if (bp.Earned)
-                        {
-                            <span class="badge-tag"><i class="ti ti-check"></i> Earned</span>
-                        }
-                        else
-                        {
-                            <span class="badge-count">@bp.Current / @bp.Threshold</span>
-                        }
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill" style="width:@bp.Percent%"></div>
-                    </div>
-                    <div class="badge-desc">@bp.Badge.Description</div>
-                </div>
-            </div>
+            var fill = Math.Clamp(korabs - i, 0, 1);
+            <span class="db-peak" style="--fill:@fill.ToString("0.00", inv)"><i></i></span>
         }
     </div>
+    <div class="db-mini">
+        <span><b>@Model.TotalHikes</b> hikes</span>
+        <span><b>@Model.TotalDistanceKm.ToString("0.#")</b> km</span>
+        <span><b>@Model.DistinctRegions</b> regions</span>
+        <span><b>@Model.BadgesEarned</b>/@Model.Badges.Count badges</span>
+    </div>
+</section>
 
-    <div class="col-md-5">
-        <p class="eyebrow mb-3">RECENT HIKES</p>
+<div class="db-grid">
+    <section>
+        <div class="db-section-head">
+            <h2>Recent hikes</h2>
+            <a asp-controller="HikeLogs" asp-action="Index">All hikes</a>
+        </div>
         @if (Model.RecentHikes.Count == 0)
         {
             <div class="asc-panel text-center text-muted">
                 <i class="ti ti-route" style="font-size:28px;opacity:.5"></i>
-                <p class="mb-1 mt-2">No hikes logged yet.</p>
-                <a asp-controller="Trails" asp-action="Index">Find a trail to hike →</a>
+                <p class="mb-2 mt-2">Your hikes will show up here with their photos.</p>
+                <a class="btn-ascent-outline" asp-controller="Trails" asp-action="Index">Find a trail</a>
             </div>
         }
         else
         {
-            foreach (var hike in Model.RecentHikes)
+            <div class="db-hikes">
+                @foreach (var h in Model.RecentHikes)
+                {
+                    var photo = h.Photos.FirstOrDefault()?.Url ?? h.Trail.CoverImageUrl;
+                    var diffClass = (h.Trail.Difficulty?.Label ?? "").ToLowerInvariant();
+                    <a class="db-hike" asp-controller="Trails" asp-action="Details" asp-route-id="@h.TrailId">
+                        <img src="@photo" alt="" loading="lazy" onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';" />
+                        <span class="db-hike-date">@h.HikedOn.ToString("d MMM")</span>
+                        @if (h.Photos.Count > 0) { <span class="db-hike-cam"><i class="ti ti-camera"></i> @h.Photos.Count</span> }
+                        <span class="db-hike-name">@h.Trail.Name<small>@h.Trail.ElevationGainM.ToString("N0") m up · @h.Trail.Difficulty?.Label</small></span>
+                    </a>
+                }
+            </div>
+        }
+    </section>
+
+    <section>
+        <div class="db-section-head">
+            <h2>Badges</h2>
+            <span class="text-muted" style="font-size:13px">@Model.BadgesEarned of @Model.Badges.Count earned</span>
+        </div>
+        <div class="db-badges">
+            @foreach (var bp in Model.Badges)
             {
-                var diffClass = (hike.Trail.Difficulty?.Label ?? "").ToLowerInvariant();
-                <div class="asc-panel mb-2" style="padding:12px 14px">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <a class="tc-title" style="font-size:15px"
-                               asp-controller="Trails" asp-action="Details" asp-route-id="@hike.TrailId">@hike.Trail.Name</a>
-                            <div class="meta-row mt-1">
-                                <span><i class="ti ti-calendar"></i> @hike.HikedOn.ToString("MMM d, yyyy")</span>
-                                <span><i class="ti ti-mountain"></i> @hike.Trail.ElevationGainM m</span>
-                            </div>
-                        </div>
-                        @if (hike.Trail.Difficulty is not null)
-                        {
-                            <span class="diff-inline diff-@diffClass">@hike.Trail.Difficulty.Label</span>
-                        }
-                    </div>
+                <div class="db-badge @(bp.Earned ? "earned" : "")" tabindex="0">
+                    <svg class="db-ring" viewBox="0 0 64 64" aria-hidden="true">
+                        <circle cx="32" cy="32" r="28" />
+                        <circle cx="32" cy="32" r="28" class="db-ring-fill" style="--p:@bp.Percent" />
+                    </svg>
+                    <i class="ti @bp.Badge.IconName"></i>
+                    <span class="db-badge-name">@bp.Badge.Name</span>
+                    <span class="db-badge-tip">
+                        <b>@bp.Badge.Name</b>
+                        @bp.Badge.Description
+                        <em>@(bp.Earned ? "Earned" : $"{bp.Current} / {bp.Threshold}")</em>
+                    </span>
                 </div>
             }
-            <a class="asc-nav-link mt-1 d-inline-block" asp-controller="HikeLogs" asp-action="Index">
-                View all hikes <i class="ti ti-arrow-right"></i>
-            </a>
-        }
-    </div>
+        </div>
+    </section>
 </div>
+
+<div class="db-grid db-grid-2">
+    <section>
+        <div class="db-section-head">
+            <h2>Where you have been</h2>
+            <span class="text-muted" style="font-size:13px">@Model.HikedTrails.Count @(Model.HikedTrails.Count == 1 ? "trail" : "trails") hiked</span>
+        </div>
+        <div id="hikedmap" class="map-box db-map"></div>
+    </section>
+
+    <section>
+        <div class="db-section-head">
+            <h2>Saved for later</h2>
+            <a asp-controller="Favorites" asp-action="Index">All saved</a>
+        </div>
+        @if (Model.SavedTrailsList.Count == 0)
+        {
+            <div class="asc-panel text-center text-muted">
+                <i class="ti ti-heart" style="font-size:28px;opacity:.5"></i>
+                <p class="mb-0 mt-2">Tap the heart on any trail to keep it here.</p>
+            </div>
+        }
+        else
+        {
+            <div class="db-saved">
+                @foreach (var t in Model.SavedTrailsList)
+                {
+                    <a class="db-saved-row" asp-controller="Trails" asp-action="Details" asp-route-id="@t.Id">
+                        <img src="@t.CoverImageUrl" alt="" loading="lazy" onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';" />
+                        <span>
+                            <span class="db-saved-name">@t.Name</span>
+                            <small>@t.Region?.Name · @t.DistanceKm.ToString("0.#") km · @t.ElevationGainM.ToString("N0") m</small>
+                        </span>
+                        <span class="diff-inline diff-@((t.Difficulty?.Label ?? "").ToLowerInvariant())">@t.Difficulty?.Label</span>
+                    </a>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+@section Styles {
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+    <style>
+        .db-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin: 28px 0 18px; }
+        .db-head h1 { font-size: clamp(30px, 4vw, 44px); }
+        .db-head b { color: var(--forest-dark); font-weight: 600; }
+
+        .db-climb { display: grid; grid-template-columns: auto 1fr auto; gap: 28px; align-items: center; padding: 22px 26px; }
+        .db-big { font-family: var(--font-display); font-size: clamp(40px, 5vw, 58px); line-height: 1; color: var(--forest-dark); display: block; font-variant-numeric: tabular-nums; }
+        .db-big small { font-family: var(--font-body); font-size: 14px; color: var(--text-muted); margin-left: 8px; }
+        .db-korab { display: block; margin-top: 8px; font-size: 14px; color: var(--text-secondary); max-width: 34ch; }
+        .db-korab b { color: var(--forest-dark); font-weight: 600; }
+        .db-korab-bar { display: flex; align-items: flex-end; gap: 6px; height: 56px; }
+        .db-peak { position: relative; width: 44px; height: 56px; clip-path: polygon(50% 0, 100% 100%, 0 100%); background: rgba(23, 53, 43, .12); overflow: hidden; }
+        .db-peak i { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--fill) * 100%); background: var(--forest); transition: height .8s cubic-bezier(.2, .8, .2, 1); }
+        .db-mini { display: grid; gap: 6px; font-size: 14px; color: var(--text-secondary); text-align: right; }
+        .db-mini b { font-family: var(--font-display); font-size: 20px; color: var(--forest-dark); margin-right: 4px; }
+
+        .db-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; margin-top: 30px; }
+        .db-grid-2 { grid-template-columns: 1fr 1fr; }
+        .db-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+        .db-section-head h2 { font-size: 24px; margin: 0; }
+        .db-section-head a { font-size: 14px; }
+
+        .db-hikes { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+        .db-hike { position: relative; display: block; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden; color: #fff; }
+        .db-hike img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+        .db-hike:hover img { transform: scale(1.05); }
+        .db-hike::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, .05) 40%, rgba(0, 0, 0, .7) 100%); }
+        .db-hike-date, .db-hike-cam { position: absolute; top: 8px; z-index: 1; padding: 3px 9px; border-radius: var(--r-pill); background: rgba(255, 255, 255, .85); color: var(--forest-dark); font-size: 12px; font-weight: 600; }
+        .db-hike-date { left: 8px; }
+        .db-hike-cam { right: 8px; }
+        .db-hike-name { position: absolute; left: 12px; right: 12px; bottom: 10px; z-index: 1; font-family: var(--font-display); font-size: 15px; line-height: 1.2; text-shadow: 0 1px 6px rgba(0, 0, 0, .5); }
+        .db-hike-name small { display: block; font-family: var(--font-body); font-size: 11px; opacity: .85; margin-top: 2px; }
+
+        .db-badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
+        .db-badge { position: relative; display: grid; justify-items: center; gap: 6px; padding: 14px 8px 12px; border-radius: 16px; text-align: center; background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); cursor: default; }
+        .db-ring { width: 64px; height: 64px; transform: rotate(-90deg); }
+        .db-ring circle { fill: none; stroke: rgba(23, 53, 43, .1); stroke-width: 5; }
+        .db-ring-fill { stroke: var(--forest) !important; stroke-linecap: round; stroke-dasharray: 176; stroke-dashoffset: calc(176 - 176 * var(--p) / 100); transition: stroke-dashoffset .8s cubic-bezier(.2, .8, .2, 1); }
+        .db-badge .ti { position: absolute; top: 30px; font-size: 26px; color: var(--text-muted); }
+        .db-badge.earned .ti { color: var(--terracotta); }
+        .db-badge.earned .db-ring-fill { stroke: var(--terracotta) !important; }
+        .db-badge-name { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+        .db-badge.earned .db-badge-name { color: var(--forest-dark); }
+        .db-badge-tip { position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px); width: 200px; padding: 10px 12px; border-radius: 12px; background: var(--forest-dark); color: #fff; font-size: 12px; line-height: 1.4; text-align: left; opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s; z-index: 5; }
+        .db-badge-tip b { display: block; font-weight: 600; }
+        .db-badge-tip em { display: block; margin-top: 4px; font-style: normal; opacity: .75; }
+        .db-badge:hover .db-badge-tip, .db-badge:focus-visible .db-badge-tip { opacity: 1; transform: translateX(-50%); }
+
+        .db-map { height: 340px; }
+        .db-saved { display: grid; gap: 8px; }
+        .db-saved-row { display: grid; grid-template-columns: 72px 1fr auto; gap: 12px; align-items: center; padding: 8px; border-radius: 14px; color: var(--text); background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); }
+        .db-saved-row:hover { color: var(--text); background: rgba(255, 255, 255, .85); }
+        .db-saved-row img { width: 72px; height: 54px; object-fit: cover; border-radius: 9px; }
+        .db-saved-name { display: block; font-family: var(--font-display); font-size: 15px; color: var(--forest-dark); line-height: 1.2; }
+        .db-saved-row small { font-size: 12px; color: var(--text-muted); }
+
+        @@media (max-width: 991px) {
+            .db-climb { grid-template-columns: 1fr; }
+            .db-mini { display: flex; flex-wrap: wrap; gap: 16px; text-align: left; }
+            .db-grid, .db-grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="~/js/ascent-map.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            const trails = @Html.Raw(mapTrails);
+            const map = AscentMap.display('hikedmap', { zoom: 6.6, pitch: 35, cooperative: true });
+            AscentMap.onReady(map, () => {
+                const pts = [];
+                trails.forEach(t => {
+                    AscentMap.addRoute(map, t.route, { color: AscentMap.colorFor(t.diff), width: 3 });
+                    AscentMap.marker(map, [t.lng, t.lat], { color: AscentMap.colorFor(t.diff), popup: '<a href="' + t.url + '"><strong>' + t.name + '</strong></a>' });
+                    pts.push([t.lng, t.lat]);
+                });
+                if (pts.length > 1) AscentMap.fit(map, pts, { padding: 50, maxZoom: 11, pitch: 35 });
+                else if (pts.length === 1) map.jumpTo({ center: pts[0], zoom: 10 });
+            });
+        })();
+    </script>
+}
