@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using ascent_app.Models;
+using ascent_app.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -83,6 +84,8 @@ public static class DatabaseSeeder
             await ReadSeedFileAsync<DemoHikeEventSeed>(
                 environment, "demo-hike-events.json", cancellationToken),
             cancellationToken);
+        await AwardDemoBadgesAsync(
+            context, provider.GetRequiredService<IBadgeService>(), logger, cancellationToken);
 
         logger.LogInformation(
             "Development seed ready: {Trails} trails, {TrailImages} trail images, " +
@@ -501,6 +504,38 @@ public static class DatabaseSeeder
         }
 
         await context.SaveChangesAsync(cancellationToken);
+    }
+
+    // Demo hike logs are inserted directly, so run the same badge evaluation a real
+    // hike log triggers; awards are backdated to the hiker's latest logged hike.
+    private static async Task AwardDemoBadgesAsync(
+        AscentDbContext context,
+        IBadgeService badges,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        var hikers = await context.HikeLogs
+            .Where(h => h.IsDemoData)
+            .GroupBy(h => h.UserId)
+            .Select(g => new { UserId = g.Key, LastHike = g.Max(h => h.HikedOn) })
+            .ToListAsync(cancellationToken);
+
+        var awarded = 0;
+        foreach (var hiker in hikers)
+        {
+            var earned = await badges.EvaluateAsync(hiker.UserId);
+            if (earned.Count == 0)
+                continue;
+
+            var ids = earned.Select(b => b.Id).ToList();
+            await context.UserBadges
+                .Where(ub => ub.UserId == hiker.UserId && ids.Contains(ub.BadgeId))
+                .ExecuteUpdateAsync(u => u.SetProperty(ub => ub.AwardedAt, hiker.LastHike), cancellationToken);
+            awarded += earned.Count;
+        }
+
+        if (awarded > 0)
+            logger.LogInformation("Awarded {Count} badges to demo hikers.", awarded);
     }
 
     private static async Task SeedHikeEventsAsync(
