@@ -1,17 +1,18 @@
 :root {
-    --bg: #F3EFE5;
-    --paper: #F3EFE5;
-    --surface: #FBFAF4;
-    --surface-alt: #E7E3D7;
-    --border: #E0DACA;
-    --border-strong: #D8D2C0;
-    --forest: #2F4A2C;
-    --forest-dark: #21301C;
-    --forest-deep: #33502F;
-    --terracotta: #B05E3B;
-    --text: #283524;
-    --text-secondary: #5F5C4D;
-    --text-muted: #8A8775;
+    --bg: #EDF1EE;
+    --bg-rgb: 237, 241, 238;
+    --paper: #FFFFFF;
+    --surface: #FFFFFF;
+    --surface-alt: #E1E7E3;
+    --border: #D3DBD6;
+    --border-strong: #BFC9C3;
+    --forest: #2C5F4A;
+    --forest-dark: #17352B;
+    --forest-deep: #244D3C;
+    --terracotta: #2E6E8E;
+    --text: #1E2A26;
+    --text-secondary: #526059;
+    --text-muted: #7C8983;
 
     --r-card: 14px;
     --r-input: 8px;
@@ -24,8 +25,8 @@
 
 body {
     background:
-        radial-gradient(1200px 600px at 12% -10%, rgba(47, 74, 44, 0.10), transparent 60%),
-        radial-gradient(900px 520px at 105% 0%, rgba(176, 94, 59, 0.08), transparent 55%),
+        radial-gradient(1200px 600px at 12% -10%, rgba(44, 95, 74, 0.10), transparent 60%),
+        radial-gradient(900px 520px at 105% 0%, rgba(46, 110, 142, 0.10), transparent 55%),
         var(--bg);
     background-attachment: fixed;
     color: var(--text);

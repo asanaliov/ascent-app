@@ -21,8 +21,6 @@ builder.Services.AddScoped<IBadgeService, BadgeService>();
 builder.Services.AddScoped<IGeoService, GeoService>();
 builder.Services.AddScoped<ITrailAdviceService, TrailAdviceService>();
 builder.Services.AddScoped<IImageStorage, ImageStorage>();
-builder.Services.AddHttpClient<IExternalTrailSource, OverpassTrailSource>();
-builder.Services.AddHttpClient<ITrailPhotoSource, OpenverseTrailPhotoSource>();
 
 builder.Services.AddControllersWithViews();
 
