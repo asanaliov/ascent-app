@@ -141,7 +141,7 @@ window.AscentMap = (function () {
         opts = opts || {};
         let m;
         if (opts.icon) {
-            // glass disc with a tabler icon and an always-visible label, e.g. trailhead / summit
+            // glass disc with a tabler icon and an always-visible label, e.g. start / end
             const el = document.createElement('div');
             el.className = 'asc-marker' + (opts.kind ? ' asc-marker-' + opts.kind : '');
             el.innerHTML = '<span class="asc-marker-dot"><i class="ti ' + opts.icon + '"></i></span>'

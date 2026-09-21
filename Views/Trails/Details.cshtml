@@ -130,7 +130,7 @@
                 </span>
             </div>
             <div class="row-item">
-                <span class="k"><i class="ti ti-current-location"></i> Trailhead</span>
+                <span class="k"><i class="ti ti-current-location"></i> Start point</span>
                 <span class="v" style="font-size:14px;font-family:var(--font-body)">@Model.Latitude.ToString("0.000"), @Model.Longitude.ToString("0.000")</span>
             </div>
         </div>
@@ -150,7 +150,7 @@
     {
         <div class="map-toolbar">
             <button id="simbtn" type="button" class="btn-play">
-                <i class="ti ti-player-play-filled"></i> Play
+                <i class="ti ti-player-play"></i> Play
             </button>
             <button id="followbtn" type="button" class="btn-follow">
                 <i class="ti ti-drone"></i> Follow route
@@ -370,8 +370,8 @@
             AscentMap.setBasemap(map, 'bm-satellite');
             const coords = AscentMap.addRoute(map, route, { width: 5 });
             if (coords) {
-                AscentMap.marker(map, coords[0], { icon: 'ti-flag-filled', kind: 'start', label: 'Trailhead' });
-                AscentMap.marker(map, coords[coords.length - 1], { icon: 'ti-mountain', kind: 'end', label: 'Summit' });
+                AscentMap.marker(map, coords[0], { icon: 'ti-flag-3', kind: 'start', label: 'Start' });
+                AscentMap.marker(map, coords[coords.length - 1], { icon: 'ti-flag-check', kind: 'end', label: 'End' });
                 AscentMap.fit(map, coords, { padding: 70, pitch: 60, bearing: -18 });
 
                 const playBtn = document.getElementById('simbtn');
@@ -381,10 +381,10 @@
                 let speed = 1;
 
                 const playHtml = m => m
-                    ? '<i class="ti ti-player-stop-filled"></i> Stop'
-                    : '<i class="ti ti-player-play-filled"></i> Play';
+                    ? '<i class="ti ti-player-stop"></i> Stop'
+                    : '<i class="ti ti-player-play"></i> Play';
                 const followHtml = m => m
-                    ? '<i class="ti ti-player-stop-filled"></i> Stop'
+                    ? '<i class="ti ti-player-stop"></i> Stop'
                     : '<i class="ti ti-drone"></i> Follow route';
 
                 function paint() {
