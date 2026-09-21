@@ -27,10 +27,23 @@ public class DashboardController : Controller
 
         var hikes = await _context.HikeLogs
             .Where(h => h.UserId == userId)
+            .Include(h => h.Photos)
             .Include(h => h.Trail).ThenInclude(t => t.Region)
             .Include(h => h.Trail).ThenInclude(t => t.Difficulty)
+            .Include(h => h.Trail).ThenInclude(t => t.Photos)
             .OrderByDescending(h => h.HikedOn)
             .AsNoTracking()
+            .ToListAsync();
+
+        var savedTrails = await _context.Favorites
+            .Where(f => f.UserId == userId)
+            .Include(f => f.Trail).ThenInclude(t => t.Region)
+            .Include(f => f.Trail).ThenInclude(t => t.Difficulty)
+            .Include(f => f.Trail).ThenInclude(t => t.Photos)
+            .OrderByDescending(f => f.CreatedAt)
+            .Take(6)
+            .AsNoTracking()
+            .Select(f => f.Trail)
             .ToListAsync();
 
         var totalHikes = hikes.Count;
@@ -71,7 +84,9 @@ public class DashboardController : Controller
             DistinctRegions = distinctRegions,
             ReviewsWritten = await _context.Reviews.CountAsync(r => r.UserId == userId),
             SavedTrails = await _context.Favorites.CountAsync(f => f.UserId == userId),
-            RecentHikes = hikes.Take(5).ToList(),
+            RecentHikes = hikes.Take(6).ToList(),
+            HikedTrails = hikes.Select(h => h.Trail).DistinctBy(t => t.Id).ToList(),
+            SavedTrailsList = savedTrails,
             Badges = badges,
         };
 

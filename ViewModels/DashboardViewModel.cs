@@ -14,6 +14,8 @@ public class DashboardViewModel
     public int SavedTrails { get; set; }
 
     public List<HikeLog> RecentHikes { get; set; } = new();
+    public List<Trail> HikedTrails { get; set; } = new();
+    public List<Trail> SavedTrailsList { get; set; } = new();
     public List<BadgeProgress> Badges { get; set; } = new();
 
     public int BadgesEarned => Badges.Count(b => b.Earned);

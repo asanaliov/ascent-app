@@ -1,114 +1,259 @@
 @model ascent_app.ViewModels.CommunityViewModel
 @{
     ViewData["Title"] = "Community";
+    var maxElev = Math.Max(1, Model.TopHikers.Select(h => h.ElevationM).DefaultIfEmpty(1).Max());
+    var maxHikes = Math.Max(1, Model.TopHikers.Select(h => h.Hikes).DefaultIfEmpty(1).Max());
+    var maxDist = Math.Max(1.0, Model.TopHikers.Select(h => h.DistanceKm).DefaultIfEmpty(1).Max());
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    string Ago(DateTime at)
+    {
+        var d = DateTime.UtcNow - at;
+        return d.TotalDays < 1 ? "today" : d.TotalDays < 2 ? "yesterday" : d.TotalDays < 30 ? $"{(int)d.TotalDays} days ago"
+             : d.TotalDays < 365 ? $"{(int)(d.TotalDays / 30)} months ago" : at.ToString("MMM yyyy");
+    }
 }
 
-<div class="mt-4 mb-3">
-    <p class="eyebrow mb-1">ASCENT · COMMUNITY</p>
-    <h1 class="mb-0">The community, by the numbers</h1>
-</div>
-
-<div class="stat-row mb-4">
-    <div class="stat-card">
-        <div class="label"><i class="ti ti-route"></i> Trails</div>
-        <div class="value">@Model.TotalTrails</div>
+<div class="cm-head">
+    <div>
+        <h1 class="mb-2">Out on the trails</h1>
+        <p class="cm-sum">
+            <b>@Model.TotalHikers</b> hikers have logged <b>@Model.TotalHikes</b> hikes on <b>@Model.TotalTrails</b> trails,
+            climbing <b>@Model.TotalElevationM.ToString("N0") m</b> between them, about
+            <b>@((Model.TotalElevationM / 2764.0).ToString("0.#"))×</b> Golem Korab.
+        </p>
     </div>
-    <div class="stat-card">
-        <div class="label"><i class="ti ti-mountain"></i> Hikes logged</div>
-        <div class="value">@Model.TotalHikes</div>
-    </div>
-    <div class="stat-card">
-        <div class="label"><i class="ti ti-users"></i> Hikers</div>
-        <div class="value">@Model.TotalHikers</div>
-    </div>
-    <div class="stat-card">
-        <div class="label"><i class="ti ti-mountain"></i> Elevation logged</div>
-        <div class="value">@Model.TotalElevationM.ToString("N0") m</div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="asc-panel">
-            <p class="eyebrow mb-3"><i class="ti ti-trophy"></i> TOP HIKERS</p>
-            @if (Model.TopHikers.Count == 0)
-            {
-                <p class="text-muted mb-0" style="font-size:14px">No hikes logged yet.</p>
-            }
-            else
-            {
-                var rank = 0;
-                foreach (var row in Model.TopHikers)
-                {
-                    rank++;
-                    <div class="d-flex align-items-center gap-3 py-2"
-                         style="border-bottom:.5px solid var(--border)">
-                        <span class="tc-title" style="font-size:18px;width:28px;text-align:right">@rank</span>
-                        <div class="flex-grow-1">
-                            <a class="tc-title" style="font-size:15px"
-                               asp-controller="Profile" asp-action="Index" asp-route-id="@row.UserId">@row.DisplayName</a>
-                            <div class="meta-row mt-1">
-                                <span><i class="ti ti-route"></i> @row.Hikes hike@(row.Hikes == 1 ? "" : "s")</span>
-                                <span><i class="ti ti-mountain"></i> @row.ElevationM.ToString("N0") m</span>
-                            </div>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
-    </div>
-
-    <div class="col-md-6">
-        <div class="asc-panel">
-            <p class="eyebrow mb-3"><i class="ti ti-heart"></i> MOST LOVED TRAILS</p>
-            @if (Model.PopularTrails.Count == 0)
-            {
-                <p class="text-muted mb-0" style="font-size:14px">No favorites yet.</p>
-            }
-            else
-            {
-                foreach (var pt in Model.PopularTrails)
-                {
-                    <div class="d-flex align-items-center justify-content-between gap-3 py-2"
-                         style="border-bottom:.5px solid var(--border)">
-                        <div>
-                            <div class="tc-region"><i class="ti ti-map-pin"></i> @pt.Trail.Region?.Name</div>
-                            <a class="tc-title" style="font-size:15px"
-                               asp-controller="Trails" asp-action="Details" asp-route-id="@pt.Trail.Id">@pt.Trail.Name</a>
-                        </div>
-                        <span class="meta-row">
-                            <span><i class="ti ti-heart" style="color:var(--terracotta)"></i> @pt.FavoriteCount</span>
-                        </span>
-                    </div>
-                }
-            }
-        </div>
-    </div>
-</div>
-
-<div class="asc-panel mt-1">
-    <p class="eyebrow mb-3"><i class="ti ti-star"></i> RECENTLY ADDED</p>
-    @if (Model.RecentTrails.Count == 0)
+    @if (User.Identity?.IsAuthenticated == true)
     {
-        <p class="text-muted mb-0" style="font-size:14px">No trails yet.</p>
+        <a class="btn-ascent" asp-controller="Trails" asp-action="Index"><i class="ti ti-plus"></i> Log a hike</a>
     }
     else
     {
-        foreach (var trail in Model.RecentTrails)
-        {
-            var diffClass = (trail.Difficulty?.Label ?? "").ToLowerInvariant();
-            <div class="d-flex align-items-center justify-content-between gap-3 py-2"
-                 style="border-bottom:.5px solid var(--border)">
-                <div>
-                    <div class="tc-region"><i class="ti ti-map-pin"></i> @trail.Region?.Name</div>
-                    <a class="tc-title" style="font-size:15px"
-                       asp-controller="Trails" asp-action="Details" asp-route-id="@trail.Id">@trail.Name</a>
-                </div>
-                @if (trail.Difficulty is not null)
-                {
-                    <span class="diff-inline diff-@diffClass">@trail.Difficulty.Label</span>
-                }
-            </div>
-        }
+        <a class="btn-ascent" asp-controller="Account" asp-action="Register"><i class="ti ti-user-plus"></i> Join</a>
     }
 </div>
+
+<section class="cm-section">
+    <div class="cm-section-head">
+        <h2>Latest activity</h2>
+        <div class="tl-seg cm-filter" role="group" aria-label="Show">
+            <button type="button" class="on" data-kind="all">All</button>
+            <button type="button" data-kind="hike">Hikes</button>
+            <button type="button" data-kind="review">Reviews</button>
+        </div>
+    </div>
+    @if (Model.Activity.Count == 0)
+    {
+        <div class="asc-panel text-center text-muted">Nothing logged yet. Be the first out.</div>
+    }
+    else
+    {
+        <div class="feed" id="feed">
+            @foreach (var a in Model.Activity)
+            {
+                <a class="feed-tile" data-kind="@a.Kind" asp-controller="Trails" asp-action="Details" asp-route-id="@a.Trail.Id">
+                    <img src="@a.PhotoUrl" alt="" loading="lazy" onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';" />
+                    <div class="feed-body">
+                        <div class="feed-who">
+                            <span class="asc-avatar">@a.DisplayName[0]</span>
+                            <span>
+                                <b>@a.DisplayName</b>
+                                @if (a.Kind == "hike") { <text>hiked</text> } else { <text>rated</text> }
+                            </span>
+                            <span class="feed-when">@Ago(a.At)</span>
+                        </div>
+                        <div class="feed-trail">@a.Trail.Name</div>
+                        @if (a.Kind == "review" && a.Rating is int r)
+                        {
+                            <div class="feed-stars">@for (var i = 1; i <= 5; i++) { <i class="ti ti-star @(i <= r ? "on" : "")"></i> }</div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(a.Text))
+                        {
+                            <p class="feed-text">@a.Text</p>
+                        }
+                        @if (a.Kind == "hike" && a.DurationMinutes is int m)
+                        {
+                            <span class="feed-meta"><i class="ti ti-clock"></i> @(m / 60)h @(m % 60)m · @a.Trail.ElevationGainM.ToString("N0") m up</span>
+                        }
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</section>
+
+@if (Model.UpcomingEvents.Count > 0)
+{
+    <section class="cm-section">
+        <div class="cm-section-head">
+            <h2>Guided hikes coming up</h2>
+            <span class="text-muted" style="font-size:13px">Led by Ascent guides. Spots are limited.</span>
+        </div>
+        <div class="events">
+            @foreach (var e in Model.UpcomingEvents)
+            {
+                <a class="event" asp-controller="Trails" asp-action="Details" asp-route-id="@e.TrailId">
+                    <div class="event-date">
+                        <b>@e.StartsAt.ToString("dd")</b>
+                        <span>@e.StartsAt.ToString("MMM")</span>
+                    </div>
+                    <img src="@e.Trail.CoverImageUrl" alt="" loading="lazy" onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';" />
+                    <div class="event-body">
+                        <div class="event-title">@e.Title</div>
+                        <div class="event-meta">@e.Trail.Name · @e.StartsAt.ToString("HH:mm")</div>
+                        <div class="event-meta"><i class="ti ti-user"></i> @e.Guide.DisplayName · <i class="ti ti-users"></i> up to @e.MaxParticipants</div>
+                        @if (!string.IsNullOrWhiteSpace(e.MeetingPoint))
+                        {
+                            <div class="event-meta"><i class="ti ti-map-pin"></i> @e.MeetingPoint</div>
+                        }
+                    </div>
+                </a>
+            }
+        </div>
+    </section>
+}
+
+<div class="cm-grid">
+    <section class="asc-panel cm-board">
+        <div class="cm-section-head">
+            <h2>Leaderboard</h2>
+            <div class="tl-seg cm-rank" role="group" aria-label="Rank by">
+                <button type="button" class="on" data-by="hikes">Hikes</button>
+                <button type="button" data-by="elev">Climb</button>
+                <button type="button" data-by="dist">Distance</button>
+            </div>
+        </div>
+        @if (Model.TopHikers.Count == 0)
+        {
+            <p class="text-muted mb-0">No hikes logged yet.</p>
+        }
+        else
+        {
+            <ol class="board" id="board">
+                @foreach (var h in Model.TopHikers)
+                {
+                    <li class="board-row" data-hikes="@h.Hikes" data-elev="@h.ElevationM" data-dist="@h.DistanceKm.ToString(inv)"
+                        data-phikes="@((100.0 * h.Hikes / maxHikes).ToString("0", inv))" data-pelev="@((100.0 * h.ElevationM / maxElev).ToString("0", inv))" data-pdist="@((100.0 * h.DistanceKm / maxDist).ToString("0", inv))">
+                        <span class="board-rank"></span>
+                        <span class="asc-avatar">@h.DisplayName[0]</span>
+                        <div class="board-main">
+                            <a asp-controller="Profile" asp-action="Index" asp-route-id="@h.UserId">@h.DisplayName</a>
+                            <div class="board-bar"><i style="width:@((100.0 * h.Hikes / maxHikes).ToString("0", inv))%"></i></div>
+                        </div>
+                        <span class="board-val">@h.Hikes hikes</span>
+                    </li>
+                }
+            </ol>
+        }
+    </section>
+
+    <section class="cm-loved">
+        <div class="cm-section-head">
+            <h2>Most saved</h2>
+        </div>
+        <div class="loved">
+            @foreach (var p in Model.PopularTrails)
+            {
+                var diffClass = (p.Trail.Difficulty?.Label ?? "").ToLowerInvariant();
+                <a class="loved-tile" asp-controller="Trails" asp-action="Details" asp-route-id="@p.Trail.Id">
+                    <img src="@p.Trail.CoverImageUrl" alt="" loading="lazy" onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';" />
+                    <span class="loved-count"><i class="ti ti-heart"></i> @p.FavoriteCount</span>
+                    <span class="loved-name">@p.Trail.Name<small>@p.Trail.Region?.Name</small></span>
+                </a>
+            }
+        </div>
+    </section>
+</div>
+
+@section Styles {
+    <style>
+        .cm-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin: 28px 0 8px; }
+        .cm-head h1 { font-size: clamp(34px, 4.5vw, 52px); }
+        .cm-sum { max-width: 60ch; color: var(--text-secondary); font-size: 16px; margin: 0; }
+        .cm-sum b { color: var(--forest-dark); font-weight: 600; }
+        .cm-section { margin-top: 34px; }
+        .cm-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+        .cm-section-head h2 { font-size: 26px; margin: 0; }
+        .tl-seg button { border: 0; background: transparent; padding: 6px 14px; border-radius: var(--r-pill); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; }
+        .tl-seg button.on { background: rgba(255, 255, 255, .92); color: var(--forest-dark); box-shadow: 0 1px 3px rgba(23, 53, 43, .15), inset 0 1px 0 #fff; }
+
+        .feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+        .feed-tile { display: flex; flex-direction: column; border-radius: 18px; overflow: hidden; color: var(--text); transition: transform .2s, box-shadow .2s; background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
+        .feed-tile:hover { transform: translateY(-3px); color: var(--text); box-shadow: var(--glass-shadow), 0 18px 40px -22px rgba(23, 53, 43, .5); }
+        .feed-tile.is-hidden { display: none; }
+        .feed-tile img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+        .feed-body { padding: 12px 14px 14px; display: grid; gap: 5px; }
+        .feed-who { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+        .feed-who .asc-avatar { width: 24px; height: 24px; font-size: 12px; }
+        .feed-who b { color: var(--forest-dark); font-weight: 600; }
+        .feed-when { margin-left: auto; color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+        .feed-trail { font-family: var(--font-display); font-size: 17px; color: var(--forest-dark); line-height: 1.25; }
+        .feed-stars .ti { font-size: 13px; color: var(--border-strong); }
+        .feed-stars .ti.on { color: #C08A2E; }
+        .feed-text { margin: 0; font-size: 13px; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .feed-meta { font-size: 12px; color: var(--text-muted); }
+
+        .events { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+        .event { display: grid; grid-template-columns: 52px 88px 1fr; gap: 12px; align-items: center; padding: 10px; border-radius: 16px; color: var(--text); background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
+        .event:hover { color: var(--text); background: rgba(255, 255, 255, .8); }
+        .event-date { text-align: center; line-height: 1; }
+        .event-date b { display: block; font-family: var(--font-display); font-size: 26px; font-weight: 500; color: var(--forest-dark); }
+        .event-date span { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+        .event img { width: 88px; height: 66px; object-fit: cover; border-radius: 10px; }
+        .event-title { font-family: var(--font-display); font-size: 16px; color: var(--forest-dark); }
+        .event-meta { font-size: 12px; color: var(--text-muted); }
+
+        .cm-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; margin-top: 34px; align-items: start; }
+        .board { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+        .board-row { display: grid; grid-template-columns: 26px 32px 1fr auto; gap: 12px; align-items: center; padding: 8px 6px; border-radius: 12px; transition: background .15s; }
+        .board-row:hover { background: rgba(255, 255, 255, .6); }
+        .board-rank { font-family: var(--font-display); font-size: 17px; color: var(--text-muted); text-align: right; }
+        .board-row:nth-child(1) .board-rank { color: #C08A2E; }
+        .board-main a { font-weight: 500; color: var(--forest-dark); }
+        .board-bar { height: 5px; margin-top: 5px; border-radius: 3px; background: rgba(23, 53, 43, .08); overflow: hidden; }
+        .board-bar i { display: block; height: 100%; border-radius: 3px; background: var(--forest); transition: width .5s cubic-bezier(.2, .8, .2, 1); }
+        .board-val { font-size: 13px; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+        .loved { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .loved-tile { position: relative; display: block; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden; color: #fff; }
+        .loved-tile:first-child { grid-column: 1 / -1; aspect-ratio: 16 / 7; }
+        .loved-tile img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+        .loved-tile:hover img { transform: scale(1.04); }
+        .loved-tile::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, .65) 100%); }
+        .loved-count { position: absolute; top: 10px; left: 10px; z-index: 1; padding: 4px 10px; border-radius: var(--r-pill); background: rgba(255, 255, 255, .85); color: var(--forest-dark); font-size: 12px; font-weight: 600; }
+        .loved-count .ti { color: #B5525C; }
+        .loved-name { position: absolute; left: 14px; right: 14px; bottom: 12px; z-index: 1; font-family: var(--font-display); font-size: 17px; line-height: 1.2; text-shadow: 0 1px 8px rgba(0, 0, 0, .5); }
+        .loved-name small { display: block; font-family: var(--font-body); font-size: 12px; opacity: .85; margin-top: 2px; }
+
+        @@media (max-width: 991px) { .cm-grid { grid-template-columns: 1fr; } }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            const feed = document.getElementById('feed');
+            document.querySelectorAll('.cm-filter button').forEach(b => b.addEventListener('click', () => {
+                document.querySelectorAll('.cm-filter button').forEach(x => x.classList.toggle('on', x === b));
+                feed?.querySelectorAll('.feed-tile').forEach(t => t.classList.toggle('is-hidden', b.dataset.kind !== 'all' && t.dataset.kind !== b.dataset.kind));
+            }));
+
+            const board = document.getElementById('board');
+            const fmt = { hikes: r => r.dataset.hikes + (r.dataset.hikes === '1' ? ' hike' : ' hikes'), elev: r => Number(r.dataset.elev).toLocaleString('en') + ' m', dist: r => r.dataset.dist + ' km' };
+            function rank(by) {
+                if (!board) return;
+                const rows = [...board.children].sort((a, b) => parseFloat(b.dataset[by]) - parseFloat(a.dataset[by]));
+                rows.forEach((r, i) => {
+                    board.appendChild(r);
+                    r.querySelector('.board-rank').textContent = i + 1;
+                    r.querySelector('.board-bar i').style.width = r.dataset['p' + by] + '%';
+                    r.querySelector('.board-val').textContent = fmt[by](r);
+                });
+            }
+            document.querySelectorAll('.cm-rank button').forEach(b => b.addEventListener('click', () => {
+                document.querySelectorAll('.cm-rank button').forEach(x => x.classList.toggle('on', x === b));
+                rank(b.dataset.by);
+            }));
+            rank('hikes');
+        })();
+    </script>
+}
