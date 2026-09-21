@@ -19,8 +19,9 @@ public class DifficultyServiceTests
     [Theory]
     [InlineData(2, 100, "Easy")]       // 20    -> <50
     [InlineData(10, 300, "Moderate")]  // ~77.5 -> <100
-    [InlineData(12, 500, "Hard")]      // ~109.5 -> <150
-    [InlineData(20, 900, "Strenuous")] // ~189.7 -> >=150
+    [InlineData(12, 500, "Hard")]      // ~109.5 -> <170
+    [InlineData(16, 800, "Hard")]      // 160    -> <170
+    [InlineData(20, 900, "Strenuous")] // ~189.7 -> >=170
     public void GetLabel_BinsScoreIntoExpectedBucket(double distKm, int gainM, string expected)
     {
         Assert.Equal(expected, Sut().GetLabel(distKm, gainM));

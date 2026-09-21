@@ -27,7 +27,7 @@ public class DifficultyService : IDifficultyService
         {
             < 50 => "Easy",
             < 100 => "Moderate",
-            < 150 => "Hard",
+            < 170 => "Hard",
             _ => "Strenuous",
         };
 

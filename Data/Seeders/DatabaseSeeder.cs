@@ -116,16 +116,24 @@ public static class DatabaseSeeder
         {
             new Difficulty { Label = "Easy", MinScore = 0, MaxScore = 50, BadgeClass = "diff-easy" },
             new Difficulty { Label = "Moderate", MinScore = 50, MaxScore = 100, BadgeClass = "diff-moderate" },
-            new Difficulty { Label = "Hard", MinScore = 100, MaxScore = 150, BadgeClass = "diff-hard" },
-            new Difficulty { Label = "Strenuous", MinScore = 150, MaxScore = null, BadgeClass = "diff-strenuous" },
+            new Difficulty { Label = "Hard", MinScore = 100, MaxScore = 170, BadgeClass = "diff-hard" },
+            new Difficulty { Label = "Strenuous", MinScore = 170, MaxScore = null, BadgeClass = "diff-strenuous" },
         };
-        var existingDifficulties = (await context.Difficulties
-            .Select(d => d.Label)
-            .ToListAsync(cancellationToken))
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        await context.Difficulties.AddRangeAsync(
-            difficulties.Where(d => !existingDifficulties.Contains(d.Label)),
-            cancellationToken);
+        var existingDifficulties = await context.Difficulties.ToListAsync(cancellationToken);
+        foreach (var difficulty in difficulties)
+        {
+            var existing = existingDifficulties.FirstOrDefault(d =>
+                d.Label.Equals(difficulty.Label, StringComparison.OrdinalIgnoreCase));
+            if (existing is null)
+            {
+                context.Difficulties.Add(difficulty);
+                continue;
+            }
+
+            existing.MinScore = difficulty.MinScore;
+            existing.MaxScore = difficulty.MaxScore;
+            existing.BadgeClass = difficulty.BadgeClass;
+        }
 
         var badges = new[]
         {
