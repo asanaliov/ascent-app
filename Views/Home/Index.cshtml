@@ -117,7 +117,7 @@
                 <span class="diff-strenuous">Strenuous</span>
                 <i class="scale-mark" style="left:@Pct(Math.Min(exampleScore, 200) / 2)%"></i>
             </div>
-            <div class="scale-ticks"><span>0</span><span>50</span><span>100</span><span>150</span><span>200+</span></div>
+            <div class="scale-ticks"><span style="left:0">0</span><span style="left:25%">50</span><span style="left:50%">100</span><span style="left:85%">170</span><span style="left:100%">200+</span></div>
         </div>
     </section>
 }
@@ -285,7 +285,7 @@
         .scale-bar {
             position: relative;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: 50fr 50fr 70fr 30fr;
             border-radius: var(--r-badge);
             overflow: visible;
         }
@@ -306,13 +306,16 @@
             border-radius: 2px;
         }
         .scale-ticks {
-            display: flex;
-            justify-content: space-between;
+            position: relative;
+            height: 18px;
             margin-top: 6px;
             font-size: 12px;
             color: var(--text-muted);
             font-variant-numeric: tabular-nums;
         }
+        .scale-ticks span { position: absolute; transform: translateX(-50%); }
+        .scale-ticks span:first-child { transform: none; }
+        .scale-ticks span:last-child { transform: translateX(-100%); }
 
         @@media (max-width: 991px) {
             .rating { grid-template-columns: 1fr; gap: 24px; }
