@@ -440,10 +440,9 @@ header { position: sticky; top: 0; z-index: 1030; }
 }
 
 footer.footer {
-    border-top: 0.5px solid var(--border);
     color: var(--text-secondary);
     font-size: 14px;
-    padding: 40px 0 26px;
+    padding: 56px 0 28px;
 }
 .ft-grid {
     display: grid;
@@ -1236,14 +1235,8 @@ footer.footer {
 .btn-ascent {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 6px 16px -8px rgba(44, 95, 74, .6);
 }
-footer.footer {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-top: 1px solid var(--glass-border);
-}
 @media (prefers-reduced-transparency: reduce) {
-    .asc-navbar, .glass, .asc-panel, .trail-card, .stat-card, .asc-menu, .admin-table, footer.footer,
+    .asc-navbar, .glass, .asc-panel, .trail-card, .stat-card, .asc-menu, .admin-table,
     .asc-chip, .tag-check, .btn-ascent-outline, .asc-user-btn, .form-control, .form-select {
         background: var(--surface);
         backdrop-filter: none;
