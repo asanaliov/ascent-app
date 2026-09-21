@@ -1,374 +1,412 @@
 @model List<Trail>
+@using System.Globalization
 @{
     ViewData["Title"] = "Home";
+    var waypoints = Model.Take(4).ToList();
+    // Vertices on the ridge polyline where the featured trails sit (viewBox 1000x400)
+    var stops = new (int x, int y)[] { (250, 300), (390, 236), (540, 140), (680, 96) };
+    string Pct(double v) => v.ToString(CultureInfo.InvariantCulture);
+    var example = Model.FirstOrDefault();
+    var exampleScore = example == null ? 0 : Math.Sqrt(2 * example.ElevationGainM * example.DistanceKm);
 }
 
-<div class="row align-items-center py-4 py-md-5">
-    <div class="col-lg-7 mb-5 mb-lg-0">
-        <section class="asc-hero p-0">
-            <span class="asc-pill"><i class="ti ti-compass"></i> ASCENT · TRAILS REGISTER</span>
-            <h1>The mountains of <em>North Macedonia</em>, hike by hike.</h1>
-            <p class="lead">A curated register of trails, auto-rated for difficulty from distance and climb.</p>
-            <div class="d-flex gap-2">
-                <a class="btn-ascent" asp-controller="Trails" asp-action="Index">Browse all trails</a>
+<section class="ascent-scroll" id="ascent">
+    <div class="ascent-stage">
+        <div class="ascent-copy">
+            <h1>Know the climb<br>before you go.</h1>
+            <p>Real hiking routes with distance, elevation and a difficulty that is computed from the numbers, not guessed. Sorted by what is nearest to you.</p>
+            <div class="ascent-actions">
+                <a class="btn-ascent" asp-controller="Trails" asp-action="Index">Browse trails</a>
                 <a class="btn-ascent-outline" asp-controller="Trails" asp-action="Nearby"><i class="ti ti-navigation"></i> Trails near me</a>
             </div>
-        </section>
-    </div>
-    
-    <div class="col-lg-5 d-flex justify-content-center position-relative">
-        <div class="stack-wrapper">
-            <div class="stack-topo-bg">
-                <partial name="_TopoRings" />
+            <div class="scroll-hint" id="scroll-hint"><i class="ti ti-arrow-down"></i> Scroll to climb</div>
+        </div>
+
+        <div class="ridge" aria-hidden="true">
+            <svg class="ridge-svg" viewBox="0 0 1000 400" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="ridge-fill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#4F7A5B" stop-opacity=".28"/>
+                        <stop offset="1" stop-color="#4F7A5B" stop-opacity="0"/>
+                    </linearGradient>
+                    <clipPath id="ridge-clip"><rect id="ridge-clip-rect" x="0" y="0" width="0" height="400"/></clipPath>
+                </defs>
+                <path class="ridge-area" clip-path="url(#ridge-clip)" fill="url(#ridge-fill)"
+                      d="M0 392 L60 372 120 350 170 318 200 326 250 300 300 262 340 272 390 236 430 210 470 150 500 168 540 140 590 124 630 132 680 96 720 64 760 32 800 60 840 88 880 104 940 150 L940 400 L0 400 Z"/>
+                <path class="ridge-ghost" d="M0 392 L60 372 120 350 170 318 200 326 250 300 300 262 340 272 390 236 430 210 470 150 500 168 540 140 590 124 630 132 680 96 720 64 760 32 800 60 840 88 880 104 940 150"/>
+                <path class="ridge-line" id="ridge-line" d="M0 392 L60 372 120 350 170 318 200 326 250 300 300 262 340 272 390 236 430 210 470 150 500 168 540 140 590 124 630 132 680 96 720 64 760 32 800 60 840 88 880 104 940 150"/>
+            </svg>
+
+            @for (var i = 0; i < waypoints.Count; i++)
+            {
+                var t = waypoints[i];
+                var s = stops[i];
+                <a class="wp" style="left:@Pct(s.x / 10.0)%; bottom:@Pct((400 - s.y) / 4.0)%" data-at="@Pct(s.x / 1000.0)"
+                   asp-controller="Trails" asp-action="Details" asp-route-id="@t.Id">
+                    <span class="wp-dot"></span>
+                    <span class="wp-label">
+                        <span class="wp-name">@t.Name</span>
+                        <span class="wp-stats">@t.DistanceKm.ToString("0.#") km, @t.ElevationGainM.ToString("N0") m up</span>
+                    </span>
+                </a>
+            }
+
+            <div class="summit" style="left:76%; bottom:92%" data-at="0.76">
+                <span class="wp-dot"></span>
+                <span class="summit-label">Golem Korab, 2,764 m<small>Highest point in North Macedonia</small></span>
             </div>
-            
-            <div class="trail-stack">
-                @for (int i = 0; i < Model.Count; i++)
-                {
-                    var trail = Model[i];
-                    var diffClass = trail.Difficulty?.Label.ToLower() ?? "easy";
-                    if (i >= 4) break;
-                    
-                    <a class="stacked-card card-index-@i" draggable="false" ondragstart="return false;" asp-controller="Trails" asp-action="Details" asp-route-id="@trail.Id">
-                        <div class="sc-img-wrapper">
-                            <img src="@trail.CoverImageUrl"
-                                 alt="@trail.Name"
-                                 draggable="false"
-                                 onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';" />
-                            <span class="diff-badge diff-@diffClass">@trail.Difficulty?.Label</span>
-                        </div>
-                        <div class="sc-content">
-                            <span class="sc-eyebrow"><i class="ti ti-map-pin"></i> @trail.Region?.Name</span>
-                            <h3 class="sc-title">@trail.Name</h3>
-                            <div class="sc-stats">
-                                <span><i class="ti ti-route"></i> @trail.DistanceKm.ToString("0.#") km</span>
-                                <span><i class="ti ti-mountain"></i> @trail.ElevationGainM m</span>
-                                @if (trail.AverageRating > 0)
-                                {
-                                    <span><i class="ti ti-star"></i> @trail.AverageRating.ToString("0.#")</span>
-                                }
-                            </div>
-                        </div>
-                    </a>
-                }
+
+            <div class="climber" id="climber">
+                <span class="climber-dot"></span>
+                <span class="climber-alt"><b id="climber-m">0</b> m</span>
             </div>
-            <button type="button" class="btn-stack-next" id="btn-next-card" title="Next Trail">
-                <i class="ti ti-arrow-right"></i>
-            </button>
         </div>
     </div>
-</div>
+</section>
+
+<section class="picks">
+    <div class="picks-head">
+        <h2>Hikers' picks</h2>
+        <a asp-controller="Trails" asp-action="Index">All trails</a>
+    </div>
+    @foreach (var t in Model)
+    {
+        var diffClass = t.Difficulty?.Label.ToLower() ?? "easy";
+        <a class="pick" asp-controller="Trails" asp-action="Details" asp-route-id="@t.Id">
+            <img src="@t.CoverImageUrl" alt="" loading="lazy" onerror="this.onerror=null;this.src='/images/trails/default-trail.svg';"/>
+            <span class="pick-main">
+                <span class="pick-name">@t.Name</span>
+                <span class="pick-where">@t.Region?.Name, @t.Region?.Country</span>
+            </span>
+            <span class="pick-meta">
+                <span class="pick-num">@t.DistanceKm.ToString("0.#") km</span>
+                <span class="pick-num">@t.ElevationGainM.ToString("N0") m</span>
+                <span class="diff-badge pick-diff diff-@diffClass">@t.Difficulty?.Label</span>
+                <span class="pick-rating">
+                    @if (t.AverageRating > 0)
+                    {
+                        <i class="ti ti-star-filled"></i> @t.AverageRating.ToString("0.0")
+                    }
+                    else
+                    {
+                        <span class="text-muted">No reviews</span>
+                    }
+                </span>
+            </span>
+        </a>
+    }
+</section>
+
+@if (example != null)
+{
+    <section class="rating">
+        <div class="rating-copy">
+            <h2>Difficulty is computed, not guessed.</h2>
+            <p>
+                Every trail gets a score of <span class="formula">√(2 × climb × distance)</span>.
+                @example.Name is @example.DistanceKm.ToString("0.#") km with @example.ElevationGainM.ToString("N0") m of climb,
+                which scores @exampleScore.ToString("0") and lands in @example.Difficulty?.Label.
+                Nobody can override it, so a Hard trail in one region is a Hard trail everywhere.
+            </p>
+        </div>
+        <div class="rating-scale">
+            <div class="scale-bar">
+                <span class="diff-easy">Easy</span>
+                <span class="diff-moderate">Moderate</span>
+                <span class="diff-hard">Hard</span>
+                <span class="diff-strenuous">Strenuous</span>
+                <i class="scale-mark" style="left:@Pct(Math.Min(exampleScore, 200) / 2)%"></i>
+            </div>
+            <div class="scale-ticks"><span>0</span><span>50</span><span>100</span><span>150</span><span>200+</span></div>
+        </div>
+    </section>
+}
 
 @section Styles {
     <style>
-        .stack-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 340px;
-            height: 460px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .stack-topo-bg {
-            position: absolute;
-            inset: -40px;
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0.7;
-        }
-        .stack-topo-bg svg {
-            width: 100%;
-            height: 100%;
-        }
-        .stack-topo-bg svg g {
-            stroke: var(--forest) !important;
-            opacity: 0.12 !important;
-        }
-
-        .trail-stack {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .stacked-card {
-            position: absolute;
-            width: 100%;
-            height: 380px;
-            top: 20px;
-            left: 0;
-            background: var(--surface);
-            border: 0.5px solid var(--border);
-            border-radius: var(--r-card);
-            overflow: hidden;
+        .ascent-scroll { height: 280vh; margin: 0 0 24px; }
+        .ascent-stage {
+            position: sticky;
+            top: 0;
+            height: calc(100vh - 75px);
+            height: calc(100svh - 75px);
             display: flex;
             flex-direction: column;
-            text-decoration: none;
-            color: var(--text);
-            box-shadow: 0 10px 30px -18px rgba(33, 48, 28, 0.25);
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
-                        box-shadow 0.4s ease, 
-                        z-index 0.4s ease, 
-                        border-color 0.3s ease,
-                        opacity 0.4s ease;
-            cursor: pointer;
-        }
-
-        .stacked-card:hover {
-            color: var(--text);
-            border-color: var(--border-strong);
-        }
-
-        .card-index-0 {
-            transform: translate3d(0, 0, 0) rotate(-2deg);
-            z-index: 4;
-        }
-        .card-index-1 {
-            transform: translate3d(12px, 8px, 0) rotate(2.5deg);
-            z-index: 3;
-        }
-        .card-index-2 {
-            transform: translate3d(-8px, 16px, 0) rotate(-1deg);
-            z-index: 2;
-        }
-        .card-index-3 {
-            transform: translate3d(6px, 24px, 0) rotate(3deg);
-            z-index: 1;
-        }
-
-        .trail-stack:hover .card-index-0 {
-            transform: translate3d(-45px, -15px, 0) rotate(-7deg);
-            box-shadow: 0 16px 40px -15px rgba(33, 48, 28, 0.35);
-            z-index: 10;
-        }
-        .trail-stack:hover .card-index-1 {
-            transform: translate3d(45px, -5px, 0) rotate(6deg);
-            box-shadow: 0 16px 40px -15px rgba(33, 48, 28, 0.35);
-            z-index: 9;
-        }
-        .trail-stack:hover .card-index-2 {
-            transform: translate3d(-20px, 25px, 0) rotate(-3deg);
-            box-shadow: 0 12px 30px -15px rgba(33, 48, 28, 0.3);
-            z-index: 8;
-        }
-        .trail-stack:hover .card-index-3 {
-            transform: translate3d(20px, 35px, 0) rotate(4deg);
-            box-shadow: 0 12px 30px -15px rgba(33, 48, 28, 0.3);
-            z-index: 7;
-        }
-
-        .sc-img-wrapper {
-            position: relative;
-            width: 100%;
-            height: 52%;
             overflow: hidden;
-            background: var(--surface-alt);
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
-        .sc-img-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
+
+        .ascent-copy { padding-top: clamp(28px, 7vh, 72px); max-width: 620px; position: relative; z-index: 2; }
+        .ascent-copy h1 {
+            font-size: clamp(40px, 6.4vw, 78px);
+            line-height: 0.98;
+            letter-spacing: -1.5px;
+            margin: 0 0 20px;
+            font-variation-settings: "opsz" 144;
         }
-        .stacked-card:hover .sc-img-wrapper img {
-            transform: scale(1.06);
-        }
-        .sc-placeholder {
-            font-size: 40px;
-            color: var(--text-muted);
-            opacity: 0.4;
-        }
-        .sc-content {
-            padding: 14px 18px;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-        .sc-eyebrow {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .sc-title {
-            font-family: var(--font-display);
+        .ascent-copy p {
             font-size: 17px;
-            color: var(--forest-dark);
-            margin: 0 0 6px 0;
-            line-height: 1.25;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .sc-stats {
-            margin-top: auto;
-            display: flex;
-            gap: 14px;
-            font-size: 12px;
             color: var(--text-secondary);
-            border-top: 0.5px solid var(--border);
-            padding-top: 8px;
+            max-width: 46ch;
+            margin: 0 0 24px;
         }
-        .sc-stats span {
+        .ascent-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .ridge {
+            position: relative;
+            margin-top: auto;
+            height: 52vh;
+            height: 52svh;
+            min-height: 220px;
+        }
+        .ridge-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+        .ridge-ghost, .ridge-line {
+            fill: none;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+            vector-effect: non-scaling-stroke;
+        }
+        .ridge-ghost { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 6; }
+        .ridge-line { stroke: var(--forest-dark); stroke-width: 2; }
+
+        .wp, .summit, .climber {
+            position: absolute;
+            width: 0; height: 0;
+            color: var(--text);
+        }
+        .wp, .summit {
+            opacity: 0;
+            transition: opacity .45s ease, transform .45s ease;
+            transform: translateY(8px);
+            pointer-events: none;
+        }
+        .wp.is-on, .summit.is-on { opacity: 1; transform: none; pointer-events: auto; }
+        .wp-dot {
+            position: absolute;
+            left: -5px; top: -5px;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 2px solid var(--forest-dark);
+        }
+        .wp:hover .wp-dot { background: var(--terracotta); border-color: var(--terracotta); }
+        .wp-label, .summit-label {
+            position: absolute;
+            bottom: 30px;
             display: flex;
+            flex-direction: column;
+            white-space: nowrap;
+            line-height: 1.3;
+        }
+        .wp-label { right: 0; align-items: flex-end; text-align: right; }
+        .summit-label { left: 0; transform: translateX(-50%); align-items: center; text-align: center; }
+        .wp-label::after, .summit-label::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            width: 1px; height: 22px;
+            margin-top: 4px;
+            background: var(--border-strong);
+        }
+        .wp-label::after { right: 0; }
+        .summit-label::after { left: 50%; }
+        .wp-name { font-family: var(--font-display); font-size: 15px; color: var(--forest-dark); }
+        .wp:hover .wp-name { color: var(--terracotta); }
+        .wp-stats { font-size: 12px; color: var(--text-muted); }
+        .summit-label { font-family: var(--font-display); font-size: 16px; color: var(--paper); }
+        .summit-label small { font-family: var(--font-body); font-size: 12px; color: var(--text-muted); }
+        .summit .wp-dot { border-color: var(--terracotta); background: var(--terracotta); }
+
+        .climber { pointer-events: none; z-index: 3; }
+        .climber-dot {
+            position: absolute;
+            left: -7px; top: -7px;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: var(--terracotta);
+            box-shadow: 0 0 0 5px rgba(204, 131, 85, .22);
+        }
+        .climber-alt {
+            position: absolute;
+            left: 18px; top: 0;
+            transform: translateY(-50%);
+            font-family: var(--font-display);
+            font-size: 22px;
+            color: var(--paper);
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+        .climber-alt b { font-weight: 500; }
+
+        .scroll-hint {
+            margin-top: 28px;
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex; align-items: center; gap: 6px;
+            transition: opacity .3s;
+        }
+        .scroll-hint .ti { animation: hint-bob 1.6s ease-in-out infinite; }
+        @@keyframes hint-bob { 50% { transform: translateY(4px); } }
+
+        .picks { margin-top: 32px; }
+        .picks-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+        .picks-head h2 { font-size: 30px; margin: 0; }
+        .picks-head a { font-size: 14px; }
+        .pick {
+            display: grid;
+            grid-template-columns: 72px 1fr auto;
+            gap: 20px;
             align-items: center;
-            gap: 4px;
+            padding: 14px 0;
+            border-top: 0.5px solid var(--border);
+            color: var(--text);
+        }
+        .pick:last-child { border-bottom: 0.5px solid var(--border); }
+        .pick img { width: 72px; height: 52px; object-fit: cover; border-radius: 6px; background: var(--surface-alt); }
+        .pick-main { display: flex; flex-direction: column; min-width: 0; }
+        .pick-name { font-family: var(--font-display); font-size: 19px; color: var(--forest-dark); line-height: 1.2; }
+        .pick:hover .pick-name { color: var(--terracotta); }
+        .pick-where { font-size: 13px; color: var(--text-muted); }
+        .pick-meta { display: flex; align-items: center; gap: 22px; font-size: 14px; color: var(--text-secondary); }
+        .pick-num { font-variant-numeric: tabular-nums; min-width: 58px; text-align: right; }
+        .pick-diff { position: static; }
+        .pick-rating { min-width: 64px; display: inline-flex; align-items: center; gap: 4px; }
+        .pick-rating .ti { color: var(--terracotta); font-size: 13px; }
+
+        .rating {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+            margin: 56px 0 24px;
+        }
+        .rating h2 { font-size: 26px; margin-bottom: 10px; }
+        .rating p { color: var(--text-secondary); max-width: 52ch; margin: 0; }
+        .formula { font-family: var(--font-display); font-style: italic; color: var(--paper); }
+        .scale-bar {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-radius: var(--r-badge);
+            overflow: visible;
+        }
+        .scale-bar > span {
+            padding: 9px 0;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .scale-bar > span:first-child { border-radius: var(--r-badge) 0 0 var(--r-badge); }
+        .scale-bar > span:nth-child(4) { border-radius: 0 var(--r-badge) var(--r-badge) 0; }
+        .scale-mark {
+            position: absolute;
+            top: -6px; bottom: -6px;
+            width: 2px;
+            margin-left: -1px;
+            background: var(--paper);
+            border-radius: 2px;
+        }
+        .scale-ticks {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
         }
 
-        .btn-stack-next {
-            position: absolute;
-            right: -24px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: rgba(251, 250, 244, 0.65);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 0.5px solid var(--border);
-            color: var(--forest);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            cursor: pointer;
-            z-index: 20;
-            transition: background 0.3s, color 0.3s, transform 0.2s, border-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 15px -5px rgba(33, 48, 28, 0.2);
-        }
-        .btn-stack-next:hover {
-            background: var(--forest);
-            color: var(--paper);
-            border-color: var(--forest);
-            transform: translateY(-50%) scale(1.08);
-            box-shadow: 0 8px 20px -5px rgba(33, 48, 28, 0.4);
-        }
-        .btn-stack-next:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-        
         @@media (max-width: 991px) {
-            .stack-wrapper {
-                margin: 40px auto 20px;
-            }
-            .btn-stack-next {
-                right: -16px;
-            }
+            .rating { grid-template-columns: 1fr; gap: 24px; }
         }
-        @@media (max-width: 480px) {
-            .stack-wrapper {
-                height: 410px;
-                max-width: 290px;
-            }
-            .stacked-card {
-                height: 330px;
-            }
-            .btn-stack-next {
-                right: -12px;
-                width: 40px;
-                height: 40px;
-                font-size: 18px;
-            }
-            .trail-stack:hover .card-index-0 {
-                transform: translate3d(-25px, -10px, 0) rotate(-5deg);
-            }
-            .trail-stack:hover .card-index-1 {
-                transform: translate3d(25px, -5px, 0) rotate(4deg);
-            }
-            .trail-stack:hover .card-index-2 {
-                transform: translate3d(-10px, 15px, 0) rotate(-2deg);
-            }
-            .trail-stack:hover .card-index-3 {
-                transform: translate3d(10px, 20px, 0) rotate(3deg);
-            }
+        @@media (max-width: 767px) {
+            .ascent-scroll { height: 220vh; }
+            .ridge { height: 34svh; }
+            .wp-label { display: none; }
+            .wp.is-on { pointer-events: none; }
+            .summit-label { font-size: 14px; }
+            .summit-label small { display: none; }
+            .climber-alt { font-size: 18px; left: 10px; top: auto; bottom: 12px; transform: translateX(-100%); }
+            .pick { grid-template-columns: 56px 1fr; gap: 12px 14px; }
+            .pick img { width: 56px; height: 42px; }
+            .pick-meta { grid-column: 2; gap: 14px; font-size: 13px; }
+            .pick-num { min-width: 0; text-align: left; }
+            .pick-rating { min-width: 0; }
+        }
+        @@media (prefers-reduced-motion: reduce) {
+            .ascent-scroll { height: auto; }
+            .ascent-stage { position: static; height: auto; min-height: 0; }
+            .ridge { margin-top: 32px; height: 300px; }
+            .wp, .summit { transition: none; }
+            .scroll-hint { display: none; }
         }
     </style>
 }
 
 @section Scripts {
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const btnNext = document.getElementById("btn-next-card");
-            const stack = document.querySelector(".trail-stack");
-            if (!btnNext || !stack) return;
+        (function () {
+            const section = document.getElementById("ascent");
+            const line = document.getElementById("ridge-line");
+            const clip = document.getElementById("ridge-clip-rect");
+            const climber = document.getElementById("climber");
+            const metres = document.getElementById("climber-m");
+            const hint = document.getElementById("scroll-hint");
+            const marks = Array.from(section.querySelectorAll("[data-at]"));
+            if (!line) return;
 
-            let isTransitioning = false;
+            const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            const pts = line.getAttribute("d").match(/-?[\d.]+/g).map(Number);
+            const box = line.closest(".ridge");
+            let segs = [], length = 0;
 
-            btnNext.addEventListener("click", function (e) {
-                e.preventDefault();
-                e.stopPropagation();
+            // Dashes are measured in screen pixels (non-scaling stroke), so walk the
+            // polyline at the box's current scale instead of using getTotalLength().
+            function measure() {
+                const sx = box.clientWidth / 1000, sy = box.clientHeight / 400;
+                segs = []; length = 0;
+                for (let i = 2; i < pts.length; i += 2) {
+                    const d = Math.hypot((pts[i] - pts[i - 2]) * sx, (pts[i + 1] - pts[i - 1]) * sy);
+                    segs.push({ x0: pts[i - 2], y0: pts[i - 1], x1: pts[i], y1: pts[i + 1], start: length, len: d });
+                    length += d;
+                }
+                line.style.strokeDasharray = length;
+            }
 
-                if (isTransitioning) return;
-                isTransitioning = true;
+            function pointAt(dist) {
+                const s = segs.find(g => dist <= g.start + g.len) || segs[segs.length - 1];
+                const t = s.len ? Math.min((dist - s.start) / s.len, 1) : 1;
+                return { x: s.x0 + (s.x1 - s.x0) * t, y: s.y0 + (s.y1 - s.y0) * t };
+            }
 
-                const cards = Array.from(stack.querySelectorAll(".stacked-card"));
-                
-                cards.sort((a, b) => {
-                    const getIdx = (el) => {
-                        for (let c of el.classList) {
-                            if (c.startsWith("card-index-")) {
-                                return parseInt(c.split("-")[2]);
-                            }
-                        }
-                        return 0;
-                    };
-                    return getIdx(a) - getIdx(b);
+            function render(p) {
+                line.style.strokeDashoffset = length * (1 - p);
+                const pt = pointAt(length * p);
+                clip.setAttribute("width", pt.x);
+                climber.style.left = pt.x / 10 + "%";
+                climber.style.top = pt.y / 4 + "%";
+                metres.textContent = Math.round((392 - pt.y) / 360 * 2764).toLocaleString("en");
+                const frac = pt.x / 1000;
+                marks.forEach(m => m.classList.toggle("is-on", frac >= parseFloat(m.dataset.at)));
+                hint.style.opacity = p > 0.2 ? "0" : "1";
+            }
+
+            measure();
+            if (reduce) { render(1); window.addEventListener("resize", () => { measure(); render(1); }); return; }
+
+            let ticking = false;
+            function onScroll() {
+                if (ticking) return;
+                ticking = true;
+                requestAnimationFrame(() => {
+                    const travel = section.offsetHeight - window.innerHeight;
+                    const scrolled = -section.getBoundingClientRect().top;
+                    const p = Math.min(Math.max(scrolled / travel, 0), 1);
+                    render(0.06 + p * 0.94);
+                    ticking = false;
                 });
-
-                if (cards.length < 2) {
-                    isTransitioning = false;
-                    return;
-                }
-
-                const topCard = cards[0];
-                
-                topCard.style.transition = "transform 0.4s ease, opacity 0.4s ease";
-                topCard.style.transform = "translate3d(130%, -20px, 0) rotate(15deg)";
-                topCard.style.opacity = "0";
-
-                setTimeout(() => {
-                    cycleStack();
-                }, 400);
-
-                function cycleStack() {
-                    const lastIdx = cards.length - 1;
-
-                    topCard.style.transition = "none";
-                    topCard.style.opacity = "0";
-                    topCard.style.transform = "";
-
-                    cards.forEach((card, idx) => {
-                        card.classList.remove(`card-index-${idx}`);
-                        let newIdx = idx - 1;
-                        if (newIdx < 0) {
-                            newIdx = lastIdx;
-                        }
-                        card.classList.add(`card-index-${newIdx}`);
-                    });
-
-                    topCard.offsetHeight;
-
-                    topCard.style.transition = "opacity 0.4s ease";
-                    topCard.style.opacity = "1";
-
-                    setTimeout(() => {
-                        topCard.removeAttribute("style");
-                        isTransitioning = false;
-                    }, 400);
-                }
-            });
-        });
+            }
+            window.addEventListener("scroll", onScroll, { passive: true });
+            window.addEventListener("resize", () => { measure(); onScroll(); });
+            onScroll();
+        })();
     </script>
 }
